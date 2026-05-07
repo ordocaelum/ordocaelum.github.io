@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leland E. Doss — Senior Unreal Engine Developer & Technical Artist</title>
+    <meta name="description" content="Resume of Leland E. Doss — Senior Unreal Engine Developer, Data Visualization Specialist, and Technical Artist.">
+    <style>
+        :root {
+            --bg: #0e1a2b;
+            --bg-soft: #142640;
+            --panel: #1a2f4d;
+            --panel-2: #11233c;
+            --line: rgba(170, 200, 235, 0.14);
+            --line-strong: rgba(170, 200, 235, 0.28);
+            --accent: #5aa8ff;
+            --accent-2: #82c0ff;
+            --accent-warm: #d4a574;
+            --text: #eef3fa;
+            --text-soft: #c2cfe0;
+            --text-mute: #8a98ad;
+            --text-dim: #5a6577;
+            --print-bg: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background:
+                radial-gradient(ellipse at 20% -10%, rgba(90, 168, 255, 0.10) 0%, transparent 55%),
+                radial-gradient(ellipse at 100% 100%, rgba(212, 165, 116, 0.06) 0%, transparent 50%),
+                var(--bg);
+            color: var(--text);
+            line-height: 1.55;
+            font-size: 15px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-feature-settings: 'kern', 'liga', 'calt';
+            min-height: 100vh;
+            padding: 40px 24px 80px;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            max-width: 1100px;
+            margin: 0 auto 24px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .btn {
+            background: var(--panel);
+            border: 1px solid var(--line-strong);
+            color: var(--text-soft);
+            padding: 9px 18px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: var(--bg-soft);
+            border-color: var(--accent);
+            color: var(--accent-2);
+        }
+
+        .btn svg { width: 14px; height: 14px; }
+
+        /* Resume Sheet */
+        .resume {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: linear-gradient(180deg, var(--bg-soft) 0%, var(--panel-2) 100%);
+            border: 1px solid var(--line-strong);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.4),
+                0 0 0 1px rgba(90, 168, 255, 0.05);
+            display: grid;
+            grid-template-columns: 320px 1fr;
+        }
+
+        /* ===== SIDEBAR ===== */
+        aside {
+            background: linear-gradient(180deg, #0d1a2c 0%, #142640 100%);
+            border-right: 1px solid var(--line);
+            padding: 0;
+            position: relative;
+        }
+
+        aside::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+        }
+
+        .identity {
+            padding: 48px 32px 36px;
+            text-align: center;
+            border-bottom: 1px solid var(--line);
+            position: relative;
+        }
+
+        .avatar {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            margin: 0 auto 24px;
+            background: linear-gradient(135deg, var(--panel) 0%, var(--bg-soft) 100%);
+            border: 2px solid var(--line-strong);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            font-weight: 200;
+            color: var(--accent-2);
+            letter-spacing: -2px;
+            position: relative;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+        }
+
+        .avatar::after {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            border: 1px dashed rgba(90, 168, 255, 0.3);
+            animation: rotate 24s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .name {
+            font-size: 1.85em;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            line-height: 1.1;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .name .accent {
+            color: var(--accent-2);
+            font-weight: 300;
+            font-size: 0.7em;
+            display: block;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-top: 6px;
+        }
+
+        .role {
+            font-size: 0.82em;
+            color: var(--text-mute);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-top: 12px;
+            line-height: 1.5;
+        }
+
+        /* Contact */
+        .contact {
+            padding: 28px 32px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            color: var(--text-soft);
+            font-size: 0.85em;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .contact-item:hover { color: var(--accent-2); }
+
+        .contact-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(90, 168, 255, 0.08);
+            border: 1px solid rgba(90, 168, 255, 0.2);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .contact-icon svg { width: 14px; height: 14px; }
+
+        .contact-text {
+            font-variant-numeric: tabular-nums;
+            word-break: break-all;
+        }
+
+        /* Sidebar Sections */
+        .side-section {
+            padding: 28px 32px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .side-section:last-child { border-bottom: none; }
+
+        .side-title {
+            font-size: 0.7em;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .side-title::before {
+            content: '';
+            width: 14px;
+            height: 2px;
+            background: var(--accent);
+        }
+
+        /* About */
+        .about-text {
+            font-size: 0.88em;
+            color: var(--text-soft);
+            line-height: 1.65;
+            font-weight: 300;
+        }
+
+        /* Skills */
+        .skill-group { margin-bottom: 6px; }
+
+        .skill-group:not(:last-child) {
+            margin-bottom: 22px;
+            padding-bottom: 22px;
+            border-bottom: 1px dashed var(--line);
+        }
+
+        .skill-group-label {
+            font-size: 0.72em;
+            font-weight: 600;
+            color: var(--text-mute);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 12px;
+        }
+
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .skill-tag {
+            font-size: 0.78em;
+            background: rgba(90, 168, 255, 0.08);
+            color: var(--text-soft);
+            padding: 5px 11px;
+            border-radius: 4px;
+            border: 1px solid rgba(90, 168, 255, 0.18);
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .skill-tag:hover {
+            background: rgba(90, 168, 255, 0.14);
+            border-color: rgba(90, 168, 255, 0.4);
+            color: var(--accent-2);
+        }
+
+        .skill-tag.featured {
+            background: linear-gradient(135deg, rgba(90, 168, 255, 0.18), rgba(90, 168, 255, 0.06));
+            border-color: rgba(90, 168, 255, 0.4);
+            color: var(--accent-2);
+            font-weight: 600;
+        }
+
+        /* ===== MAIN ===== */
+        main {
+            padding: 56px 56px 48px;
+        }
+
+        .main-header {
+            margin-bottom: 40px;
+            padding-bottom: 28px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .availability-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(212, 165, 116, 0.1);
+            border: 1px solid rgba(212, 165, 116, 0.3);
+            color: var(--accent-warm);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.72em;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+        }
+
+        .availability-badge .pulse {
+            width: 7px;
+            height: 7px;
+            background: var(--accent-warm);
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .availability-badge .pulse::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            background: var(--accent-warm);
+            opacity: 0.4;
+            animation: pulse 2s ease-out infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.6; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+
+        .lead {
+            font-size: 1.15em;
+            color: var(--text-soft);
+            line-height: 1.7;
+            font-weight: 300;
+            max-width: 640px;
+        }
+
+        .lead strong {
+            color: var(--accent-2);
+            font-weight: 600;
+        }
+
+        /* Quick Stats */
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin: 28px 0 0;
+            padding-top: 28px;
+            border-top: 1px solid var(--line);
+        }
+
+        .stat {
+            text-align: left;
+        }
+
+        .stat-value {
+            font-size: 1.7em;
+            font-weight: 700;
+            color: var(--accent-2);
+            letter-spacing: -1px;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat-label {
+            font-size: 0.7em;
+            color: var(--text-mute);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            margin-top: 6px;
+        }
+
+        /* Section Heading */
+        .section {
+            margin-top: 44px;
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .section-heading h2 {
+            font-size: 1.35em;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.3px;
+        }
+
+        .section-heading .section-num {
+            font-size: 0.75em;
+            color: var(--accent);
+            font-weight: 700;
+            letter-spacing: 2px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .section-heading .section-line {
+            flex: 1;
+            height: 1px;
+            background: var(--line);
+        }
+
+        /* Experience */
+        .experience-item {
+            position: relative;
+            padding: 24px 28px 24px 32px;
+            background: rgba(90, 168, 255, 0.025);
+            border: 1px solid var(--line);
+            border-left: 3px solid var(--accent);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            transition: all 0.2s;
+        }
+
+        .experience-item:hover {
+            background: rgba(90, 168, 255, 0.05);
+            border-color: var(--line-strong);
+            border-left-color: var(--accent-2);
+            transform: translateX(2px);
+        }
+
+        .exp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+        }
+
+        .exp-title {
+            font-size: 1.08em;
+            font-weight: 600;
+            color: var(--text);
+            letter-spacing: -0.2px;
+            line-height: 1.3;
+        }
+
+        .exp-period {
+            font-size: 0.78em;
+            color: var(--accent-warm);
+            font-weight: 600;
+            background: rgba(212, 165, 116, 0.08);
+            border: 1px solid rgba(212, 165, 116, 0.2);
+            padding: 4px 10px;
+            border-radius: 4px;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .exp-company {
+            font-size: 0.9em;
+            color: var(--accent-2);
+            font-weight: 500;
+            margin-bottom: 14px;
+        }
+
+        .exp-company .separator {
+            color: var(--text-dim);
+            margin: 0 8px;
+        }
+
+        .exp-bullets {
+            list-style: none;
+            margin-top: 14px;
+        }
+
+        .exp-bullets li {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 9px;
+            color: var(--text-soft);
+            font-size: 0.92em;
+            line-height: 1.65;
+        }
+
+        .exp-bullets li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 9px;
+            width: 6px;
+            height: 6px;
+            border: 1.5px solid var(--accent);
+            border-radius: 50%;
+            background: var(--bg);
+        }
+
+        .exp-bullets li strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        /* Education */
+        .education-item {
+            background: rgba(90, 168, 255, 0.025);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 24px 28px;
+        }
+
+        .edu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .edu-school {
+            font-size: 1.08em;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .edu-degree {
+            font-size: 0.85em;
+            color: var(--accent-2);
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .edu-detail {
+            color: var(--text-soft);
+            font-size: 0.92em;
+            line-height: 1.65;
+        }
+
+        /* Footer note */
+        .resume-footer {
+            margin-top: 44px;
+            padding-top: 24px;
+            border-top: 1px solid var(--line);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.78em;
+            color: var(--text-dim);
+            letter-spacing: 0.5px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .resume-footer .ref {
+            color: var(--text-mute);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            body { padding: 20px 16px 60px; }
+            .resume { grid-template-columns: 1fr; }
+            aside { border-right: none; border-bottom: 1px solid var(--line); }
+            main { padding: 40px 28px; }
+            .quick-stats { grid-template-columns: repeat(2, 1fr); gap: 18px; }
+        }
+
+        @media (max-width: 540px) {
+            .name { font-size: 1.5em; }
+            .identity { padding: 36px 24px 28px; }
+            .contact, .side-section { padding: 22px 24px; }
+            main { padding: 32px 22px; }
+            .experience-item, .education-item { padding: 20px 20px 20px 24px; }
+        }
+
+        /* ===== PRINT ===== */
+        @media print {
+            @page { margin: 0.4in; size: letter; }
+
+            body {
+                background: white !important;
+                color: #1a1a1a !important;
+                padding: 0 !important;
+                font-size: 10.5pt;
+            }
+
+            .toolbar { display: none !important; }
+
+            .resume {
+                background: white !important;
+                box-shadow: none !important;
+                border: none !important;
+                border-radius: 0 !important;
+                max-width: 100% !important;
+                grid-template-columns: 240px 1fr !important;
+            }
+
+            aside {
+                background: #f4f6fa !important;
+                border-right: 1px solid #d0d8e4 !important;
+            }
+
+            aside::before { display: none !important; }
+
+            main {
+                padding: 28px 32px !important;
+            }
+
+            .identity { padding: 28px 20px !important; border-bottom-color: #d0d8e4 !important; }
+            .contact, .side-section { padding: 20px !important; border-bottom-color: #d0d8e4 !important; }
+
+            .name, .exp-title, .edu-school, .section-heading h2 { color: #0e1a2b !important; }
+            .name .accent, .exp-company, .edu-degree, .section-heading .section-num, .side-title { color: #2563eb !important; }
+            .role, .skill-group-label, .stat-label { color: #5a6577 !important; }
+            .lead, .about-text, .exp-bullets li, .edu-detail, .contact-item, .stat-value { color: #1a1a1a !important; }
+            .stat-value { color: #2563eb !important; }
+            .exp-period { background: #fff7ec !important; color: #b8742a !important; border-color: #e8c89a !important; }
+
+            .skill-tag {
+                background: white !important;
+                color: #1a1a1a !important;
+                border: 1px solid #c8d2e0 !important;
+            }
+
+            .skill-tag.featured {
+                background: #eff5ff !important;
+                color: #1d4ed8 !important;
+                border-color: #93b8e8 !important;
+            }
+
+            .experience-item, .education-item {
+                background: white !important;
+                border: 1px solid #d0d8e4 !important;
+                border-left: 3px solid #2563eb !important;
+                page-break-inside: avoid;
+            }
+
+            .exp-bullets li::before { border-color: #2563eb !important; background: white !important; }
+
+            .availability-badge { display: none !important; }
+
+            .contact-icon {
+                background: white !important;
+                border-color: #c8d2e0 !important;
+                color: #2563eb !important;
+            }
+
+            .avatar {
+                background: #2563eb !important;
+                color: white !important;
+                border-color: #2563eb !important;
+                box-shadow: none !important;
+            }
+
+            .avatar::after { display: none !important; }
+
+            .resume-footer { color: #5a6577 !important; border-top-color: #d0d8e4 !important; }
+
+            .section { page-break-inside: avoid; }
+            .section-heading .section-line { background: #d0d8e4 !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="toolbar">
+        <button class="btn" onclick="window.print()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Print / Save as PDF
+        </button>
+    </div>
+
+    <article class="resume">
+
+        <!-- =========== SIDEBAR =========== -->
+        <aside>
+            <div class="identity">
+                <div class="avatar">LD</div>
+                <h1 class="name">Leland E. Doss<span class="accent">Doss</span></h1>
+                <div class="role">Sr. Unreal Engine Developer<br>Technical Artist · Data Visualization</div>
+            </div>
+
+            <div class="contact">
+                <a class="contact-item" href="tel:+14352729294">
+                    <span class="contact-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.33 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    </span>
+                    <span class="contact-text">435.272.9294</span>
+                </a>
+                <a class="contact-item" href="mailto:Leland.thegamedeveloper@gmail.com">
+                    <span class="contact-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    </span>
+                    <span class="contact-text">Leland.thegamedeveloper@gmail.com</span>
+                </a>
+                <a class="contact-item" href="#" target="_blank" rel="noopener">
+                    <span class="contact-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                    </span>
+                    <span class="contact-text">Portfolio Reel</span>
+                </a>
+                <a class="contact-item" href="#" target="_blank" rel="noopener">
+                    <span class="contact-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+                    </span>
+                    <span class="contact-text">linkedin.com/in/leland-doss</span>
+                </a>
+            </div>
+
+            <div class="side-section">
+                <div class="side-title">About</div>
+                <p class="about-text">Versatile senior developer and data visualization specialist. I build complex real-time systems, immersive defense-grade environments, and high-fidelity visualizations — bridging shipped commercial titles with mission-critical workloads.</p>
+            </div>
+
+            <div class="side-section">
+                <div class="side-title">Core Stack</div>
+
+                <div class="skill-group">
+                    <div class="skill-group-label">Engine & Programming</div>
+                    <div class="skill-tags">
+                        <span class="skill-tag featured">Unreal Engine 5</span>
+                        <span class="skill-tag featured">Blueprints</span>
+                        <span class="skill-tag">C++</span>
+                        <span class="skill-tag">Level Design</span>
+                    </div>
+                </div>
+
+                <div class="skill-group">
+                    <div class="skill-group-label">Art & 3D</div>
+                    <div class="skill-tags">
+                        <span class="skill-tag">3D Modeling</span>
+                        <span class="skill-tag">Hard-Surface</span>
+                        <span class="skill-tag">Character Anim</span>
+                        <span class="skill-tag">Lighting</span>
+                        <span class="skill-tag">Blender</span>
+                        <span class="skill-tag">Photoshop</span>
+                    </div>
+                </div>
+
+                <div class="skill-group">
+                    <div class="skill-group-label">Media & Production</div>
+                    <div class="skill-tags">
+                        <span class="skill-tag">Video Editing</span>
+                        <span class="skill-tag">Sound Design</span>
+                        <span class="skill-tag">Virtual Production</span>
+                        <span class="skill-tag">Data Visualization</span>
+                    </div>
+                </div>
+
+                <div class="skill-group">
+                    <div class="skill-group-label">Operations & Strategy</div>
+                    <div class="skill-tags">
+                        <span class="skill-tag">Project Management</span>
+                        <span class="skill-tag">Account Mgmt</span>
+                        <span class="skill-tag">Marketing Strategy</span>
+                        <span class="skill-tag">Brand Building</span>
+                        <span class="skill-tag">Content Creation</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="side-section">
+                <div class="side-title">Languages & Tools</div>
+                <div class="skill-tags">
+                    <span class="skill-tag">Niagara VFX</span>
+                    <span class="skill-tag">Sequencer</span>
+                    <span class="skill-tag">Cesium for Unreal</span>
+                    <span class="skill-tag">Git</span>
+                    <span class="skill-tag">Perforce</span>
+                    <span class="skill-tag">Substance</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- =========== MAIN =========== -->
+        <main>
+            <header class="main-header">
+                <div class="availability-badge">
+                    <span class="pulse"></span>
+                    Available May 16, 2026 · Open to Senior &amp; Lead Roles
+                </div>
+                <p class="lead">Senior Unreal Engine developer with a track record of shipping <strong>commercial titles</strong> and architecting <strong>defense-grade visualization systems</strong>. I work at the intersection of real-time graphics, geospatial data, and applied AI — and I think like an operator: every system I build is evaluated against the outcome it delivers.</p>
+
+                <div class="quick-stats">
+                    <div class="stat">
+                        <div class="stat-value">8+</div>
+                        <div class="stat-label">Years Shipping</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">3</div>
+                        <div class="stat-label">Studios &amp; Founder</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">UE5</div>
+                        <div class="stat-label">Production Stack</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">DoD</div>
+                        <div class="stat-label">Domain Experience</div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- EXPERIENCE -->
+            <section class="section">
+                <div class="section-heading">
+                    <span class="section-num">01</span>
+                    <h2>Experience</h2>
+                    <span class="section-line"></span>
+                </div>
+
+                <div class="experience-item">
+                    <div class="exp-header">
+                        <div>
+                            <div class="exp-title">Sr. Unreal Engine Developer · Data Visualization Consultant</div>
+                            <div class="exp-company">Logistics Management Institute (LMI)<span class="separator">·</span>Tysons, VA</div>
+                        </div>
+                        <div class="exp-period">Jul 2023 — Present</div>
+                    </div>
+                    <ul class="exp-bullets">
+                        <li>Designed and shipped <strong>data visualization software for SWAC</strong>, surfacing actionable intelligence on space defense systems for analyst and command audiences.</li>
+                        <li>Integrated complex, multi-source datasets into real-time visual representations of defense assets across the air, land, sea, and space domains.</li>
+                        <li>Built immersive virtual production pipelines in Unreal Engine 5, leveraging real-time rendering, custom VFX, and live-driven cinematic workflows.</li>
+                        <li>Led development of a <strong>satellite-data visualization platform</strong> used to communicate connectivity and capability gaps directly to funding decision-makers.</li>
+                        <li>Produced high-impact briefing media for military clients, combining advanced graphics, motion design, and narrative pacing tailored for executive audiences.</li>
+                    </ul>
+                </div>
+
+                <div class="experience-item">
+                    <div class="exp-header">
+                        <div>
+                            <div class="exp-title">Production Coordinator &amp; Technical Artist</div>
+                            <div class="exp-company">Sequin AR<span class="separator">·</span>Remote</div>
+                        </div>
+                        <div class="exp-period">Nov 2022 — Jun 2023</div>
+                    </div>
+                    <ul class="exp-bullets">
+                        <li>Coordinated production across game development and virtual production projects, owning workflow definition, schedule integrity, and on-time delivery.</li>
+                        <li>Evaluated and integrated emerging real-time technologies to compress production cycles and unlock <strong>cutting-edge visual results</strong>.</li>
+                        <li>Designed and implemented complex technical art systems that optimized runtime performance and improved end-user experience.</li>
+                        <li>Partnered closely with artists, engineers, and designers to ensure seamless technology integration across cross-disciplinary teams.</li>
+                        <li>Contributed to the creation of photoreal, immersive virtual environments using advanced 3D modeling, texturing, and lighting techniques.</li>
+                    </ul>
+                </div>
+
+                <div class="experience-item">
+                    <div class="exp-header">
+                        <div>
+                            <div class="exp-title">Founder &amp; CEO</div>
+                            <div class="exp-company">Version 5 Games, LLC<span class="separator">·</span>St. George, UT</div>
+                        </div>
+                        <div class="exp-period">Jan 2018 — Present</div>
+                    </div>
+                    <ul class="exp-bullets">
+                        <li>Founded and lead an independent game studio, specializing in <strong>Blueprint-driven gameplay systems</strong> and immersive real-time experiences.</li>
+                        <li>Published multiple products on the <strong>Epic Games Marketplace</strong>, recognized for innovation, polish, and developer-utility value.</li>
+                        <li>Built and operated two SaaS products end-to-end — including pricing, onboarding, support, and iteration informed by direct user feedback.</li>
+                        <li>Managed a YouTube channel producing tutorials and dev-log content, growing a developer-focused community and reinforcing brand authority.</li>
+                        <li>Developed and executed marketing strategies that drove sales growth, expanded the customer base, and sustained recurring revenue.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- EDUCATION -->
+            <section class="section">
+                <div class="section-heading">
+                    <span class="section-num">02</span>
+                    <h2>Education</h2>
+                    <span class="section-line"></span>
+                </div>
+
+                <div class="education-item">
+                    <div class="edu-header">
+                        <div>
+                            <div class="edu-school">Utah Tech University</div>
+                            <div class="edu-degree">Interdisciplinary Studies · Critical Thinking, Communication &amp; Problem-Solving</div>
+                        </div>
+                    </div>
+                    <p class="edu-detail">Built a strong foundation in critical thinking, structured problem-solving, and clear communication across a diverse range of subjects. The breadth of academic exposure directly supports an ability to approach novel technical and creative challenges with rigor and to collaborate effectively across professional disciplines.</p>
+                </div>
+            </section>
+
+            <!-- HIGHLIGHTS -->
+            <section class="section">
+                <div class="section-heading">
+                    <span class="section-num">03</span>
+                    <h2>Selected Highlights</h2>
+                    <span class="section-line"></span>
+                </div>
+
+                <div class="education-item">
+                    <ul class="exp-bullets" style="margin-top: 0;">
+                        <li><strong>Satellite Tracking &amp; Propagation Simulation</strong> — Real-time orbital mechanics in Unreal Engine, ingesting live TLE data for 400+ satellites, architected for drop-in classified ephemeris feeds.</li>
+                        <li><strong>Kill Chain Visualization System</strong> — Multi-domain command-and-control surface rendering friendly, hostile, and neutral assets with live targeting-pipeline phases.</li>
+                        <li><strong>Interactive Geospatial Globe</strong> — Cesium-backed coordinate-precise navigation with terrain ingest, obstacle detection, and threat overlays for ISR and logistics planning.</li>
+                        <li><strong>Epic Games Marketplace</strong> — Multiple shipped, revenue-generating Unreal products with active customer base and ongoing iteration.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <div class="resume-footer">
+                <span>Leland E. Doss · Senior Unreal Engine Developer</span>
+                <span class="ref">References &amp; portfolio available on request</span>
+            </div>
+        </main>
+
+    </article>
+
+    <script>
+        // Subtle entrance
+        document.addEventListener('DOMContentLoaded', () => {
+            const items = document.querySelectorAll('.experience-item, .education-item, .stat');
+            items.forEach((el, i) => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(8px)';
+                el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, 80 + i * 60);
+            });
+        });
+    </script>
+</body>
+</html>
