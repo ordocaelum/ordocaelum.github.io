@@ -561,6 +561,8 @@
         round <= 10 ? 3 :
         round <= 25 ? 2 : 1;
 
+    const ONE_HOUR_MS = 3600000;
+
     /* ══════════════════════════════════════════════════════════════════════
        STATE
     ══════════════════════════════════════════════════════════════════════ */
@@ -598,7 +600,7 @@
         svcs:     ['user-service','data-pipeline','auth-service','api-gateway','cache-service','worker-01'],
         sess:     ['sess_abc123','sess_def456','sess_ghi789','sess_jkl012','sess_mno345'],
         jobs:     ['job_001','job_002','job_003','job_004','job_005'],
-        ts:       Date.now() - 3600000,   // start from 1h ago
+        ts:       Date.now() - ONE_HOUR_MS,   // start from 1h ago
     };
 
     function advanceTs(addMs) {
@@ -1249,9 +1251,9 @@
         G.correctClicks  = 0;
         G.missedErrors   = 0;
         G.caughtErrors   = 0;
-        G.bestStreak     = 0;
+        // Note: G.bestStreak intentionally preserved across replays
 
-        CTX.ts = Date.now() - 3600000;
+        CTX.ts = Date.now() - ONE_HOUR_MS;
 
         $resultScreen.classList.add('hidden');
         updateStats();
