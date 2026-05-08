@@ -723,7 +723,12 @@
     var TOTAL       = 30;
     var BASE_NEURON_RADIUS = 8;
     var PROXIMITY_CHECK_INTERVAL = 0.22; /* seconds */
-    var CONFLICT_PROXIMITY = 78;
+    var CONFLICT_PROXIMITY_PX = 78;
+    var MIN_SCATTER_SPACING_PX = 22;
+    var SCATTER_SPACING_SCALE = 0.065;
+    var MAX_PLACEMENT_ATTEMPTS = 120;
+    var DAMAGE_RADIUS_MULTIPLIER = 2.5;
+    var DAMAGE_RADIUS_BASE = 30;
 
     /* Base color palette — safe, vibrant, readable on dark BG */
     var PALETTE = [
@@ -1149,13 +1154,13 @@
         var padY = size.h * 0.11;
         var spanW = size.w - padX * 2;
         var spanH = size.h - padY * 2;
-        var minDist = Math.max(22, Math.min(size.w, size.h) * 0.065);
+        var minDist = Math.max(MIN_SCATTER_SPACING_PX, Math.min(size.w, size.h) * SCATTER_SPACING_SCALE);
 
         for (var i = 0; i < TOTAL; i++) {
             var nx = 0.5;
             var ny = 0.5;
             var attempts = 0;
-            while (attempts < 120) {
+            while (attempts < MAX_PLACEMENT_ATTEMPTS) {
                 nx = Math.random();
                 ny = Math.random();
                 var testX = padX + nx * spanW;
@@ -1212,7 +1217,7 @@
         }
 
         /* Damage radius scales with power */
-        var damageRadius = app.connectedRadius * 2.5 + 30;
+        var damageRadius = app.connectedRadius * DAMAGE_RADIUS_MULTIPLIER + DAMAGE_RADIUS_BASE;
 
         /* Cascade to neighbours */
         for (var i = 0; i < app.neurons.length; i++) {
@@ -1320,7 +1325,7 @@
                 var b = app.neurons[j];
                 if (!b.alive || !b.connected) { continue; }
                 if (!isEnemyPair(a.color, b.color)) { continue; }
-                if (Math.hypot(a.x - b.x, a.y - b.y) > CONFLICT_PROXIMITY) { continue; }
+                if (Math.hypot(a.x - b.x, a.y - b.y) > CONFLICT_PROXIMITY_PX) { continue; }
                 addLog('⚠ PROXIMITY CONFLICT: ' + a.id + ' near ' + b.id, 'boom');
                 triggerExplosion(a, app.power);
                 setTimeout(function (n) {
