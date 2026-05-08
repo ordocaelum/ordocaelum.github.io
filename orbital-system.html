@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ORBITAL_SYSTEM — Leland E. Doss</title>
-    <meta name="description" content="Interactive orbital system demo for Leland E. Doss resume.">
+    <meta name="description" content="Interactive orbital mechanics demo — L2 &amp; L3 features. Multiple satellites, celestial bodies, Lagrange points, collision detection, three-body chaos.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Material+Symbols+Rounded:FILL@0..1&display=swap" rel="stylesheet">
     <style>
+        /* ═══ ROOT ═══════════════════════════════════════════════════════════ */
         :root {
             --bg: #0e1a2b;
             --bg-soft: #142640;
@@ -20,6 +21,7 @@
             --accent-2: #82c0ff;
             --electric-cyan: #7ee2ff;
             --electric-green: #6fffb0;
+            --electric-yellow: #ffe066;
             --electric-orange: #ffb167;
             --electric-red: #ff7386;
             --text: #eef3fa;
@@ -29,7 +31,6 @@
         }
 
         * { box-sizing: border-box; }
-
         html, body { margin: 0; min-height: 100%; }
 
         body {
@@ -39,7 +40,7 @@
                 radial-gradient(circle at bottom right, rgba(90, 168, 255, 0.10), transparent 30%),
                 var(--bg);
             color: var(--text);
-            padding: 88px 24px 40px;
+            padding: 88px 24px 48px;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
@@ -57,13 +58,12 @@
             font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
         }
 
-        a { color: inherit; }
+        a { color: inherit; text-decoration: none; }
 
+        /* ═══ NAV ════════════════════════════════════════════════════════════ */
         .top-nav {
             position: fixed;
-            top: 14px;
-            left: 24px;
-            right: 24px;
+            top: 14px; left: 24px; right: 24px;
             z-index: 20;
             background: rgba(13, 26, 44, 0.76);
             border: 1px solid var(--line-strong);
@@ -83,39 +83,46 @@
             gap: 12px;
         }
 
-        .btn,
-        .stat-card,
-        .control-card,
-        .canvas-shell {
-            transition: border-color 0.35s ease, box-shadow 0.35s ease, background-color 0.35s ease, transform 0.35s ease;
-        }
-
+        /* ═══ BUTTONS ════════════════════════════════════════════════════════ */
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 7px;
             border: 1px solid var(--line-strong);
             border-radius: 8px;
             background: var(--panel);
             color: var(--text-soft);
-            padding: 10px 16px;
-            text-decoration: none;
+            padding: 9px 14px;
             font: inherit;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             letter-spacing: 0.12em;
             text-transform: uppercase;
             cursor: pointer;
+            transition: border-color 0.22s, background 0.22s, color 0.22s;
         }
 
-        .btn:hover,
-        .btn:focus-visible {
+        .btn:hover, .btn:focus-visible {
             border-color: var(--accent);
             background: var(--bg-soft);
             color: var(--accent-2);
             outline: none;
         }
 
+        .btn.btn-sm { padding: 6px 10px; font-size: 0.74rem; }
+
+        .panel-badge {
+            padding: 5px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(126, 226, 255, 0.22);
+            background: rgba(126, 226, 255, 0.08);
+            color: var(--accent-2);
+            font-size: 0.73rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        /* ═══ PAGE LAYOUT ════════════════════════════════════════════════════ */
         .page {
             max-width: 1220px;
             margin: 0 auto;
@@ -123,13 +130,11 @@
             gap: 22px;
         }
 
-        .hero {
-            padding: 14px 4px 0;
-        }
+        .hero { padding: 14px 4px 0; }
 
         .eyebrow {
             color: var(--electric-cyan);
-            font-size: 0.78rem;
+            font-size: 0.77rem;
             letter-spacing: 0.28em;
             text-transform: uppercase;
             margin-bottom: 10px;
@@ -137,7 +142,7 @@
 
         h1 {
             margin: 0;
-            font-size: clamp(2rem, 4vw, 3.35rem);
+            font-size: clamp(1.9rem, 4vw, 3.2rem);
             line-height: 0.95;
             letter-spacing: 0.12em;
             text-transform: uppercase;
@@ -145,35 +150,42 @@
 
         .subcopy {
             max-width: 760px;
-            margin: 16px 0 0;
+            margin: 14px 0 0;
             color: var(--text-soft);
-            font-size: 1rem;
+            font-size: 0.97rem;
+            line-height: 1.6;
         }
 
         .system-layout {
             display: grid;
-            grid-template-columns: 280px minmax(320px, 1fr) 280px;
-            gap: 22px;
+            grid-template-columns: 272px minmax(320px, 1fr) 272px;
+            gap: 20px;
             align-items: start;
         }
 
-        .control-card,
-        .stat-card,
-        .canvas-shell {
+        /* ═══ CARDS ══════════════════════════════════════════════════════════ */
+        .control-card, .stat-card, .canvas-shell {
             background: linear-gradient(180deg, rgba(26, 47, 77, 0.98), rgba(17, 35, 60, 0.98));
             border: 1px solid var(--line-strong);
             border-radius: 18px;
             box-shadow: var(--shadow);
         }
 
-        .control-card,
-        .stats-panel {
+        /* ═══ CONTROLS PANEL ═════════════════════════════════════════════════ */
+        .controls-panel {
             display: grid;
-            gap: 18px;
+            gap: 14px;
+            padding: 18px;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(126, 226, 255, 0.2) transparent;
         }
 
-        .control-card {
-            padding: 22px;
+        .controls-panel::-webkit-scrollbar { width: 3px; }
+        .controls-panel::-webkit-scrollbar-thumb {
+            background: rgba(126, 226, 255, 0.2);
+            border-radius: 2px;
         }
 
         .panel-heading {
@@ -184,27 +196,23 @@
         }
 
         .panel-title {
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             color: var(--electric-cyan);
             letter-spacing: 0.22em;
             text-transform: uppercase;
         }
 
-        .panel-badge {
-            padding: 6px 10px;
-            border-radius: 999px;
-            border: 1px solid rgba(126, 226, 255, 0.22);
-            background: rgba(126, 226, 255, 0.08);
-            color: var(--accent-2);
-            font-size: 0.74rem;
-            letter-spacing: 0.16em;
+        .section-label {
+            color: var(--text-mute);
+            font-size: 0.7rem;
+            letter-spacing: 0.24em;
             text-transform: uppercase;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--line);
+            margin-top: 2px;
         }
 
-        .control-group {
-            display: grid;
-            gap: 10px;
-        }
+        .control-group { display: grid; gap: 7px; }
 
         .control-label-row {
             display: flex;
@@ -215,17 +223,16 @@
 
         .control-label {
             color: var(--text-soft);
-            font-size: 0.8rem;
-            letter-spacing: 0.18em;
+            font-size: 0.76rem;
+            letter-spacing: 0.16em;
             text-transform: uppercase;
         }
 
         .control-value {
             color: var(--electric-cyan);
-            font-size: 0.95rem;
+            font-size: 0.88rem;
             font-weight: 600;
             letter-spacing: 0.08em;
-            text-transform: uppercase;
         }
 
         input[type="range"] {
@@ -236,58 +243,243 @@
         }
 
         input[type="range"]::-webkit-slider-runnable-track {
-            height: 8px;
+            height: 6px;
             border-radius: 999px;
-            background: linear-gradient(90deg, rgba(126, 226, 255, 0.24), rgba(90, 168, 255, 0.45));
-            border: 1px solid rgba(170, 200, 235, 0.18);
+            background: linear-gradient(90deg, rgba(126, 226, 255, 0.22), rgba(90, 168, 255, 0.42));
+            border: 1px solid rgba(170, 200, 235, 0.16);
         }
 
         input[type="range"]::-webkit-slider-thumb {
             appearance: none;
-            width: 18px;
-            height: 18px;
-            margin-top: -6px;
+            width: 15px;
+            height: 15px;
+            margin-top: -5px;
             border-radius: 50%;
             background: var(--electric-cyan);
             border: 2px solid #d8f7ff;
-            box-shadow: 0 0 18px rgba(126, 226, 255, 0.75);
+            box-shadow: 0 0 12px rgba(126, 226, 255, 0.7);
         }
 
         input[type="range"]::-moz-range-track {
-            height: 8px;
+            height: 6px;
             border-radius: 999px;
-            background: linear-gradient(90deg, rgba(126, 226, 255, 0.24), rgba(90, 168, 255, 0.45));
-            border: 1px solid rgba(170, 200, 235, 0.18);
+            background: linear-gradient(90deg, rgba(126, 226, 255, 0.22), rgba(90, 168, 255, 0.42));
         }
 
         input[type="range"]::-moz-range-thumb {
-            width: 18px;
-            height: 18px;
+            width: 15px;
+            height: 15px;
             border-radius: 50%;
             background: var(--electric-cyan);
             border: 2px solid #d8f7ff;
-            box-shadow: 0 0 18px rgba(126, 226, 255, 0.75);
+            box-shadow: 0 0 12px rgba(126, 226, 255, 0.7);
         }
 
         .button-row {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 12px;
+            gap: 8px;
         }
 
+        /* ═══ SATELLITE TABS ═════════════════════════════════════════════════ */
+        .sat-tab-bar {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .sat-tab {
+            flex: 1 1 auto;
+            min-width: 44px;
+            padding: 5px 6px;
+            border: 1px solid var(--line-strong);
+            border-radius: 7px;
+            background: var(--panel-2);
+            color: var(--text-mute);
+            font: inherit;
+            font-size: 0.72rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .sat-tab:hover { border-color: var(--accent); color: var(--accent-2); }
+
+        .sat-tab.active {
+            border-color: var(--electric-cyan);
+            background: rgba(126, 226, 255, 0.09);
+            color: var(--electric-cyan);
+        }
+
+        .sat-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 3px;
+            vertical-align: middle;
+        }
+
+        /* ═══ BUTTON GROUP (body / mode selector) ════════════════════════════ */
+        .btn-group {
+            display: flex;
+            border-radius: 9px;
+            border: 1px solid var(--line-strong);
+            overflow: hidden;
+        }
+
+        .btn-group-btn {
+            flex: 1;
+            padding: 7px 4px;
+            border: none;
+            border-right: 1px solid var(--line-strong);
+            background: var(--panel-2);
+            color: var(--text-mute);
+            font: inherit;
+            font-size: 0.7rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-group-btn:last-child { border-right: none; }
+        .btn-group-btn:hover { background: var(--panel); color: var(--text-soft); }
+
+        .btn-group-btn.active {
+            background: rgba(126, 226, 255, 0.11);
+            color: var(--electric-cyan);
+        }
+
+        /* ═══ COLOR PICKER ═══════════════════════════════════════════════════ */
+        .color-row { display: flex; align-items: center; gap: 8px; }
+
+        input[type="color"] {
+            width: 34px;
+            height: 28px;
+            border: 1px solid var(--line-strong);
+            border-radius: 6px;
+            background: var(--panel-2);
+            cursor: pointer;
+            padding: 2px;
+        }
+
+        .color-hex {
+            color: var(--text-mute);
+            font-size: 0.76rem;
+            letter-spacing: 0.1em;
+        }
+
+        /* ═══ PRESETS ════════════════════════════════════════════════════════ */
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 7px;
+        }
+
+        .preset-btn {
+            padding: 7px 5px;
+            border: 1px solid var(--line-strong);
+            border-radius: 8px;
+            background: var(--panel-2);
+            color: var(--text-mute);
+            font: inherit;
+            font-size: 0.68rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .preset-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent-2);
+            background: var(--panel);
+        }
+
+        .preset-btn.wide { grid-column: span 2; }
+
+        /* ═══ ADVANCED SETTINGS ══════════════════════════════════════════════ */
+        .advanced-details {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .advanced-details summary {
+            padding: 9px 13px;
+            cursor: pointer;
+            color: var(--text-mute);
+            font-size: 0.73rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            user-select: none;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .advanced-details summary::-webkit-details-marker { display: none; }
+
+        .advanced-details summary::after {
+            content: '▼';
+            font-size: 0.58rem;
+            transition: transform 0.22s;
+        }
+
+        .advanced-details[open] summary::after { transform: rotate(180deg); }
+        .advanced-details summary:hover { color: var(--text-soft); }
+
+        .adv-content {
+            padding: 11px 13px;
+            display: grid;
+            gap: 10px;
+            border-top: 1px solid var(--line);
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-soft);
+            font-size: 0.74rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .toggle-label input[type="checkbox"] {
+            width: 13px;
+            height: 13px;
+            accent-color: var(--electric-cyan);
+            cursor: pointer;
+        }
+
+        .system-note {
+            color: var(--text-mute);
+            font-size: 0.73rem;
+            line-height: 1.7;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        /* ═══ CANVAS SECTION ═════════════════════════════════════════════════ */
         .canvas-shell {
             position: relative;
-            padding: 24px;
-            min-height: 100%;
+            padding: 22px;
             overflow: hidden;
         }
 
         .canvas-shell::before {
             content: '';
             position: absolute;
-            inset: 18px;
-            border-radius: 16px;
-            border: 1px solid rgba(126, 226, 255, 0.08);
+            inset: 16px;
+            border-radius: 14px;
+            border: 1px solid rgba(126, 226, 255, 0.07);
             pointer-events: none;
         }
 
@@ -296,12 +488,12 @@
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            margin-bottom: 18px;
+            margin-bottom: 15px;
         }
 
         .canvas-copy {
             color: var(--text-mute);
-            font-size: 0.86rem;
+            font-size: 0.8rem;
             letter-spacing: 0.06em;
             text-transform: uppercase;
         }
@@ -311,35 +503,78 @@
             aspect-ratio: 1 / 1;
             width: min(100%, 460px);
             margin: 0 auto;
-            border-radius: 22px;
+            border-radius: 20px;
             background:
                 radial-gradient(circle at 50% 50%, rgba(126, 226, 255, 0.08), transparent 55%),
                 radial-gradient(circle at 30% 20%, rgba(90, 168, 255, 0.14), transparent 24%),
                 rgba(8, 16, 28, 0.95);
             border: 1px solid rgba(170, 200, 235, 0.12);
-            box-shadow:
-                inset 0 0 24px rgba(126, 226, 255, 0.08),
-                0 0 30px rgba(90, 168, 255, 0.08);
+            box-shadow: inset 0 0 24px rgba(126, 226, 255, 0.07), 0 0 30px rgba(90, 168, 255, 0.07);
         }
 
         canvas {
             display: block;
             width: 100%;
             height: 100%;
-            border-radius: 22px;
+            border-radius: 20px;
         }
 
-        .stats-panel {
-            gap: 14px;
+        /* ═══ COLLISION OVERLAY ══════════════════════════════════════════════ */
+        .collision-overlay {
+            position: absolute;
+            inset: 0;
+            border-radius: 20px;
+            pointer-events: none;
+            z-index: 2;
         }
 
-        .stat-card {
-            padding: 18px 20px;
+        @keyframes collFlash {
+            0%   { background: rgba(255, 115, 134, 0.42); box-shadow: inset 0 0 30px rgba(255,115,134,0.55); }
+            100% { background: rgba(255, 115, 134, 0); box-shadow: none; }
         }
+
+        .collision-overlay.flash { animation: collFlash 0.55s ease-out forwards; }
+
+        /* ═══ LAGRANGE TOOLTIP ═══════════════════════════════════════════════ */
+        .lagrange-tip {
+            position: absolute;
+            background: rgba(10, 22, 38, 0.94);
+            border: 1px solid rgba(111, 255, 176, 0.35);
+            border-radius: 6px;
+            padding: 5px 9px;
+            color: var(--electric-green);
+            font-size: 0.7rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            pointer-events: none;
+            z-index: 4;
+            opacity: 0;
+            transition: opacity 0.18s;
+            white-space: nowrap;
+        }
+
+        .lagrange-tip.visible { opacity: 1; }
+
+        /* ═══ PRESET NAME ════════════════════════════════════════════════════ */
+        .preset-name {
+            text-align: center;
+            color: var(--electric-cyan);
+            font-size: 0.75rem;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            margin-top: 13px;
+            min-height: 18px;
+            opacity: 0.85;
+        }
+
+        /* ═══ STATS PANEL ════════════════════════════════════════════════════ */
+        .stats-panel { display: grid; gap: 13px; }
+
+        .stat-card { padding: 16px 18px; border-radius: 18px; }
 
         .stat-label {
             color: var(--text-mute);
-            font-size: 0.74rem;
+            font-size: 0.72rem;
             letter-spacing: 0.2em;
             text-transform: uppercase;
             margin-bottom: 8px;
@@ -347,7 +582,7 @@
 
         .stat-value {
             color: var(--text);
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             font-weight: 600;
             letter-spacing: 0.08em;
             text-transform: uppercase;
@@ -356,44 +591,139 @@
         .status-value {
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            font-size: 1rem;
-            letter-spacing: 0.15em;
+            gap: 9px;
+            font-size: 0.96rem;
+            letter-spacing: 0.14em;
         }
 
         .status-dot {
-            width: 10px;
-            height: 10px;
+            width: 9px;
+            height: 9px;
             border-radius: 50%;
-            box-shadow: 0 0 14px currentColor;
+            box-shadow: 0 0 10px currentColor;
             background: currentColor;
+            flex-shrink: 0;
         }
 
-        .system-note {
+        /* ═══ ENERGY CARD ════════════════════════════════════════════════════ */
+        .energy-card { padding: 16px 18px; border-radius: 18px; }
+
+        .energy-badge {
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            margin-bottom: 13px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.55; }
+        }
+
+        .energy-badge.pulsing { animation: pulse 1.1s ease-in-out infinite; }
+
+        .energy-bar-labels {
+            display: flex;
+            justify-content: space-between;
             color: var(--text-mute);
-            font-size: 0.8rem;
-            line-height: 1.7;
-            letter-spacing: 0.06em;
+            font-size: 0.65rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .energy-bar-track {
+            height: 7px;
+            border-radius: 999px;
+            background: rgba(126, 226, 255, 0.1);
+            border: 1px solid var(--line);
+            overflow: hidden;
+        }
+
+        .energy-bar-fill {
+            height: 100%;
+            border-radius: 999px;
+            width: 0%;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+
+        /* ═══ COLLISION LOG ══════════════════════════════════════════════════ */
+        .event-list {
+            display: grid;
+            gap: 4px;
+            min-height: 22px;
+        }
+
+        .event-entry {
+            color: var(--electric-red);
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            line-height: 1.5;
+        }
+
+        .event-none {
+            color: var(--text-mute);
+            font-size: 0.72rem;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
         }
 
-        @media (max-width: 1080px) {
+        /* ═══ EXPORT ═════════════════════════════════════════════════════════ */
+        .export-area {
+            margin-top: 9px;
+            padding: 9px 11px;
+            background: var(--panel-2);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            font-size: 0.68rem;
+            color: var(--electric-cyan);
+            letter-spacing: 0.06em;
+            word-break: break-all;
+            max-height: 140px;
+            overflow-y: auto;
+            display: none;
+            line-height: 1.4;
+        }
+
+        .export-area.visible { display: block; }
+
+        .copy-notice {
+            color: var(--electric-green);
+            font-size: 0.7rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            margin-top: 7px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .copy-notice.visible { opacity: 1; }
+
+        /* ═══ TELEMETRY HEADER ═══════════════════════════════════════════════ */
+        .telem-header {
+            padding: 16px 18px;
+            border-radius: 18px;
+        }
+
+        /* ═══ RESPONSIVE ═════════════════════════════════════════════════════ */
+        @media (max-width: 1100px) {
             .system-layout {
                 grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
                 grid-template-areas:
                     "canvas canvas"
                     "controls stats";
             }
-
-            .controls-panel { grid-area: controls; }
-            .canvas-shell { grid-area: canvas; }
-            .stats-panel { grid-area: stats; }
+            .controls-panel { grid-area: controls; max-height: none; }
+            .canvas-shell    { grid-area: canvas; }
+            .stats-panel     { grid-area: stats; }
         }
 
         @media (max-width: 720px) {
-            body { padding: 78px 16px 28px; }
-            .top-nav { top: 10px; left: 16px; right: 16px; }
-            .top-nav-inner { padding: 8px 10px; }
+            body { padding: 76px 14px 28px; }
+            .top-nav { top: 10px; left: 14px; right: 14px; }
+            .top-nav-inner { padding: 7px 10px; }
             .system-layout {
                 grid-template-columns: 1fr;
                 grid-template-areas:
@@ -401,310 +731,1132 @@
                     "canvas"
                     "stats";
             }
-            .control-card,
-            .canvas-shell,
-            .stat-card { border-radius: 16px; }
+            .controls-panel { max-height: none; }
             .button-row { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <div class="top-nav" role="navigation" aria-label="Orbital system navigation">
-        <div class="top-nav-inner">
-            <a class="btn" href="index.html" aria-label="Back to resume">
-                <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
-                <span>Resume</span>
-            </a>
-            <div class="panel-badge">System Demo</div>
-        </div>
+
+<div class="top-nav" role="navigation" aria-label="Orbital system navigation">
+    <div class="top-nav-inner">
+        <a class="btn" href="index.html" aria-label="Back to resume">
+            <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
+            <span>Resume</span>
+        </a>
+        <div class="panel-badge">System Demo — L2 + L3</div>
     </div>
+</div>
 
-    <main class="page">
-        <section class="hero" aria-labelledby="orbital-system-title">
-            <div class="eyebrow">Interactive Portfolio Module</div>
-            <h1 id="orbital-system-title">Orbital_System</h1>
-            <p class="subcopy">A stylized orbital mechanics toy built for the resume. It is intentionally simple: smooth circular motion, responsive controls, glowing telemetry, and just enough fake science to feel fun.</p>
+<main class="page">
+    <section class="hero" aria-labelledby="orbital-system-title">
+        <div class="eyebrow">Interactive Portfolio Module — Level 2 &amp; 3</div>
+        <h1 id="orbital-system-title">Orbital_System</h1>
+        <p class="subcopy">Multi-satellite orbital mechanics toy. Add up to five satellites, switch celestial bodies, watch Lagrange points, trigger collision chaos, and export your configuration — all in a stylized mock simulation.</p>
+    </section>
+
+    <section class="system-layout" aria-label="Orbital system interface">
+
+        <!-- ══ LEFT: CONTROLS ═════════════════════════════════════════════ -->
+        <aside class="control-card controls-panel" aria-labelledby="controls-title">
+            <div class="panel-heading">
+                <div class="panel-title" id="controls-title">Controls</div>
+                <div class="panel-badge" id="playbackMode">Live</div>
+            </div>
+
+            <!-- Satellite manager -->
+            <div class="section-label">Satellites</div>
+            <div class="sat-tab-bar" id="satTabBar" role="tablist" aria-label="Satellite selector"></div>
+            <div class="button-row">
+                <button class="btn btn-sm" id="addSatBtn" type="button" aria-label="Add satellite">
+                    <span class="material-symbols-rounded" aria-hidden="true" style="font-size:15px">add_circle</span>
+                    <span>Add</span>
+                </button>
+                <button class="btn btn-sm" id="removeSatBtn" type="button" aria-label="Remove active satellite">
+                    <span class="material-symbols-rounded" aria-hidden="true" style="font-size:15px">remove_circle</span>
+                    <span>Remove</span>
+                </button>
+            </div>
+
+            <!-- Active satellite controls -->
+            <div class="control-group">
+                <div class="control-label-row">
+                    <label class="control-label" for="speedSlider">Speed</label>
+                    <span class="control-value" id="speedValue">1.0x</span>
+                </div>
+                <input id="speedSlider" type="range" min="0.1" max="5" step="0.1" value="1" aria-label="Orbital speed">
+            </div>
+
+            <div class="control-group">
+                <div class="control-label-row">
+                    <label class="control-label" for="angleSlider">Launch_Angle</label>
+                    <span class="control-value" id="angleValue">0°</span>
+                </div>
+                <input id="angleSlider" type="range" min="0" max="359" step="1" value="0" aria-label="Launch angle">
+            </div>
+
+            <div class="control-group">
+                <div class="control-label-row">
+                    <label class="control-label" for="radiusSlider">Radius</label>
+                    <span class="control-value" id="radiusValue">120</span>
+                </div>
+                <input id="radiusSlider" type="range" min="60" max="180" step="5" value="120" aria-label="Orbital radius">
+            </div>
+
+            <div class="control-group">
+                <div class="control-label-row">
+                    <label class="control-label" for="colorPicker">Color</label>
+                    <span class="color-hex" id="colorHex">#7EE2FF</span>
+                </div>
+                <div class="color-row">
+                    <input id="colorPicker" type="color" value="#7ee2ff" aria-label="Satellite color">
+                </div>
+            </div>
+
+            <!-- Play / Pause / Reset -->
+            <div class="button-row">
+                <button class="btn" id="playPauseBtn" type="button">
+                    <span class="material-symbols-rounded" aria-hidden="true">pause_circle</span>
+                    <span>Pause</span>
+                </button>
+                <button class="btn" id="resetBtn" type="button">
+                    <span class="material-symbols-rounded" aria-hidden="true">replay</span>
+                    <span>Reset</span>
+                </button>
+            </div>
+
+            <!-- Central body -->
+            <div class="section-label">Central Body</div>
+            <div class="btn-group" id="bodySelector" role="group" aria-label="Central body selector">
+                <button class="btn-group-btn active" data-body="earth" type="button">Earth</button>
+                <button class="btn-group-btn" data-body="moon" type="button">Moon</button>
+                <button class="btn-group-btn" data-body="sun" type="button">Sun</button>
+            </div>
+
+            <!-- Simulation mode -->
+            <div class="section-label">Simulation Mode</div>
+            <div class="btn-group" id="modeSelector" role="group" aria-label="Simulation mode selector">
+                <button class="btn-group-btn active" data-mode="single" type="button">1-Body</button>
+                <button class="btn-group-btn" data-mode="dual" type="button">2-Body</button>
+                <button class="btn-group-btn" data-mode="triple" type="button">3-Body</button>
+            </div>
+
+            <!-- Presets -->
+            <div class="section-label">Presets</div>
+            <div class="preset-grid" id="presetGrid">
+                <button class="preset-btn" data-preset="geostationary" type="button">GEO</button>
+                <button class="preset-btn" data-preset="leo" type="button">LEO</button>
+                <button class="preset-btn" data-preset="escape" type="button">Escape</button>
+                <button class="preset-btn" data-preset="binary" type="button">Binary</button>
+                <button class="preset-btn wide" data-preset="lagrange" type="button">Lagrange Dance</button>
+            </div>
+
+            <!-- Advanced settings -->
+            <details class="advanced-details" id="advancedDetails">
+                <summary>Advanced Settings</summary>
+                <div class="adv-content">
+                    <div class="control-group">
+                        <div class="control-label-row">
+                            <span class="control-label">Trail Length</span>
+                            <span class="control-value" id="trailLenVal">250</span>
+                        </div>
+                        <input id="trailLenSlider" type="range" min="50" max="300" step="10" value="250" aria-label="Trail length">
+                    </div>
+                    <label class="toggle-label">
+                        <input type="checkbox" id="showTrailsCb" checked> Show Trails
+                    </label>
+                    <label class="toggle-label">
+                        <input type="checkbox" id="showLagrangeCb" checked> Lagrange Points
+                    </label>
+                    <label class="toggle-label">
+                        <input type="checkbox" id="collisionCb" checked> Collision Detection
+                    </label>
+                    <label class="toggle-label">
+                        <input type="checkbox" id="showVectorsCb" checked> Velocity Vectors
+                    </label>
+                </div>
+            </details>
+
+            <p class="system-note">Stylized mock — not real physics. K.I.S.S. principle. Fun guaranteed.</p>
+        </aside>
+
+        <!-- ══ CENTER: CANVAS ═════════════════════════════════════════════ -->
+        <section class="canvas-shell" aria-labelledby="visual-title">
+            <div class="canvas-header">
+                <div class="panel-title" id="visual-title">Visualization</div>
+                <div class="canvas-copy" id="canvasCopy">Multi-Body Orbital Canvas</div>
+            </div>
+            <div class="canvas-wrap" id="canvasWrap">
+                <canvas id="orbitalCanvas" width="460" height="460"
+                    aria-label="Animated orbital system with multiple satellites"></canvas>
+                <div class="collision-overlay" id="collisionOverlay"></div>
+                <div class="lagrange-tip" id="lagrangeTip"></div>
+            </div>
+            <div class="preset-name" id="presetNameDisplay"></div>
         </section>
 
-        <section class="system-layout" aria-label="Orbital system interface">
-            <aside class="control-card controls-panel" aria-labelledby="controls-title">
+        <!-- ══ RIGHT: STATS ═══════════════════════════════════════════════ -->
+        <aside class="stats-panel" aria-labelledby="stats-title">
+
+            <!-- Energy status -->
+            <div class="stat-card energy-card">
+                <div class="stat-label">Energy Status</div>
+                <div class="energy-badge" id="energyBadge" style="color:var(--electric-green)">Stable_Orbit</div>
+                <div class="energy-bar-labels">
+                    <span>Kinetic ▶</span>
+                    <span>◀ Potential</span>
+                </div>
+                <div class="energy-bar-track">
+                    <div class="energy-bar-fill" id="energyBarFill" style="background:var(--electric-green)"></div>
+                </div>
+            </div>
+
+            <!-- Telemetry heading -->
+            <div class="stat-card telem-header" id="stats-title">
                 <div class="panel-heading">
-                    <div class="panel-title" id="controls-title">Controls</div>
-                    <div class="panel-badge" id="playbackMode">Live</div>
+                    <div class="panel-title">Telemetry</div>
+                    <div class="panel-badge" id="activeSatBadge">Sat #1</div>
                 </div>
+                <p class="system-note" style="margin:8px 0 0">Active satellite readout. Switch tabs to compare.</p>
+            </div>
 
-                <div class="control-group">
-                    <div class="control-label-row">
-                        <label class="control-label" for="speedSlider">Orbital_Speed</label>
-                        <span class="control-value" id="speedValue">1.0x</span>
-                    </div>
-                    <input id="speedSlider" type="range" min="0.5" max="5" step="0.1" value="1">
+            <div class="stat-card">
+                <div class="stat-label">Speed</div>
+                <div class="stat-value" id="statSpeed">1.0x</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Orbital Period</div>
+                <div class="stat-value" id="statPeriod">100.0 Hours</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Altitude</div>
+                <div class="stat-value" id="statAltitude">420 Km</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Status</div>
+                <div class="stat-value status-value" id="statStatus">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span id="statusText">Stable_Orbit</span>
                 </div>
+            </div>
 
-                <div class="control-group">
-                    <div class="control-label-row">
-                        <label class="control-label" for="angleSlider">Launch_Angle</label>
-                        <span class="control-value" id="angleValue">0°</span>
-                    </div>
-                    <input id="angleSlider" type="range" min="0" max="360" step="1" value="0">
+            <!-- System events / collision log -->
+            <div class="stat-card">
+                <div class="stat-label">System Events</div>
+                <div class="event-list" id="eventList">
+                    <div class="event-none">No Events</div>
                 </div>
+            </div>
 
-                <div class="button-row">
-                    <button class="btn" id="playPauseBtn" type="button">
-                        <span class="material-symbols-rounded" aria-hidden="true">pause_circle</span>
-                        <span>Pause</span>
-                    </button>
-                    <button class="btn" id="resetBtn" type="button">
-                        <span class="material-symbols-rounded" aria-hidden="true">replay</span>
-                        <span>Reset</span>
-                    </button>
-                </div>
+            <!-- Export / Share -->
+            <div class="stat-card">
+                <div class="stat-label">Export / Share</div>
+                <button class="btn" id="exportBtn" type="button" style="width:100%;margin-top:6px">
+                    <span class="material-symbols-rounded" aria-hidden="true">download</span>
+                    <span>Export_Config</span>
+                </button>
+                <div class="export-area" id="exportArea"></div>
+                <div class="copy-notice" id="copyNotice">✓ Copied to clipboard</div>
+            </div>
 
-                <p class="system-note">K.I.S.S. mode enabled. This is a polished mock orbital system, not a real simulation.</p>
-            </aside>
+        </aside>
+    </section>
+</main>
 
-            <section class="canvas-shell" aria-labelledby="visual-title">
-                <div class="canvas-header">
-                    <div class="panel-title" id="visual-title">Visualization</div>
-                    <div class="canvas-copy">400 × 400 Canvas</div>
-                </div>
-                <div class="canvas-wrap">
-                    <canvas id="orbitalCanvas" width="400" height="400" aria-label="Animated orbital system"></canvas>
-                </div>
-            </section>
+<script>
+(function () {
+    'use strict';
 
-            <aside class="stats-panel" aria-labelledby="stats-title">
-                <div class="control-card">
-                    <div class="panel-heading">
-                        <div class="panel-title" id="stats-title">Telemetry</div>
-                        <div class="panel-badge">Uppercase</div>
-                    </div>
-                    <p class="system-note">Realtime values update directly from the speed and angle controls.</p>
-                </div>
+    /* ══════════════════════════════════════════════════════════════════════
+       CONFIGURATION
+    ══════════════════════════════════════════════════════════════════════ */
+    var TWO_PI       = Math.PI * 2;
+    var ANGLE_INC    = 0.018;   // radians/frame at speed=1; gives ~1 full orbit per ~350 frames at 60fps
+    var GRAVITY      = 7;       // gravitational constant, tuned so circular orbit at r=120, mass=100 ≈ speed 1
+    var SAT_R        = 7;       // satellite draw radius (px)
+    var BODY_ORBT_R  = 62;      // secondary body orbit radius around barycenter (px)
+    var MAX_SATS     = 5;
+    var BODY_SPD     = 0.0075;  // secondary body angular speed (rad/frame); ~840 frames per revolution
+    var FLASH_FRAMES = 22;      // total countdown frames when a collision occurs
+    var FLASH_TRIGGER = 18;     // frame count at which the CSS flash animation fires (22 - 4 frame delay)
+    var COLL_DEBOUNCE_MS = 800; // ignore repeat collision events within this window (ms)
+    var LP_HIT_RADIUS = 18;     // mouse hit radius for Lagrange point tooltip (px)
 
-                <div class="stat-card">
-                    <div class="stat-label">Speed</div>
-                    <div class="stat-value" id="statSpeed">1.0x</div>
-                </div>
+    var BODIES = {
+        // mass: relative gravitational pull; radius: visual px; periodBase: hours at r=120, speed=1
+        // altBase: display altitude in km (or Mkm for Sun); all values tuned for visual plausibility
+        earth: { name: 'EARTH', mass: 100, radius: 28, color: '#5aa8ff', glow: 'rgba(90,168,255,0.85)',   hl: '#b8e3ff', periodBase: 100, altBase: 420 },
+        moon:  { name: 'MOON',  mass: 17,  radius: 16, color: '#c8d8e8', glow: 'rgba(200,216,232,0.7)',  hl: '#e8f0f8', periodBase: 240, altBase: 100 },
+        sun:   { name: 'SUN',   mass: 400, radius: 40, color: '#ffb340', glow: 'rgba(255,180,64,0.85)',   hl: '#ffe0a0', periodBase: 50,  altBase: 150000000 }
+    };
 
-                <div class="stat-card">
-                    <div class="stat-label">Orbital Period</div>
-                    <div class="stat-value" id="statPeriod">100.0 Hours</div>
-                </div>
+    var SAT_PALETTE = ['#7ee2ff', '#82c0ff', '#6fffb0', '#ffb167', '#ff7386'];
 
-                <div class="stat-card">
-                    <div class="stat-label">Altitude</div>
-                    <div class="stat-value" id="statAltitude">420 Km</div>
-                </div>
+    var PRESETS = {
+        geostationary: {
+            name: 'GEOSTATIONARY',
+            body: 'earth', mode: 'single',
+            sats: [{ speed: 0.5, angle: 0, radius: 160, color: '#7ee2ff' }]
+        },
+        leo: {
+            name: 'LOW_EARTH_ORBIT',
+            body: 'earth', mode: 'single',
+            sats: [{ speed: 1.2, angle: 45, radius: 90, color: '#82c0ff' }]
+        },
+        escape: {
+            name: 'ESCAPE_VELOCITY',
+            body: 'earth', mode: 'single',
+            sats: [{ speed: 3.5, angle: 90, radius: 110, color: '#ff7386' }]
+        },
+        binary: {
+            name: 'BINARY_CHAOS',
+            body: 'earth', mode: 'single',
+            sats: [
+                { speed: 1.5, angle: 0,   radius: 100, color: '#7ee2ff' },
+                { speed: 0.8, angle: 180, radius: 140, color: '#ffb167' }
+            ]
+        },
+        lagrange: {
+            name: 'LAGRANGE_DANCE',
+            body: 'earth', mode: 'single',
+            sats: [{ speed: 1.0, angle: 60, radius: 120, color: '#6fffb0' }]
+        }
+    };
 
-                <div class="stat-card">
-                    <div class="stat-label">Status</div>
-                    <div class="stat-value status-value" id="statStatus">
-                        <span class="status-dot" id="statusDot"></span>
-                        <span id="statusText">Stable_Orbit</span>
-                    </div>
-                </div>
-            </aside>
-        </section>
-    </main>
+    /* ══════════════════════════════════════════════════════════════════════
+       SATELLITE CLASS
+    ══════════════════════════════════════════════════════════════════════ */
+    function Satellite(id, opts) {
+        opts = opts || {};
+        this.id     = id;
+        this.speed  = opts.speed  != null ? opts.speed  : 1.0;
+        this.angle  = opts.angle  != null ? opts.angle * Math.PI / 180 : 0;
+        this.radius = opts.radius != null ? opts.radius : 120;
+        this.color  = opts.color  || SAT_PALETTE[id % SAT_PALETTE.length];
+        this.trail  = [];
+        // Physics mode state (multi-body)
+        this.px = 0; this.py = 0; // position relative to canvas center
+        this.vx = 0; this.vy = 0; // velocity
+        this.physMode = false;
+    }
 
-    <script>
-        (function () {
-            const canvas = document.getElementById('orbitalCanvas');
-            const ctx = canvas.getContext('2d');
-            const speedSlider = document.getElementById('speedSlider');
-            const angleSlider = document.getElementById('angleSlider');
-            const speedValue = document.getElementById('speedValue');
-            const angleValue = document.getElementById('angleValue');
-            const statSpeed = document.getElementById('statSpeed');
-            const statPeriod = document.getElementById('statPeriod');
-            const statAltitude = document.getElementById('statAltitude');
-            const statStatus = document.getElementById('statStatus');
-            const statusDot = document.getElementById('statusDot');
-            const statusText = document.getElementById('statusText');
-            const playPauseBtn = document.getElementById('playPauseBtn');
-            const resetBtn = document.getElementById('resetBtn');
-            const playbackMode = document.getElementById('playbackMode');
+    Satellite.prototype.initPhysics = function (bodyMass) {
+        var startX = this.radius * Math.cos(this.angle);
+        var startY = this.radius * Math.sin(this.angle);
+        var vMag   = Math.sqrt(GRAVITY * bodyMass / Math.max(this.radius, 1)) * this.speed;
+        var perp   = this.angle + Math.PI / 2;
+        this.px = startX;
+        this.py = startY;
+        this.vx = vMag * Math.cos(perp);
+        this.vy = vMag * Math.sin(perp);
+        this.physMode = true;
+    };
 
-            const ORBIT_RADIUS = 120;
-            const SATELLITE_RADIUS = 8;
-            const ANGLE_INCREMENT = 0.02;
-            const TWO_PI = Math.PI * 2;
+    Satellite.prototype.exitPhysics = function () {
+        this.angle  = Math.atan2(this.py, this.px);
+        this.radius = Math.hypot(this.px, this.py) || 120;
+        this.physMode = false;
+    };
 
-            const state = {
-                speed: Number(speedSlider.value),
-                angle: 0,
-                isPlaying: true
-            };
+    Satellite.prototype.stepCircular = function () {
+        this.angle = (this.angle + this.speed * ANGLE_INC) % TWO_PI;
+    };
 
-            function formatAngle(angleRadians) {
-                const degrees = ((angleRadians * 180 / Math.PI) % 360 + 360) % 360;
-                return Math.round(degrees);
+    Satellite.prototype.stepPhysics = function (allBodies) {
+        var ax = 0, ay = 0;
+        for (var i = 0; i < allBodies.length; i++) {
+            var b   = allBodies[i];
+            var dx  = b.px - this.px;
+            var dy  = b.py - this.py;
+            var d2  = dx * dx + dy * dy;
+            var min = b.radius + SAT_R;
+            if (d2 < min * min) { continue; }
+            var d   = Math.sqrt(d2);
+            var acc = GRAVITY * b.mass / d2;
+            ax += acc * dx / d;
+            ay += acc * dy / d;
+        }
+        this.vx += ax;
+        this.vy += ay;
+        this.px += this.vx;
+        this.py += this.vy;
+        // Update approximate circular params for telemetry
+        this.angle  = Math.atan2(this.py, this.px);
+        this.radius = Math.hypot(this.px, this.py);
+    };
+
+    Satellite.prototype.getPos = function (cx, cy) {
+        if (this.physMode) {
+            return { x: cx + this.px, y: cy + this.py };
+        }
+        return {
+            x: cx + this.radius * Math.cos(this.angle),
+            y: cy + this.radius * Math.sin(this.angle)
+        };
+    };
+
+    Satellite.prototype.addTrail = function (x, y, cap) {
+        this.trail.push({ x: x, y: y });
+        if (this.trail.length > cap) { this.trail.shift(); }
+    };
+
+    Satellite.prototype.clearTrail = function () { this.trail = []; };
+
+    /* ══════════════════════════════════════════════════════════════════════
+       APP STATE
+    ══════════════════════════════════════════════════════════════════════ */
+    var app = {
+        satellites:     [],
+        activeSatId:    0,
+        body:           'earth',
+        mode:           'single',
+        isPlaying:      true,
+        showTrails:     true,
+        showLagrange:   true,
+        collisionDetect: true,
+        showVectors:    true,
+        trailLength:    250,
+        bodyAngle:      0,
+        flashFrames:    0,
+        presetName:     '',
+        mouseX:         0,
+        mouseY:         0,
+        hoveredLP:      null
+    };
+
+    /* ══════════════════════════════════════════════════════════════════════
+       DOM REFS
+    ══════════════════════════════════════════════════════════════════════ */
+    var canvas          = document.getElementById('orbitalCanvas');
+    var ctx             = canvas.getContext('2d');
+    var canvasWrap      = document.getElementById('canvasWrap');
+    var speedSlider     = document.getElementById('speedSlider');
+    var angleSlider     = document.getElementById('angleSlider');
+    var radiusSlider    = document.getElementById('radiusSlider');
+    var colorPicker     = document.getElementById('colorPicker');
+    var colorHexEl      = document.getElementById('colorHex');
+    var speedValue      = document.getElementById('speedValue');
+    var angleValue      = document.getElementById('angleValue');
+    var radiusValue     = document.getElementById('radiusValue');
+    var statSpeed       = document.getElementById('statSpeed');
+    var statPeriod      = document.getElementById('statPeriod');
+    var statAltitude    = document.getElementById('statAltitude');
+    var statStatus      = document.getElementById('statStatus');
+    var statusDot       = document.getElementById('statusDot');
+    var statusText      = document.getElementById('statusText');
+    var playPauseBtn    = document.getElementById('playPauseBtn');
+    var resetBtn        = document.getElementById('resetBtn');
+    var playbackMode    = document.getElementById('playbackMode');
+    var satTabBar       = document.getElementById('satTabBar');
+    var addSatBtn       = document.getElementById('addSatBtn');
+    var removeSatBtn    = document.getElementById('removeSatBtn');
+    var energyBadge     = document.getElementById('energyBadge');
+    var energyBarFill   = document.getElementById('energyBarFill');
+    var activeSatBadge  = document.getElementById('activeSatBadge');
+    var collisionOverlay= document.getElementById('collisionOverlay');
+    var lagrangeTip     = document.getElementById('lagrangeTip');
+    var eventList       = document.getElementById('eventList');
+    var exportBtn       = document.getElementById('exportBtn');
+    var exportArea      = document.getElementById('exportArea');
+    var copyNotice      = document.getElementById('copyNotice');
+    var presetNameDisplay = document.getElementById('presetNameDisplay');
+    var trailLenSlider  = document.getElementById('trailLenSlider');
+    var trailLenVal     = document.getElementById('trailLenVal');
+    var showTrailsCb    = document.getElementById('showTrailsCb');
+    var showLagrangeCb  = document.getElementById('showLagrangeCb');
+    var collisionCb     = document.getElementById('collisionCb');
+    var showVectorsCb   = document.getElementById('showVectorsCb');
+
+    /* ══════════════════════════════════════════════════════════════════════
+       SATELLITE MANAGEMENT
+    ══════════════════════════════════════════════════════════════════════ */
+    function initSatellites(configs) {
+        app.satellites = configs.map(function (cfg, i) { return new Satellite(i, cfg); });
+        app.activeSatId = 0;
+        if (app.mode !== 'single') {
+            app.satellites.forEach(function (s) { s.initPhysics(BODIES[app.body].mass); });
+        }
+    }
+
+    function addSatellite() {
+        if (app.satellites.length >= MAX_SATS) { return; }
+        var id  = app.satellites.length;
+        var sat = new Satellite(id, {
+            speed: 1.0,
+            angle: id * 72,
+            radius: 90 + id * 20,
+            color: SAT_PALETTE[id % SAT_PALETTE.length]
+        });
+        if (app.mode !== 'single') { sat.initPhysics(BODIES[app.body].mass); }
+        app.satellites.push(sat);
+        app.activeSatId = id;
+        renderTabs();
+        updateActiveControls();
+    }
+
+    function removeSatellite() {
+        if (app.satellites.length <= 1) { return; }
+        app.satellites.splice(app.activeSatId, 1);
+        app.satellites.forEach(function (s, i) { s.id = i; });
+        app.activeSatId = Math.min(app.activeSatId, app.satellites.length - 1);
+        renderTabs();
+        updateActiveControls();
+    }
+
+    function renderTabs() {
+        satTabBar.innerHTML = '';
+        app.satellites.forEach(function (sat, i) {
+            var tab = document.createElement('button');
+            tab.className = 'sat-tab' + (i === app.activeSatId ? ' active' : '');
+            tab.type = 'button';
+            tab.setAttribute('role', 'tab');
+            tab.setAttribute('aria-selected', i === app.activeSatId ? 'true' : 'false');
+            tab.innerHTML =
+                '<span class="sat-dot" style="background:' + sat.color +
+                ';box-shadow:0 0 5px ' + sat.color + '"></span>S' + (i + 1);
+            tab.addEventListener('click', function () {
+                app.activeSatId = i;
+                renderTabs();
+                updateActiveControls();
+            });
+            satTabBar.appendChild(tab);
+        });
+    }
+
+    function updateActiveControls() {
+        var sat = app.satellites[app.activeSatId];
+        if (!sat) { return; }
+        var deg = Math.round(((sat.angle * 180 / Math.PI) % 360 + 360) % 360);
+        speedSlider.value  = String(sat.speed);
+        speedValue.textContent = sat.speed.toFixed(1) + 'x';
+        angleSlider.value  = String(deg);
+        angleValue.textContent = deg + '°';
+        radiusSlider.value = String(Math.min(180, Math.max(60, Math.round(sat.radius))));
+        radiusValue.textContent = String(Math.round(sat.radius));
+        colorPicker.value  = sat.color.length === 7 ? sat.color : '#7ee2ff';
+        colorHexEl.textContent = sat.color.toUpperCase();
+        activeSatBadge.textContent = 'Sat #' + (app.activeSatId + 1);
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       BODY POSITIONS (for multi-body mode)
+    ══════════════════════════════════════════════════════════════════════ */
+    function getBodyDefs() {
+        var b = BODIES[app.body];
+        var main = { px: 0, py: 0, mass: b.mass, radius: b.radius, color: b.color, glow: b.glow, hl: b.hl };
+        if (app.mode === 'single') { return [main]; }
+
+        // Secondary mass/radius are 38%/48% of primary — chosen so the companion is visually
+        // distinct but still clearly smaller, without destabilising the satellite too quickly.
+        var secMass = b.mass * 0.38;
+        var secRad  = Math.max(9, b.radius * 0.48);
+        var sec1 = {
+            px: BODY_ORBT_R * Math.cos(app.bodyAngle),
+            py: BODY_ORBT_R * Math.sin(app.bodyAngle),
+            mass: secMass, radius: secRad,
+            color: '#82c0ff', glow: 'rgba(130,192,255,0.7)', hl: '#c8e4ff'
+        };
+        if (app.mode === 'dual') { return [main, sec1]; }
+
+        var sec2 = {
+            px: BODY_ORBT_R * Math.cos(app.bodyAngle + TWO_PI / 3),
+            py: BODY_ORBT_R * Math.sin(app.bodyAngle + TWO_PI / 3),
+            mass: secMass * 0.65, radius: Math.max(7, b.radius * 0.36),
+            color: '#ffb167', glow: 'rgba(255,177,103,0.7)', hl: '#ffe4c8'
+        };
+        return [main, sec1, sec2];
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       PHYSICS UPDATE
+    ══════════════════════════════════════════════════════════════════════ */
+    function updatePhysics(bodies) {
+        app.satellites.forEach(function (sat) {
+            if (app.mode === 'single') {
+                sat.stepCircular();
+            } else {
+                sat.stepPhysics(bodies);
             }
+        });
+        app.bodyAngle = (app.bodyAngle + BODY_SPD) % TWO_PI;
+    }
 
-            function getStatus(speed) {
-                if (speed < 0.8) {
-                    return { label: 'DECAYING', color: 'var(--electric-orange)' };
+    /* ══════════════════════════════════════════════════════════════════════
+       COLLISION DETECTION
+    ══════════════════════════════════════════════════════════════════════ */
+    function checkCollisions(cx, cy, bodies) {
+        if (!app.collisionDetect) { return; }
+
+        app.satellites.forEach(function (sat) {
+            var pos  = sat.getPos(cx, cy);
+            var spx  = sat.physMode ? sat.px : (pos.x - cx);
+            var spy  = sat.physMode ? sat.py : (pos.y - cy);
+
+            // vs each central/secondary body
+            bodies.forEach(function (b) {
+                var dx   = b.px - spx;
+                var dy   = b.py - spy;
+                var dist = Math.hypot(dx, dy);
+                if (dist < b.radius + SAT_R) {
+                    triggerCollision('Sat #' + (sat.id + 1) + ' \u2192 ' + BODIES[app.body].name);
+                    // Push satellite out
+                    if (sat.physMode) {
+                        sat.vx *= -0.4; sat.vy *= -0.4;
+                        var pushDist = b.radius + SAT_R + 3;
+                        var nx = spx - b.px, ny = spy - b.py;
+                        var nd = Math.hypot(nx, ny) || 1;
+                        sat.px = b.px + pushDist * nx / nd;
+                        sat.py = b.py + pushDist * ny / nd;
+                    } else {
+                        sat.radius = b.radius + SAT_R + 4;
+                    }
                 }
-                if (speed > 3) {
-                    return { label: 'ESCAPE_VELOCITY', color: 'var(--electric-red)' };
+            });
+
+            // vs other satellites
+            app.satellites.forEach(function (other) {
+                if (other.id <= sat.id) { return; }
+                var opos = other.getPos(cx, cy);
+                var dist = Math.hypot(opos.x - pos.x, opos.y - pos.y);
+                if (dist < SAT_R * 2 + 1) {
+                    triggerCollision('Sat #' + (sat.id + 1) + ' \u2194 Sat #' + (other.id + 1));
                 }
-                return { label: 'STABLE_ORBIT', color: 'var(--electric-green)' };
-            }
+            });
+        });
+    }
 
-            function syncStats() {
-                const angleDegrees = formatAngle(state.angle);
-                const orbitPeriod = 100 / state.speed;
-                const altitude = 420 + Math.sin(state.angle * 1.5) * 12;
-                const status = getStatus(state.speed);
+    var _lastCollMsg = '';
+    var _lastCollTime = 0;
+    function triggerCollision(msg) {
+        var now = Date.now();
+        // Deduplicate rapid-fire collisions (same message within debounce window)
+        if (msg === _lastCollMsg && now - _lastCollTime < COLL_DEBOUNCE_MS) { return; }
+        _lastCollMsg  = msg;
+        _lastCollTime = now;
 
-                speedValue.textContent = state.speed.toFixed(1) + 'x';
-                angleValue.textContent = angleDegrees + '°';
-                statSpeed.textContent = state.speed.toFixed(1) + 'x';
-                statPeriod.textContent = orbitPeriod.toFixed(1) + ' HOURS';
-                statAltitude.textContent = altitude.toFixed(0) + ' KM';
-                statusText.textContent = status.label;
-                statStatus.style.color = status.color;
-                statusDot.style.color = status.color;
-                angleSlider.value = String(angleDegrees);
-                playbackMode.textContent = state.isPlaying ? 'Live' : 'Paused';
-            }
+        app.flashFrames = FLASH_FRAMES;
 
-            function resizeCanvas() {
-                const rect = canvas.getBoundingClientRect();
-                const dpr = window.devicePixelRatio || 1;
-                canvas.width = rect.width * dpr;
-                canvas.height = rect.height * dpr;
-                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-            }
+        // Remove placeholder
+        var placeholder = eventList.querySelector('.event-none');
+        if (placeholder) { placeholder.remove(); }
 
-            function drawArrow(x1, y1, x2, y2, color) {
-                const angle = Math.atan2(y2 - y1, x2 - x1);
-                const headLength = 12;
+        var entry = document.createElement('div');
+        entry.className = 'event-entry';
+        var d = new Date();
+        var ts = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ':' + ('0' + d.getSeconds()).slice(-2);
+        entry.textContent = '[' + ts + '] COLLISION: ' + msg;
+        eventList.insertBefore(entry, eventList.firstChild);
+        while (eventList.children.length > 5) { eventList.removeChild(eventList.lastChild); }
+    }
 
+    /* ══════════════════════════════════════════════════════════════════════
+       LAGRANGE POINTS
+    ══════════════════════════════════════════════════════════════════════ */
+    function getLagrangePoints(cx, cy) {
+        if (!app.showLagrange || app.satellites.length === 0) { return []; }
+        var sat = app.satellites[app.activeSatId];
+        var r   = Math.max(sat.radius, 30);
+        var a   = sat.angle;
+        return [
+            { label: 'L1', x: cx + r * 0.82 * Math.cos(a),                y: cy + r * 0.82 * Math.sin(a) },
+            { label: 'L2', x: cx + r * 1.18 * Math.cos(a),                y: cy + r * 1.18 * Math.sin(a) },
+            { label: 'L3', x: cx + r * Math.cos(a + Math.PI),             y: cy + r * Math.sin(a + Math.PI) },
+            { label: 'L4', x: cx + r * Math.cos(a + Math.PI / 3),         y: cy + r * Math.sin(a + Math.PI / 3) },
+            { label: 'L5', x: cx + r * Math.cos(a - Math.PI / 3),         y: cy + r * Math.sin(a - Math.PI / 3) }
+        ];
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       CANVAS RESIZE
+    ══════════════════════════════════════════════════════════════════════ */
+    function resizeCanvas() {
+        var rect = canvas.getBoundingClientRect();
+        var dpr  = window.devicePixelRatio || 1;
+        canvas.width  = rect.width  * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       RENDERING HELPERS
+    ══════════════════════════════════════════════════════════════════════ */
+    function drawArrow(x1, y1, x2, y2, color) {
+        var ang = Math.atan2(y2 - y1, x2 - x1);
+        var hl  = 10;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = color;
+        ctx.lineWidth   = 1.8;
+        ctx.shadowBlur  = 9;
+        ctx.shadowColor = color;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - hl * Math.cos(ang - Math.PI / 6), y2 - hl * Math.sin(ang - Math.PI / 6));
+        ctx.lineTo(x2 - hl * Math.cos(ang + Math.PI / 6), y2 - hl * Math.sin(ang + Math.PI / 6));
+        ctx.closePath();
+        ctx.fillStyle  = color;
+        ctx.shadowBlur = 9;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+    }
+
+    function drawBody(bx, by, bd) {
+        ctx.beginPath();
+        ctx.arc(bx, by, bd.radius, 0, TWO_PI);
+        ctx.fillStyle  = bd.color;
+        ctx.shadowBlur = 28;
+        ctx.shadowColor = bd.glow;
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(bx, by, bd.radius * 0.55, 0, TWO_PI);
+        ctx.fillStyle  = bd.hl;
+        ctx.shadowBlur = 0;
+        ctx.fill();
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       MAIN RENDER LOOP
+    ══════════════════════════════════════════════════════════════════════ */
+    function render(bodies, lagrange) {
+        var w  = canvas.clientWidth;
+        var h  = canvas.clientHeight;
+        var cx = w / 2;
+        var cy = h / 2;
+
+        ctx.clearRect(0, 0, w, h);
+
+        /* ── Stars ──────────────────────────────────────────────────────── */
+        for (var s = 0; s < 24; s++) {
+            var sx = 16 + (s * 43) % (w - 32);
+            var sy = 20 + (s * 71) % (h - 40);
+            ctx.beginPath();
+            ctx.arc(sx, sy, s % 5 === 0 ? 1.4 : 0.85, 0, TWO_PI);
+            ctx.fillStyle = 'rgba(238,243,250,' + (0.22 + (s % 3) * 0.14) + ')';
+            ctx.fill();
+        }
+
+        /* ── Lagrange points ─────────────────────────────────────────────── */
+        if (app.showLagrange && lagrange.length) {
+            lagrange.forEach(function (lp) {
+                var hov   = app.hoveredLP === lp.label;
+                var alpha = hov ? 0.95 : 0.42;
+                var rad   = hov ? 5.5 : 3.5;
                 ctx.beginPath();
-                ctx.moveTo(x1, y1);
-                ctx.lineTo(x2, y2);
-                ctx.strokeStyle = color;
-                ctx.lineWidth = 2.5;
-                ctx.shadowBlur = 12;
-                ctx.shadowColor = color;
-                ctx.stroke();
-
-                ctx.beginPath();
-                ctx.moveTo(x2, y2);
-                ctx.lineTo(
-                    x2 - headLength * Math.cos(angle - Math.PI / 6),
-                    y2 - headLength * Math.sin(angle - Math.PI / 6)
-                );
-                ctx.lineTo(
-                    x2 - headLength * Math.cos(angle + Math.PI / 6),
-                    y2 - headLength * Math.sin(angle + Math.PI / 6)
-                );
-                ctx.closePath();
-                ctx.fillStyle = color;
+                ctx.arc(lp.x, lp.y, rad, 0, TWO_PI);
+                ctx.fillStyle  = 'rgba(111,255,176,' + alpha + ')';
+                ctx.shadowBlur = hov ? 14 : 7;
+                ctx.shadowColor = 'rgba(111,255,176,0.6)';
                 ctx.fill();
-            }
-
-            function render() {
-                const width = canvas.clientWidth;
-                const height = canvas.clientHeight;
-                const centerX = width / 2;
-                const centerY = height / 2;
-                const satelliteX = centerX + ORBIT_RADIUS * Math.cos(state.angle);
-                const satelliteY = centerY + ORBIT_RADIUS * Math.sin(state.angle);
-                const velocityAngle = state.angle + Math.PI / 2;
-                const vectorLength = 28 + state.speed * 10;
-                const arrowX = satelliteX + Math.cos(velocityAngle) * vectorLength;
-                const arrowY = satelliteY + Math.sin(velocityAngle) * vectorLength;
-
-                ctx.clearRect(0, 0, width, height);
-
-                for (let i = 0; i < 16; i += 1) {
-                    const starX = 28 + (i * 37) % (width - 56);
-                    const starY = 34 + (i * 59) % (height - 68);
-                    ctx.beginPath();
-                    ctx.arc(starX, starY, i % 4 === 0 ? 1.6 : 1, 0, TWO_PI);
-                    ctx.fillStyle = 'rgba(238, 243, 250, 0.45)';
-                    ctx.fill();
-                }
-
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, ORBIT_RADIUS, 0, TWO_PI);
-                ctx.strokeStyle = 'rgba(126, 226, 255, 0.85)';
-                ctx.lineWidth = 1.5;
-                ctx.shadowBlur = 18;
-                ctx.shadowColor = 'rgba(126, 226, 255, 0.35)';
-                ctx.stroke();
-
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, 30, 0, TWO_PI);
-                ctx.fillStyle = '#5aa8ff';
-                ctx.shadowBlur = 28;
-                ctx.shadowColor = 'rgba(90, 168, 255, 0.85)';
-                ctx.fill();
-
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, 18, 0, TWO_PI);
-                ctx.fillStyle = '#b8e3ff';
-                ctx.fill();
-
-                ctx.beginPath();
-                ctx.arc(satelliteX, satelliteY, SATELLITE_RADIUS, 0, TWO_PI);
-                ctx.fillStyle = '#7ee2ff';
-                ctx.shadowBlur = 18;
-                ctx.shadowColor = 'rgba(126, 226, 255, 0.85)';
-                ctx.fill();
-
-                drawArrow(satelliteX, satelliteY, arrowX, arrowY, '#7ee2ff');
                 ctx.shadowBlur = 0;
-            }
+                ctx.fillStyle  = 'rgba(111,255,176,' + alpha + ')';
+                ctx.font       = '9px Inter,sans-serif';
+                ctx.fillText(lp.label, lp.x + 7, lp.y + 3);
+            });
+        }
 
-            function frame() {
-                if (state.isPlaying) {
-                    state.angle = (state.angle + state.speed * ANGLE_INCREMENT) % TWO_PI;
+        /* ── Orbital path rings (single mode only) ───────────────────────── */
+        if (app.mode === 'single') {
+            app.satellites.forEach(function (sat) {
+                // Convert hex color to rgba with low opacity for orbit ring
+                var c = sat.color;
+                var rr = parseInt(c.slice(1, 3), 16);
+                var gg = parseInt(c.slice(3, 5), 16);
+                var bb = parseInt(c.slice(5, 7), 16);
+                ctx.beginPath();
+                ctx.arc(cx, cy, sat.radius, 0, TWO_PI);
+                ctx.strokeStyle = 'rgba(' + rr + ',' + gg + ',' + bb + ',0.28)';
+                ctx.lineWidth   = 1;
+                ctx.shadowBlur  = 6;
+                ctx.shadowColor = 'rgba(' + rr + ',' + gg + ',' + bb + ',0.18)';
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            });
+        }
+
+        /* ── Trails ──────────────────────────────────────────────────────── */
+        if (app.showTrails) {
+            app.satellites.forEach(function (sat) {
+                var trail = sat.trail;
+                if (trail.length < 2) { return; }
+                var c  = sat.color;
+                var rr = parseInt(c.slice(1, 3), 16);
+                var gg = parseInt(c.slice(3, 5), 16);
+                var bb = parseInt(c.slice(5, 7), 16);
+                for (var ti = 1; ti < trail.length; ti++) {
+                    var alpha = (ti / trail.length) * 0.65;
+                    ctx.beginPath();
+                    ctx.moveTo(trail[ti - 1].x, trail[ti - 1].y);
+                    ctx.lineTo(trail[ti].x, trail[ti].y);
+                    ctx.strokeStyle = 'rgba(' + rr + ',' + gg + ',' + bb + ',' + alpha + ')';
+                    ctx.lineWidth   = 1.4;
+                    ctx.stroke();
                 }
-                syncStats();
-                render();
-                requestAnimationFrame(frame);
+            });
+        }
+
+        /* ── Central / secondary bodies ──────────────────────────────────── */
+        bodies.forEach(function (b) {
+            drawBody(cx + b.px, cy + b.py, b);
+        });
+
+        /* ── Satellites ──────────────────────────────────────────────────── */
+        app.satellites.forEach(function (sat) {
+            var pos = sat.getPos(cx, cy);
+
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, SAT_R, 0, TWO_PI);
+            ctx.fillStyle   = sat.color;
+            ctx.shadowBlur  = 20;
+            ctx.shadowColor = sat.color;
+            ctx.fill();
+            ctx.shadowBlur  = 0;
+
+            /* Velocity vector */
+            if (app.showVectors) {
+                var velAng, vecLen;
+                if (sat.physMode) {
+                    velAng = Math.atan2(sat.vy, sat.vx);
+                    vecLen = Math.min(Math.hypot(sat.vx, sat.vy) * 5, 60);
+                } else {
+                    velAng = sat.angle + Math.PI / 2;
+                    vecLen = 26 + sat.speed * 10;
+                }
+                drawArrow(pos.x, pos.y,
+                    pos.x + Math.cos(velAng) * vecLen,
+                    pos.y + Math.sin(velAng) * vecLen,
+                    sat.color);
             }
 
-            speedSlider.addEventListener('input', function () {
-                state.speed = Number(speedSlider.value);
-                syncStats();
-            });
+            /* Add to trail */
+            sat.addTrail(pos.x, pos.y, app.trailLength);
+        });
 
-            angleSlider.addEventListener('input', function () {
-                state.angle = Number(angleSlider.value) * Math.PI / 180;
-                syncStats();
-                render();
-            });
+        ctx.shadowBlur = 0;
+    }
 
-            playPauseBtn.addEventListener('click', function () {
-                state.isPlaying = !state.isPlaying;
-                playPauseBtn.innerHTML = state.isPlaying
-                    ? '<span class="material-symbols-rounded" aria-hidden="true">pause_circle</span><span>Pause</span>'
-                    : '<span class="material-symbols-rounded" aria-hidden="true">play_circle</span><span>Play</span>';
-                syncStats();
-            });
+    /* ══════════════════════════════════════════════════════════════════════
+       STATUS / ENERGY HELPERS
+    ══════════════════════════════════════════════════════════════════════ */
+    function getStatusInfo(speed) {
+        if (speed < 0.5) { return { label: 'DECAYING',       color: 'var(--electric-orange)', pulse: true  }; }
+        if (speed < 1.5) { return { label: 'STABLE_ORBIT',   color: 'var(--electric-green)',  pulse: false }; }
+        if (speed < 2.5) { return { label: 'TRANSITIONAL',   color: 'var(--electric-yellow)', pulse: true  }; }
+        if (speed < 3.0) { return { label: 'CRITICAL',       color: 'var(--electric-orange)', pulse: true  }; }
+        return               { label: 'ESCAPE_VELOCITY',  color: 'var(--electric-red)',    pulse: true  };
+    }
 
-            resetBtn.addEventListener('click', function () {
-                state.angle = 0;
-                angleSlider.value = '0';
-                syncStats();
-                render();
-            });
+    /* ══════════════════════════════════════════════════════════════════════
+       STATS SYNC
+    ══════════════════════════════════════════════════════════════════════ */
+    function syncStats() {
+        var sat = app.satellites[app.activeSatId];
+        if (!sat) { return; }
+        var b   = BODIES[app.body];
+        var deg = Math.round(((sat.angle * 180 / Math.PI) % 360 + 360) % 360);
 
-            window.addEventListener('resize', function () {
-                resizeCanvas();
-                render();
-            });
+        /* Kepler mock: T ∝ r^1.5 / speed / sqrt(mass) */
+        var rawPeriod = b.periodBase * Math.pow(Math.max(sat.radius, 1) / 120, 1.5) / sat.speed / Math.sqrt(b.mass / 100);
+        var periodStr = rawPeriod > 48
+            ? (rawPeriod / 24).toFixed(1) + ' DAYS'
+            : rawPeriod.toFixed(1) + ' HOURS';
 
-            resizeCanvas();
-            syncStats();
-            render();
-            requestAnimationFrame(frame);
-        })();
-    </script>
+        /* Altitude display */
+        var alt    = b.altBase + Math.round(Math.sin(sat.angle * 1.5) * b.altBase * 0.025);
+        var altStr = b.altBase >= 1000000
+            ? (alt / 1000000).toFixed(1) + ' MKM'
+            : alt.toFixed(0) + ' KM';
+
+        var status = getStatusInfo(sat.speed);
+
+        speedValue.textContent    = sat.speed.toFixed(1) + 'x';
+        angleValue.textContent    = deg + '°';
+        radiusValue.textContent   = String(Math.round(sat.radius));
+        statSpeed.textContent     = sat.speed.toFixed(1) + 'x';
+        statPeriod.textContent    = periodStr;
+        statAltitude.textContent  = altStr;
+        statusText.textContent    = status.label;
+        statStatus.style.color    = status.color;
+        statusDot.style.color     = status.color;
+
+        energyBadge.textContent   = status.label;
+        energyBadge.style.color   = status.color;
+        energyBadge.classList.toggle('pulsing', status.pulse);
+
+        var energyRatio = Math.min(sat.speed / 3.5, 1.0);
+        energyBarFill.style.width      = (energyRatio * 100) + '%';
+        energyBarFill.style.background = status.color;
+
+        playbackMode.textContent  = app.isPlaying ? 'Live' : 'Paused';
+        activeSatBadge.textContent = 'Sat #' + (app.activeSatId + 1);
+
+        /* Collision flash overlay */
+        if (app.flashFrames > 0) {
+            app.flashFrames--;
+            if (app.flashFrames === FLASH_TRIGGER) {
+                collisionOverlay.classList.remove('flash');
+                void collisionOverlay.offsetWidth; // reflow to restart animation
+                collisionOverlay.classList.add('flash');
+                setTimeout(function () { collisionOverlay.classList.remove('flash'); }, 600);
+            }
+        }
+
+        /* Lagrange tooltip positioning */
+        var rect = canvasWrap.getBoundingClientRect();
+        var w = canvas.clientWidth, h = canvas.clientHeight;
+        var lps = getLagrangePoints(w / 2, h / 2);
+        var hov = null;
+        lps.forEach(function (lp) {
+            if (Math.hypot(lp.x - app.mouseX, lp.y - app.mouseY) < LP_HIT_RADIUS) { hov = lp; }
+        });
+        app.hoveredLP = hov ? hov.label : null;
+        if (hov) {
+            lagrangeTip.textContent = hov.label + ' Lagrange Point';
+            lagrangeTip.style.left  = (hov.x + 12) + 'px';
+            lagrangeTip.style.top   = (hov.y - 12) + 'px';
+            lagrangeTip.classList.add('visible');
+        } else {
+            lagrangeTip.classList.remove('visible');
+        }
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       MAIN FRAME LOOP
+    ══════════════════════════════════════════════════════════════════════ */
+    function frame() {
+        var bodies  = getBodyDefs();
+        var lagrange = getLagrangePoints(canvas.clientWidth / 2, canvas.clientHeight / 2);
+
+        if (app.isPlaying) {
+            var cx = canvas.clientWidth  / 2;
+            var cy = canvas.clientHeight / 2;
+            updatePhysics(bodies);
+            checkCollisions(cx, cy, bodies);
+        }
+        syncStats();
+        render(bodies, lagrange);
+        requestAnimationFrame(frame);
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       EVENT HANDLERS
+    ══════════════════════════════════════════════════════════════════════ */
+
+    /* Speed */
+    speedSlider.addEventListener('input', function () {
+        var sat = app.satellites[app.activeSatId];
+        if (!sat) { return; }
+        sat.speed = Number(this.value);
+        syncStats();
+    });
+
+    /* Launch angle */
+    angleSlider.addEventListener('input', function () {
+        var sat = app.satellites[app.activeSatId];
+        if (!sat) { return; }
+        sat.angle = Number(this.value) * Math.PI / 180;
+        sat.clearTrail();
+        if (sat.physMode) { sat.initPhysics(BODIES[app.body].mass); }
+        syncStats();
+    });
+
+    /* Orbital radius */
+    radiusSlider.addEventListener('input', function () {
+        var sat = app.satellites[app.activeSatId];
+        if (!sat) { return; }
+        sat.radius = Number(this.value);
+        sat.clearTrail();
+        if (sat.physMode) { sat.initPhysics(BODIES[app.body].mass); }
+        radiusValue.textContent = String(Math.round(sat.radius));
+        syncStats();
+    });
+
+    /* Color */
+    colorPicker.addEventListener('input', function () {
+        var sat = app.satellites[app.activeSatId];
+        if (!sat) { return; }
+        sat.color = this.value;
+        colorHexEl.textContent = this.value.toUpperCase();
+        renderTabs();
+    });
+
+    /* Play / Pause */
+    playPauseBtn.addEventListener('click', function () {
+        app.isPlaying = !app.isPlaying;
+        this.innerHTML = app.isPlaying
+            ? '<span class="material-symbols-rounded" aria-hidden="true">pause_circle</span><span>Pause</span>'
+            : '<span class="material-symbols-rounded" aria-hidden="true">play_circle</span><span>Play</span>';
+    });
+
+    /* Reset */
+    resetBtn.addEventListener('click', function () {
+        app.satellites.forEach(function (sat) {
+            sat.angle  = 0;
+            sat.speed  = 1.0;
+            sat.radius = 120;
+            sat.clearTrail();
+            if (sat.physMode) { sat.initPhysics(BODIES[app.body].mass); }
+        });
+        app.bodyAngle  = 0;
+        app.presetName = '';
+        presetNameDisplay.textContent = '';
+        updateActiveControls();
+    });
+
+    /* Add / Remove satellite */
+    addSatBtn.addEventListener('click', addSatellite);
+    removeSatBtn.addEventListener('click', removeSatellite);
+
+    /* Central body selector */
+    document.getElementById('bodySelector').addEventListener('click', function (e) {
+        var btn = e.target.closest('.btn-group-btn');
+        if (!btn) { return; }
+        app.body = btn.dataset.body;
+        document.querySelectorAll('#bodySelector .btn-group-btn').forEach(function (b) {
+            b.classList.toggle('active', b === btn);
+        });
+        if (app.mode !== 'single') {
+            app.satellites.forEach(function (sat) { sat.initPhysics(BODIES[app.body].mass); });
+        }
+        app.satellites.forEach(function (s) { s.clearTrail(); });
+        syncStats();
+    });
+
+    /* Simulation mode selector */
+    document.getElementById('modeSelector').addEventListener('click', function (e) {
+        var btn = e.target.closest('.btn-group-btn');
+        if (!btn) { return; }
+        app.mode = btn.dataset.mode;
+        document.querySelectorAll('#modeSelector .btn-group-btn').forEach(function (b) {
+            b.classList.toggle('active', b === btn);
+        });
+        app.satellites.forEach(function (sat) {
+            sat.clearTrail();
+            if (app.mode === 'single') {
+                if (sat.physMode) { sat.exitPhysics(); }
+            } else {
+                sat.initPhysics(BODIES[app.body].mass);
+            }
+        });
+        app.bodyAngle = 0;
+    });
+
+    /* Presets */
+    document.getElementById('presetGrid').addEventListener('click', function (e) {
+        var btn = e.target.closest('.preset-btn');
+        if (!btn) { return; }
+        loadPreset(btn.dataset.preset);
+    });
+
+    function loadPreset(key) {
+        var preset = PRESETS[key];
+        if (!preset) { return; }
+
+        app.body = preset.body;
+        app.mode = preset.mode;
+
+        document.querySelectorAll('#bodySelector .btn-group-btn').forEach(function (b) {
+            b.classList.toggle('active', b.dataset.body === preset.body);
+        });
+        document.querySelectorAll('#modeSelector .btn-group-btn').forEach(function (b) {
+            b.classList.toggle('active', b.dataset.mode === preset.mode);
+        });
+
+        app.satellites = preset.sats.map(function (cfg, i) { return new Satellite(i, cfg); });
+        if (app.mode !== 'single') {
+            app.satellites.forEach(function (sat) { sat.initPhysics(BODIES[app.body].mass); });
+        }
+        app.activeSatId = 0;
+        app.bodyAngle   = 0;
+        app.presetName  = preset.name;
+        presetNameDisplay.textContent = '\u25B6 ' + preset.name;
+
+        renderTabs();
+        updateActiveControls();
+    }
+
+    /* Advanced settings */
+    trailLenSlider.addEventListener('input', function () {
+        app.trailLength = Number(this.value);
+        trailLenVal.textContent = this.value;
+    });
+
+    showTrailsCb.addEventListener('change',   function () { app.showTrails    = this.checked; });
+    showLagrangeCb.addEventListener('change', function () { app.showLagrange  = this.checked; });
+    collisionCb.addEventListener('change',    function () { app.collisionDetect = this.checked; });
+    showVectorsCb.addEventListener('change',  function () { app.showVectors   = this.checked; });
+
+    /* Mouse tracking on canvas (for Lagrange tooltip) */
+    canvasWrap.addEventListener('mousemove', function (e) {
+        var rect = canvas.getBoundingClientRect();
+        app.mouseX = e.clientX - rect.left;
+        app.mouseY = e.clientY - rect.top;
+    });
+
+    canvasWrap.addEventListener('mouseleave', function () {
+        app.mouseX = -9999;
+        app.mouseY = -9999;
+        app.hoveredLP = null;
+        lagrangeTip.classList.remove('visible');
+    });
+
+    /* Export config */
+    exportBtn.addEventListener('click', function () {
+        var config = {
+            centralBody: BODIES[app.body].name,
+            mode: app.mode,
+            satellites: app.satellites.map(function (sat) {
+                return {
+                    speed:  sat.speed,
+                    angle:  Math.round(((sat.angle * 180 / Math.PI) % 360 + 360) % 360),
+                    radius: Math.round(sat.radius),
+                    color:  sat.color
+                };
+            }),
+            timestamp: new Date().toISOString()
+        };
+        var json = JSON.stringify(config, null, 2);
+
+        exportArea.textContent = json;
+        exportArea.classList.add('visible');
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(json).then(function () {
+                showCopyNotice();
+            }).catch(function () {
+                showCopyNotice();
+            });
+        } else {
+            showCopyNotice();
+        }
+    });
+
+    var _copyTimer = null;
+    function showCopyNotice() {
+        copyNotice.classList.add('visible');
+        clearTimeout(_copyTimer);
+        _copyTimer = setTimeout(function () { copyNotice.classList.remove('visible'); }, 2800);
+    }
+
+    /* Window resize */
+    window.addEventListener('resize', function () {
+        resizeCanvas();
+    });
+
+    /* ══════════════════════════════════════════════════════════════════════
+       BOOTSTRAP
+    ══════════════════════════════════════════════════════════════════════ */
+    initSatellites([{ speed: 1.0, angle: 0, radius: 120, color: '#7ee2ff' }]);
+    renderTabs();
+    updateActiveControls();
+    resizeCanvas();
+    frame();
+
+})();
+</script>
 </body>
 </html>
