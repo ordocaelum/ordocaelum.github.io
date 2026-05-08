@@ -536,6 +536,49 @@
             font-weight: 600;
         }
 
+        .demo-launch-link {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-top: 20px;
+            padding: 9px 13px;
+            border: 1px solid rgba(126, 226, 255, 0.22);
+            border-radius: 8px;
+            background: rgba(126, 226, 255, 0.05);
+            color: var(--accent-2);
+            font-size: 0.76em;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: border-color 0.2s, background 0.2s, color 0.2s;
+        }
+
+        .demo-launch-link:hover {
+            border-color: rgba(126, 226, 255, 0.55);
+            background: rgba(126, 226, 255, 0.11);
+            color: var(--electric-cyan);
+        }
+
+        .demo-launch-icon {
+            font-size: 1.1em;
+            color: var(--electric-cyan);
+            opacity: 0.75;
+        }
+
+        .demo-launch-sub {
+            font-weight: 400;
+            color: var(--text-mute);
+            letter-spacing: 0.06em;
+            text-transform: none;
+        }
+
+        .demo-launch-arrow {
+            margin-left: auto;
+            font-size: 1em;
+            opacity: 0.6;
+        }
+
         /* ===== MAIN ===== */
         main {
             padding: 56px 56px 48px;
@@ -1038,6 +1081,7 @@
             .exp-bullets li::before { border-color: #2563eb !important; background: white !important; }
 
             .availability-badge { display: none !important; }
+            .demo-launch-link   { display: none !important; }
 
             .contact-icon {
                 background: white !important;
@@ -1187,6 +1231,11 @@
                         <span class="skill-tag">Content Creation</span>
                     </div>
                 </div>
+                <a href="core-system.html" class="demo-launch-link" aria-label="Open CORE neural network interactive demo">
+                    <span class="demo-launch-icon">⬡</span>
+                    <span>CORE_SYSTEM<span class="demo-launch-sub"> — Interactive Demo</span></span>
+                    <span class="demo-launch-arrow">→</span>
+                </a>
             </div>
 
             <div class="side-section">
