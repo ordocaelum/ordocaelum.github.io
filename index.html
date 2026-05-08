@@ -53,6 +53,7 @@
             display: flex;
             justify-content: flex-end;
             gap: 12px;
+            animation: slideInRight 0.7s ease-out both;
         }
 
         .btn {
@@ -79,6 +80,24 @@
 
         .btn svg { width: 14px; height: 14px; }
 
+        @keyframes slideInLeft {
+            from {
+                transform: translateX(-44px);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(44px);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
         /* Resume Sheet */
         .resume {
             max-width: 1100px;
@@ -100,6 +119,7 @@
             border-right: 1px solid var(--line);
             padding: 0;
             position: relative;
+            animation: slideInLeft 0.8s ease-out 0.08s both;
         }
 
         aside::before {
@@ -229,6 +249,21 @@
                 filter: none;
                 will-change: auto;
             }
+
+            .toolbar,
+            aside,
+            main,
+            .section,
+            .experience-item,
+            .education-item,
+            .project-card,
+            .experience-item::before {
+                animation: none !important;
+                transition: none !important;
+                opacity: 1 !important;
+                transform: none !important;
+                filter: none !important;
+            }
         }
 
         .contact-icon {
@@ -339,6 +374,7 @@
         /* ===== MAIN ===== */
         main {
             padding: 56px 56px 48px;
+            animation: slideInRight 0.8s ease-out 0.12s both;
         }
 
         .main-header {
@@ -434,7 +470,17 @@
         /* Section Heading */
         .section {
             margin-top: 44px;
+            animation-duration: 0.72s;
+            animation-timing-function: ease-out;
+            animation-fill-mode: both;
         }
+
+        .section:nth-of-type(odd) { animation-name: slideInLeft; }
+        .section:nth-of-type(even) { animation-name: slideInRight; }
+        .section:nth-of-type(1) { animation-delay: 0.18s; }
+        .section:nth-of-type(2) { animation-delay: 0.26s; }
+        .section:nth-of-type(3) { animation-delay: 0.34s; }
+        .section:nth-of-type(4) { animation-delay: 0.42s; }
 
         .section-heading {
             display: flex;
@@ -464,76 +510,112 @@
             background: linear-gradient(90deg, var(--line-strong), transparent);
         }
 
-                /* Experience */
-                .experience-item:hover {
+        /* Experience */
+        .experience-item {
+            position: relative;
+            padding: 24px 28px 24px 32px;
+            background: rgba(90, 168, 255, 0.025);
+            border: 1px solid var(--line);
+            border-left: 3px solid var(--accent);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            transition: transform 0.6s ease, background 0.6s ease, border-color 0.6s ease, box-shadow 0.6s ease;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+            isolation: isolate;
+            overflow: visible;
+            animation: slideInLeft 0.7s ease-out both;
+        }
+
+        .experience-item:nth-of-type(even) {
+            animation-name: slideInRight;
+        }
+
+        .experience-item:nth-of-type(1) { animation-delay: 0.26s; }
+        .experience-item:nth-of-type(2) { animation-delay: 0.34s; }
+        .experience-item:nth-of-type(3) { animation-delay: 0.42s; }
+
+        .experience-item::before {
+            content: '';
+            position: absolute;
+            inset: 10px 6px -6px 6px;
+            border-radius: inherit;
+            background: radial-gradient(circle at center, rgba(255, 214, 64, 0.14) 0%, rgba(255, 158, 43, 0.10) 46%, transparent 74%);
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.96);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+            z-index: -1;
+        }
+
+        .experience-item:hover {
             background: rgba(90, 168, 255, 0.05);
             border-color: var(--line-strong);
             border-left-color: var(--accent-2);
-            transform: translateX(2px) scale(1.25);
-            filter: 
-                drop-shadow(0 2px 4px rgba(255, 200, 0, 0.15))
-                drop-shadow(0 6px 12px rgba(255, 165, 0, 0.2))
-                drop-shadow(0 12px 24px rgba(255, 140, 0, 0.15))
-                blur(0.5px);
-            backdrop-filter: blur(4px);
-            animation: experienceGlow 2.2s ease-in-out infinite, smokeWave 4s ease-in-out infinite;
+            transform: translateX(4px) scale(1.03);
+            box-shadow:
+                0 16px 34px rgba(0, 0, 0, 0.24),
+                0 0 0 1px rgba(255, 196, 0, 0.10);
+            animation: experienceGlow 2.2s ease-in-out infinite;
+        }
+
+        .experience-item:hover::before {
+            opacity: 1;
+            transform: scale(1);
+            animation: smokeWave 4s ease-in-out infinite;
         }
         
         @keyframes experienceGlow {
             0% {
                 box-shadow: 
-                    0 4px 12px rgba(255, 255, 0, 0.25),
-                    0 8px 20px rgba(255, 255, 0, 0.15),
-                    0 16px 40px rgba(255, 255, 0, 0.08);
+                    0 14px 28px rgba(255, 221, 89, 0.18),
+                    0 22px 38px rgba(255, 221, 89, 0.10);
             }
             50% {
                 box-shadow: 
-                    0 4px 12px rgba(255, 155, 0, 0.3),
-                    0 8px 20px rgba(255, 140, 0, 0.2),
-                    0 16px 40px rgba(255, 155, 0, 0.12);
+                    0 16px 32px rgba(255, 170, 0, 0.24),
+                    0 24px 42px rgba(255, 136, 0, 0.14);
             }
             100% {
                 box-shadow: 
-                    0 4px 12px rgba(255, 200, 0, 0.25),
-                    0 8px 20px rgba(255, 200, 0, 0.15),
-                    0 16px 40px rgba(255, 200, 0, 0.08);
+                    0 14px 28px rgba(255, 200, 0, 0.18),
+                    0 22px 38px rgba(255, 170, 0, 0.10);
             }
         }
         
         @keyframes smokeWave {
             0% {
                 filter: 
-                    drop-shadow(8px 2px 4px rgba(255, 200, 0, 0.15))
-                    drop-shadow(12px 6px 12px rgba(255, 165, 0, 0.2))
-                    drop-shadow(16px 12px 24px rgba(255, 140, 0, 0.15))
+                    drop-shadow(12px 12px 14px rgba(255, 220, 84, 0.32))
+                    drop-shadow(18px 18px 24px rgba(255, 176, 0, 0.26))
+                    drop-shadow(24px 24px 34px rgba(255, 138, 0, 0.20))
                     blur(0.5px);
             }
             25% {
                 filter: 
-                    drop-shadow(4px 8px 4px rgba(255, 200, 0, 0.15))
-                    drop-shadow(6px 14px 12px rgba(255, 165, 0, 0.2))
-                    drop-shadow(8px 20px 24px rgba(255, 140, 0, 0.15))
+                    drop-shadow(18px 12px 14px rgba(255, 220, 84, 0.30))
+                    drop-shadow(24px 18px 24px rgba(255, 176, 0, 0.24))
+                    drop-shadow(12px 24px 34px rgba(255, 138, 0, 0.18))
                     blur(0.5px);
             }
             50% {
                 filter: 
-                    drop-shadow(-8px 2px 4px rgba(255, 200, 0, 0.15))
-                    drop-shadow(-12px 6px 12px rgba(255, 165, 0, 0.2))
-                    drop-shadow(-16px 12px 24px rgba(255, 140, 0, 0.15))
+                    drop-shadow(-12px 12px 14px rgba(255, 220, 84, 0.32))
+                    drop-shadow(-18px 18px 24px rgba(255, 176, 0, 0.26))
+                    drop-shadow(-24px 24px 34px rgba(255, 138, 0, 0.20))
                     blur(0.5px);
             }
             75% {
                 filter: 
-                    drop-shadow(-4px -8px 4px rgba(255, 200, 0, 0.15))
-                    drop-shadow(-6px -14px 12px rgba(255, 165, 0, 0.2))
-                    drop-shadow(-8px -20px 24px rgba(255, 140, 0, 0.15))
+                    drop-shadow(-18px 12px 14px rgba(255, 220, 84, 0.30))
+                    drop-shadow(-24px 18px 24px rgba(255, 176, 0, 0.24))
+                    drop-shadow(-12px 24px 34px rgba(255, 138, 0, 0.18))
                     blur(0.5px);
             }
             100% {
                 filter: 
-                    drop-shadow(8px 2px 4px rgba(255, 200, 0, 0.15))
-                    drop-shadow(12px 6px 12px rgba(255, 165, 0, 0.2))
-                    drop-shadow(16px 12px 24px rgba(255, 140, 0, 0.15))
+                    drop-shadow(12px 12px 14px rgba(255, 220, 84, 0.32))
+                    drop-shadow(18px 18px 24px rgba(255, 176, 0, 0.26))
+                    drop-shadow(24px 24px 34px rgba(255, 138, 0, 0.20))
                     blur(0.5px);
             }
         }
@@ -618,6 +700,7 @@
             border: 1px solid var(--line);
             border-radius: 8px;
             padding: 24px 28px;
+            animation: slideInRight 0.7s ease-out 0.4s both;
         }
 
         /* Projects */
@@ -635,6 +718,11 @@
             border-radius: 8px;
             border-left: 3px solid var(--accent);
             transition: all 0.2s;
+            animation: slideInLeft 0.72s ease-out 0.46s both;
+        }
+
+        .project-card:nth-of-type(even) {
+            animation-name: slideInRight;
         }
 
         .project-card:hover {
@@ -843,9 +931,13 @@
                 border-left: 3px solid #2563eb !important;
                 page-break-inside: avoid;
                 box-shadow: none !important;
+                animation: none !important;
+                opacity: 1 !important;
+                transform: none !important;
             }
 
             .exp-bullets li::before { border-color: #2563eb !important; background: white !important; }
+            .experience-item::before { display: none !important; }
 
             .availability-badge { display: none !important; }
 
@@ -1146,20 +1238,5 @@
 
     </article>
 
-    <script>
-        // Subtle entrance
-        document.addEventListener('DOMContentLoaded', () => {
-            const items = document.querySelectorAll('.experience-item, .education-item, .stat');
-            items.forEach((el, i) => {
-                el.style.opacity = '0';
-                el.style.transform = 'translateY(8px)';
-                el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                setTimeout(() => {
-                    el.style.opacity = '1';
-                    el.style.transform = 'translateY(0)';
-                }, 80 + i * 60);
-            });
-        });
-    </script>
 </body>
 </html>
