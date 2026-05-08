@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORE_SYSTEM — Leland E. Doss</title>
+    <meta name="description" content="Interactive neural network visualization — color mixing, enemy pair explosions, chain reactions, and power-scaled particle effects.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Material+Symbols+Rounded:FILL@0..1&display=swap" rel="stylesheet">
+    <style>
+        /* ═══ ROOT ═══════════════════════════════════════════════════════════ */
+        :root {
+            --bg: #0e1a2b;
+            --bg-soft: #142640;
+            --panel: #1a2f4d;
+            --panel-2: #11233c;
+            --line: rgba(170, 200, 235, 0.14);
+            --line-strong: rgba(170, 200, 235, 0.28);
+            --accent: #5aa8ff;
+            --accent-2: #82c0ff;
+            --electric-cyan: #7ee2ff;
+            --electric-green: #6fffb0;
+            --electric-yellow: #ffe066;
+            --electric-orange: #ffb167;
+            --electric-red: #ff7386;
+            --text: #eef3fa;
+            --text-soft: #c2cfe0;
+            --text-mute: #8a98ad;
+            --shadow: 0 24px 60px rgba(0, 0, 0, 0.38);
+        }
+
+        * { box-sizing: border-box; }
+        html, body { margin: 0; min-height: 100%; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(126, 226, 255, 0.12), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(90, 168, 255, 0.10), transparent 30%),
+                var(--bg);
+            color: var(--text);
+            padding: 88px 24px 48px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .material-symbols-rounded {
+            font-family: 'Material Symbols Rounded';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 18px;
+            line-height: 1;
+            display: inline-block;
+            white-space: nowrap;
+            direction: ltr;
+            -webkit-font-smoothing: antialiased;
+            font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        /* ═══ NAV ════════════════════════════════════════════════════════════ */
+        .top-nav {
+            position: fixed;
+            top: 14px; left: 24px; right: 24px;
+            z-index: 20;
+            background: rgba(13, 26, 44, 0.76);
+            border: 1px solid var(--line-strong);
+            border-radius: 10px;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .top-nav-inner {
+            max-width: 1220px;
+            margin: 0 auto;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        /* ═══ BUTTONS ════════════════════════════════════════════════════════ */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            border: 1px solid var(--line-strong);
+            border-radius: 8px;
+            background: var(--panel);
+            color: var(--text-soft);
+            padding: 9px 14px;
+            font: inherit;
+            font-size: 0.8rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: border-color 0.22s, background 0.22s, color 0.22s;
+        }
+
+        .btn:hover, .btn:focus-visible {
+            border-color: var(--accent);
+            background: var(--bg-soft);
+            color: var(--accent-2);
+            outline: none;
+        }
+
+        .btn.btn-danger {
+            border-color: rgba(255, 115, 134, 0.35);
+            color: var(--electric-red);
+        }
+        .btn.btn-danger:hover {
+            border-color: var(--electric-red);
+            background: rgba(255, 115, 134, 0.1);
+            color: var(--electric-red);
+        }
+
+        .panel-badge {
+            padding: 5px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(126, 226, 255, 0.22);
+            background: rgba(126, 226, 255, 0.08);
+            color: var(--accent-2);
+            font-size: 0.73rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        /* ═══ PAGE LAYOUT ════════════════════════════════════════════════════ */
+        .page {
+            max-width: 1220px;
+            margin: 0 auto;
+            display: grid;
+            gap: 22px;
+        }
+
+        .hero { padding: 14px 4px 0; }
+
+        .eyebrow {
+            color: var(--electric-cyan);
+            font-size: 0.77rem;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(1.9rem, 4vw, 3.2rem);
+            line-height: 0.95;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .subcopy {
+            max-width: 760px;
+            margin: 14px 0 0;
+            color: var(--text-soft);
+            font-size: 0.97rem;
+            line-height: 1.6;
+        }
+
+        .system-layout {
+            display: grid;
+            grid-template-columns: 256px minmax(320px, 1fr) 256px;
+            gap: 20px;
+            align-items: start;
+        }
+
+        /* ═══ CARDS ══════════════════════════════════════════════════════════ */
+        .control-card, .stat-card, .canvas-shell {
+            background: linear-gradient(180deg, rgba(26, 47, 77, 0.98), rgba(17, 35, 60, 0.98));
+            border: 1px solid var(--line-strong);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+        }
+
+        /* ═══ CONTROLS PANEL ═════════════════════════════════════════════════ */
+        .controls-panel {
+            display: grid;
+            gap: 14px;
+            padding: 18px;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(126, 226, 255, 0.2) transparent;
+        }
+
+        .controls-panel::-webkit-scrollbar { width: 3px; }
+        .controls-panel::-webkit-scrollbar-thumb {
+            background: rgba(126, 226, 255, 0.2);
+            border-radius: 2px;
+        }
+
+        .panel-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .panel-title {
+            font-size: 0.8rem;
+            color: var(--electric-cyan);
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+        }
+
+        .section-label {
+            color: var(--text-mute);
+            font-size: 0.7rem;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--line);
+            margin-top: 2px;
+        }
+
+        .control-group { display: grid; gap: 7px; }
+
+        .control-label-row {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .control-label {
+            color: var(--text-soft);
+            font-size: 0.76rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .control-value {
+            color: var(--electric-cyan);
+            font-size: 0.88rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            height: 6px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(126, 226, 255, 0.22), rgba(90, 168, 255, 0.42));
+            border: 1px solid rgba(170, 200, 235, 0.16);
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            margin-top: -5px;
+            border-radius: 50%;
+            background: var(--electric-cyan);
+            border: 2px solid #d8f7ff;
+            box-shadow: 0 0 12px rgba(126, 226, 255, 0.7);
+        }
+
+        input[type="range"]::-moz-range-track {
+            height: 6px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(126, 226, 255, 0.22), rgba(90, 168, 255, 0.42));
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: var(--electric-cyan);
+            border: 2px solid #d8f7ff;
+            box-shadow: 0 0 12px rgba(126, 226, 255, 0.7);
+        }
+
+        .button-row {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .button-row.single { grid-template-columns: 1fr; }
+
+        /* ═══ ENEMY PAIRS LEGEND ═════════════════════════════════════════════ */
+        .enemy-list {
+            display: grid;
+            gap: 6px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .enemy-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.75rem;
+            color: var(--text-soft);
+            letter-spacing: 0.06em;
+        }
+
+        .swatch {
+            display: inline-block;
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .enemy-sep {
+            color: var(--electric-red);
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        .system-note {
+            color: var(--text-mute);
+            font-size: 0.72rem;
+            line-height: 1.5;
+            letter-spacing: 0.04em;
+            border-top: 1px solid var(--line);
+            padding-top: 12px;
+        }
+
+        /* ═══ CANVAS SECTION ═════════════════════════════════════════════════ */
+        .canvas-shell {
+            position: relative;
+            padding: 22px;
+            overflow: hidden;
+        }
+
+        .canvas-shell::before {
+            content: '';
+            position: absolute;
+            inset: 16px;
+            border-radius: 14px;
+            border: 1px solid rgba(126, 226, 255, 0.07);
+            pointer-events: none;
+        }
+
+        .canvas-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .canvas-copy {
+            color: var(--text-mute);
+            font-size: 0.8rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .canvas-wrap {
+            position: relative;
+            width: 100%;
+        }
+
+        #neuralCanvas {
+            display: block;
+            width: 100%;
+            border-radius: 10px;
+            background: #060f1c;
+            touch-action: none;
+            cursor: crosshair;
+        }
+
+        /* Flash overlay for explosions */
+        .flash-overlay {
+            position: absolute;
+            inset: 0;
+            border-radius: 10px;
+            pointer-events: none;
+            background: white;
+            opacity: 0;
+            transition: opacity 0.08s ease-out;
+        }
+
+        /* ═══ STATS PANEL ════════════════════════════════════════════════════ */
+        .stats-panel {
+            display: grid;
+            gap: 10px;
+            padding: 18px;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(126, 226, 255, 0.2) transparent;
+        }
+
+        .stats-panel::-webkit-scrollbar { width: 3px; }
+        .stats-panel::-webkit-scrollbar-thumb {
+            background: rgba(126, 226, 255, 0.2);
+            border-radius: 2px;
+        }
+
+        .stat-card {
+            padding: 13px 15px;
+            border-radius: 12px;
+        }
+
+        .stat-label {
+            color: var(--text-mute);
+            font-size: 0.68rem;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            color: var(--electric-cyan);
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            line-height: 1;
+        }
+
+        .stat-value.red   { color: var(--electric-red); }
+        .stat-value.green { color: var(--electric-green); }
+        .stat-value.amber { color: var(--electric-yellow); }
+
+        .stat-sub {
+            color: var(--text-mute);
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            margin-top: 3px;
+        }
+
+        /* Stability bar */
+        .stability-bar-wrap {
+            height: 5px;
+            border-radius: 999px;
+            background: rgba(170, 200, 235, 0.1);
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .stability-bar {
+            height: 100%;
+            border-radius: 999px;
+            background: var(--electric-green);
+            transition: width 0.4s ease, background 0.4s ease;
+        }
+
+        /* Power indicator */
+        .power-bar-wrap {
+            height: 5px;
+            border-radius: 999px;
+            background: rgba(170, 200, 235, 0.1);
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .power-bar {
+            height: 100%;
+            border-radius: 999px;
+            background: var(--electric-cyan);
+            transition: width 0.2s ease, background 0.2s ease;
+        }
+
+        /* Event log */
+        .event-log-wrap {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .event-log-title {
+            color: var(--text-mute);
+            font-size: 0.68rem;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+            padding: 8px 12px 6px;
+            border-bottom: 1px solid var(--line);
+            background: rgba(0,0,0,0.15);
+        }
+
+        .event-log {
+            max-height: 130px;
+            overflow-y: auto;
+            padding: 6px 10px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(126, 226, 255, 0.15) transparent;
+        }
+
+        .event-log::-webkit-scrollbar { width: 2px; }
+        .event-log::-webkit-scrollbar-thumb {
+            background: rgba(126, 226, 255, 0.15);
+            border-radius: 2px;
+        }
+
+        .log-entry {
+            font-size: 0.7rem;
+            color: var(--text-mute);
+            letter-spacing: 0.06em;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(170,200,235,0.04);
+            display: flex;
+            gap: 7px;
+        }
+
+        .log-entry:last-child { border-bottom: none; }
+
+        .log-time {
+            color: rgba(126, 226, 255, 0.4);
+            flex-shrink: 0;
+        }
+
+        .log-msg { color: var(--text-soft); }
+        .log-msg.boom { color: var(--electric-red); }
+        .log-msg.blend { color: var(--electric-cyan); }
+
+        /* ═══ RESPONSIVE ═════════════════════════════════════════════════════ */
+        @media (max-width: 1100px) {
+            .system-layout {
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                grid-template-areas:
+                    "canvas canvas"
+                    "controls stats";
+            }
+            .controls-panel { grid-area: controls; max-height: none; }
+            .canvas-shell    { grid-area: canvas; }
+            .stats-panel     { grid-area: stats; max-height: none; }
+        }
+
+        @media (max-width: 720px) {
+            body { padding: 76px 14px 28px; }
+            .top-nav { top: 10px; left: 14px; right: 14px; }
+            .top-nav-inner { padding: 7px 10px; }
+            .system-layout {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "controls"
+                    "canvas"
+                    "stats";
+            }
+            .controls-panel, .stats-panel { max-height: none; }
+            .button-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="top-nav" role="navigation" aria-label="Core system navigation">
+    <div class="top-nav-inner">
+        <a class="btn" href="index.html" aria-label="Back to resume">
+            <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
+            <span>Resume</span>
+        </a>
+        <div class="panel-badge">Interactive Demo — CORE</div>
+    </div>
+</nav>
+
+<main class="page">
+    <section class="hero" aria-labelledby="core-system-title">
+        <div class="eyebrow">Interactive Portfolio Module — Core</div>
+        <h1 id="core-system-title">Core_System</h1>
+        <p class="subcopy">Neural network color-mixing sandbox. Drag neurons together to blend colors — but beware enemy pairs. Crank the power and watch chain reactions cascade through the entire network.</p>
+    </section>
+
+    <section class="system-layout" aria-label="Neural network interface">
+
+        <!-- ══ LEFT: CONTROLS ═════════════════════════════════════════════ -->
+        <aside class="control-card controls-panel" aria-labelledby="controls-title">
+            <div class="panel-heading">
+                <div class="panel-title" id="controls-title">Controls</div>
+                <div class="panel-badge" id="statusBadge">Active</div>
+            </div>
+
+            <!-- Power Output Slider -->
+            <div class="section-label">Power</div>
+            <div class="control-group">
+                <div class="control-label-row">
+                    <label class="control-label" for="powerSlider">Power_Output</label>
+                    <span class="control-value" id="powerValue">50%</span>
+                </div>
+                <input id="powerSlider" type="range" min="0" max="100" step="1" value="50" aria-label="Power output">
+            </div>
+
+            <!-- Neuron Size Slider -->
+            <div class="section-label">Display</div>
+            <div class="control-group">
+                <div class="control-label-row">
+                    <label class="control-label" for="sizeSlider">Neuron_Size</label>
+                    <span class="control-value" id="sizeValue">Med</span>
+                </div>
+                <input id="sizeSlider" type="range" min="10" max="28" step="2" value="18" aria-label="Neuron size">
+            </div>
+
+            <!-- Actions -->
+            <div class="section-label">Actions</div>
+            <div class="button-row single">
+                <button class="btn" id="resetBtn" type="button">
+                    <span class="material-symbols-rounded" aria-hidden="true">replay</span>
+                    <span>Reset Network</span>
+                </button>
+            </div>
+            <div class="button-row single">
+                <button class="btn btn-danger" id="chaosBtn" type="button">
+                    <span class="material-symbols-rounded" aria-hidden="true">bolt</span>
+                    <span>Trigger Chaos</span>
+                </button>
+            </div>
+
+            <!-- Enemy pairs legend -->
+            <div class="section-label">Enemy Pairs</div>
+            <ul class="enemy-list" aria-label="Color incompatibility legend">
+                <li class="enemy-item">
+                    <span class="swatch" style="background:#ff3333;box-shadow:0 0 6px #ff3333"></span>
+                    Red
+                    <span class="enemy-sep">↔</span>
+                    Cyan
+                    <span class="swatch" style="background:#00ffff;box-shadow:0 0 6px #00ffff"></span>
+                    <span class="enemy-sep" style="margin-left:auto">💥</span>
+                </li>
+                <li class="enemy-item">
+                    <span class="swatch" style="background:#ffff00;box-shadow:0 0 6px #ffff00"></span>
+                    Yellow
+                    <span class="enemy-sep">↔</span>
+                    Blue
+                    <span class="swatch" style="background:#4444ff;box-shadow:0 0 6px #4444ff"></span>
+                    <span class="enemy-sep" style="margin-left:auto">💥</span>
+                </li>
+                <li class="enemy-item">
+                    <span class="swatch" style="background:#00ff44;box-shadow:0 0 6px #00ff44"></span>
+                    Green
+                    <span class="enemy-sep">↔</span>
+                    Magenta
+                    <span class="swatch" style="background:#ff00ff;box-shadow:0 0 6px #ff00ff"></span>
+                    <span class="enemy-sep" style="margin-left:auto">💥</span>
+                </li>
+            </ul>
+
+            <p class="system-note">Drag between neurons to connect. Safe colors blend. Enemy colors cascade. Higher power = bigger blast radius.</p>
+        </aside>
+
+        <!-- ══ CENTER: CANVAS ═════════════════════════════════════════════ -->
+        <section class="canvas-shell" aria-labelledby="visual-title">
+            <div class="canvas-header">
+                <div class="panel-title" id="visual-title">Neural Network</div>
+                <div class="canvas-copy" id="canvasCopy">Drag to Connect · Beware Enemy Pairs</div>
+            </div>
+            <div class="canvas-wrap" id="canvasWrap">
+                <canvas id="neuralCanvas" width="600" height="520"
+                    aria-label="Interactive neural network grid with colored neurons"></canvas>
+                <div class="flash-overlay" id="flashOverlay"></div>
+            </div>
+        </section>
+
+        <!-- ══ RIGHT: STATS ════════════════════════════════════════════════ -->
+        <aside class="stats-panel" aria-labelledby="stats-title">
+            <div class="panel-heading">
+                <div class="panel-title" id="stats-title">Telemetry</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Active Connections</div>
+                <div class="stat-value" id="statConnections">0</div>
+                <div class="stat-sub">neuron links</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Dead Neurons</div>
+                <div class="stat-value red" id="statDead">0</div>
+                <div class="stat-sub">of 30 total</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Explosions Triggered</div>
+                <div class="stat-value amber" id="statExplosions">0</div>
+                <div class="stat-sub">chain reactions</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Network Stability</div>
+                <div class="stat-value green" id="statStability">100%</div>
+                <div class="stability-bar-wrap">
+                    <div class="stability-bar" id="stabilityBar" style="width:100%"></div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Last Power Output</div>
+                <div class="stat-value" id="statPower">50%</div>
+                <div class="power-bar-wrap">
+                    <div class="power-bar" id="powerBar" style="width:50%"></div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Unique Colors</div>
+                <div class="stat-value" id="statColors">—</div>
+                <div class="stat-sub">in living neurons</div>
+            </div>
+
+            <div class="event-log-wrap">
+                <div class="event-log-title">Event Log</div>
+                <div class="event-log" id="eventLog" aria-live="polite" aria-label="Event log"></div>
+            </div>
+        </aside>
+
+    </section>
+</main>
+
+<script>
+(function () {
+    'use strict';
+
+    /* ══════════════════════════════════════════════════════════════════════
+       CONSTANTS
+    ══════════════════════════════════════════════════════════════════════ */
+
+    var GRID_COLS   = 6;
+    var GRID_ROWS   = 5;
+    var TOTAL       = GRID_COLS * GRID_ROWS; // 30
+
+    /* Base color palette — safe, vibrant, readable on dark BG */
+    var PALETTE = [
+        '#ff3333', // red
+        '#ff9900', // orange
+        '#ffff00', // yellow
+        '#00ff44', // green
+        '#00ffff', // cyan
+        '#4444ff', // blue
+        '#ff00ff', // magenta
+        '#ff6699', // pink
+        '#66ffcc', // mint
+        '#aa66ff'  // purple
+    ];
+
+    /* Enemy pairs — touching these triggers explosion */
+    var ENEMY_PAIRS = [
+        ['#ff3333', '#00ffff'], // red  ↔ cyan
+        ['#ffff00', '#4444ff'], // yellow ↔ blue
+        ['#00ff44', '#ff00ff']  // green ↔ magenta
+    ];
+
+    /* Safe blend results for display palettes */
+    var SAFE_BLENDS = {
+        '#ff3333#ff9900': '#ff6600',
+        '#ff3333#ffff00': '#ff9900',
+        '#ff3333#ff00ff': '#ff22aa',
+        '#ff9900#ffff00': '#ffcc00',
+        '#00ff44#00ffff': '#00ffaa',
+        '#4444ff#00ffff': '#22aaff',
+        '#4444ff#ff00ff': '#8833ff',
+        '#4444ff#aa66ff': '#7755ff'
+    };
+
+    /* Particle counts and sizes relative to power */
+    var MIN_PARTICLES  = 8;
+    var MAX_PARTICLES  = 60;
+    var MIN_PART_SPEED = 1.5;
+    var MAX_PART_SPEED = 9;
+    var MIN_PART_R     = 2;
+    var MAX_PART_R     = 7;
+
+    /* RGB Euclidean distance tolerance for enemy-pair detection on blended colors */
+    var ENEMY_PAIR_COLOR_THRESHOLD = 60;
+
+    /* Maximum chain-reaction depth to prevent infinite cascade loops */
+    var MAX_CASCADE_DEPTH = 6;
+
+    /* ══════════════════════════════════════════════════════════════════════
+       DOM REFS
+    ══════════════════════════════════════════════════════════════════════ */
+    var canvas       = document.getElementById('neuralCanvas');
+    var ctx          = canvas.getContext('2d');
+    var canvasWrap   = document.getElementById('canvasWrap');
+    var flashOverlay = document.getElementById('flashOverlay');
+    var powerSlider  = document.getElementById('powerSlider');
+    var sizeSlider   = document.getElementById('sizeSlider');
+    var powerValueEl = document.getElementById('powerValue');
+    var sizeValueEl  = document.getElementById('sizeValue');
+    var resetBtn     = document.getElementById('resetBtn');
+    var chaosBtn     = document.getElementById('chaosBtn');
+    var statusBadge  = document.getElementById('statusBadge');
+
+    var statConnEl   = document.getElementById('statConnections');
+    var statDeadEl   = document.getElementById('statDead');
+    var statExpEl    = document.getElementById('statExplosions');
+    var statStabEl   = document.getElementById('statStability');
+    var stabBar      = document.getElementById('stabilityBar');
+    var statPowerEl  = document.getElementById('statPower');
+    var powerBar     = document.getElementById('powerBar');
+    var statColEl    = document.getElementById('statColors');
+    var eventLog     = document.getElementById('eventLog');
+
+    /* ══════════════════════════════════════════════════════════════════════
+       STATE
+    ══════════════════════════════════════════════════════════════════════ */
+    var app = {
+        power:          50,  // 0-100
+        neuronRadius:   18,  // base visual radius
+        neurons:        [],
+        connections:    [],
+        particles:      [],
+        shakeFrames:    0,
+        shakeIntensity: 0,
+        totalExplosions:0,
+        dragFrom:       null,  // neuron being dragged from
+        dragX:          0,
+        dragY:          0,
+        isDragging:     false,
+        raf:            0
+    };
+
+    /* ══════════════════════════════════════════════════════════════════════
+       COLOR UTILITIES
+    ══════════════════════════════════════════════════════════════════════ */
+
+    function hexToRgb(hex) {
+        var r = parseInt(hex.slice(1, 3), 16);
+        var g = parseInt(hex.slice(3, 5), 16);
+        var b = parseInt(hex.slice(5, 7), 16);
+        return { r: r, g: g, b: b };
+    }
+
+    function rgbToHex(r, g, b) {
+        function c(n) { return ('0' + Math.round(Math.max(0, Math.min(255, n))).toString(16)).slice(-2); }
+        return '#' + c(r) + c(g) + c(b);
+    }
+
+    function blendColors(hexA, hexB, t) {
+        /* t=0.5 → equal blend */
+        if (t === undefined) { t = 0.5; }
+        var a = hexToRgb(hexA);
+        var b = hexToRgb(hexB);
+        return rgbToHex(
+            a.r + (b.r - a.r) * t,
+            a.g + (b.g - a.g) * t,
+            a.b + (b.b - a.b) * t
+        );
+    }
+
+    function colorDistance(hexA, hexB) {
+        var a = hexToRgb(hexA);
+        var b = hexToRgb(hexB);
+        var dr = a.r - b.r, dg = a.g - b.g, db = a.b - b.b;
+        return Math.sqrt(dr*dr + dg*dg + db*db);
+    }
+
+    function isEnemyPair(colorA, colorB) {
+        for (var i = 0; i < ENEMY_PAIRS.length; i++) {
+            var pa = ENEMY_PAIRS[i][0];
+            var pb = ENEMY_PAIRS[i][1];
+            var distApa = colorDistance(colorA, pa);
+            var distAbp = colorDistance(colorA, pb);
+            var distBpa = colorDistance(colorB, pa);
+            var distBpb = colorDistance(colorB, pb);
+            var THRESH = ENEMY_PAIR_COLOR_THRESHOLD; /* RGB distance tolerance for blended colors */
+            if ((distApa < THRESH && distBpb < THRESH) ||
+                (distAbp < THRESH && distBpa < THRESH)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       NEURON CLASS
+    ══════════════════════════════════════════════════════════════════════ */
+    function Neuron(id, x, y, color) {
+        this.id      = id;
+        this.x       = x;
+        this.y       = y;
+        this.color   = color;
+        this.targetColor = color;
+        this.alive   = true;
+        this.health  = 1.0;   // 0-1
+        this.glow    = 0.4;   // glow intensity
+        this.pulseT  = Math.random() * Math.PI * 2; // phase offset
+        this.blendT  = 0;     // blend animation progress (0-1)
+        this.fromColor = color;
+    }
+
+    Neuron.prototype.update = function (dt) {
+        this.pulseT += dt * 1.8;
+
+        /* Animate color blend */
+        if (this.blendT < 1) {
+            this.blendT = Math.min(1, this.blendT + dt * 3.0); /* ~0.33s */
+            this.color = blendColors(this.fromColor, this.targetColor, this.blendT);
+        } else {
+            this.color = this.targetColor;
+        }
+
+        /* Dead neurons pulse glow to zero */
+        if (!this.alive) {
+            this.glow = Math.max(0, this.glow - dt * 1.5);
+        } else {
+            this.glow = 0.35 + Math.sin(this.pulseT) * 0.15;
+        }
+    };
+
+    Neuron.prototype.startBlend = function (newColor) {
+        this.fromColor = this.color;
+        this.targetColor = newColor;
+        this.blendT = 0;
+    };
+
+    Neuron.prototype.draw = function () {
+        var r = app.neuronRadius;
+
+        if (!this.alive) {
+            /* Dead neuron — dark ring */
+            ctx.save();
+            ctx.globalAlpha = 0.4;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
+            ctx.strokeStyle = '#334455';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            /* X mark */
+            var xs = r * 0.35;
+            ctx.strokeStyle = '#334455';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(this.x - xs, this.y - xs);
+            ctx.lineTo(this.x + xs, this.y + xs);
+            ctx.moveTo(this.x + xs, this.y - xs);
+            ctx.lineTo(this.x - xs, this.y + xs);
+            ctx.stroke();
+            ctx.restore();
+            return;
+        }
+
+        ctx.save();
+
+        /* Outer glow */
+        var glowR = r * 1.9;
+        var grad = ctx.createRadialGradient(this.x, this.y, r * 0.3, this.x, this.y, glowR);
+        var alpha = this.glow.toFixed(2);
+        grad.addColorStop(0, hexWithAlpha(this.color, +alpha));
+        grad.addColorStop(1, hexWithAlpha(this.color, 0));
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, glowR, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        /* Core fill */
+        var coreGrad = ctx.createRadialGradient(
+            this.x - r*0.25, this.y - r*0.25, r*0.05,
+            this.x, this.y, r
+        );
+        coreGrad.addColorStop(0, lighten(this.color, 0.4));
+        coreGrad.addColorStop(1, this.color);
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
+        ctx.fillStyle = coreGrad;
+        ctx.fill();
+
+        /* Border */
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
+        ctx.strokeStyle = hexWithAlpha(lighten(this.color, 0.5), 0.7);
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.restore();
+    };
+
+    /* ══════════════════════════════════════════════════════════════════════
+       CONNECTION CLASS
+    ══════════════════════════════════════════════════════════════════════ */
+    function Connection(a, b) {
+        this.a     = a;
+        this.b     = b;
+        this.alpha = 0;    /* animate in */
+        this.age   = 0;
+    }
+
+    Connection.prototype.blendColor = function () {
+        return blendColors(this.a.color, this.b.color, 0.5);
+    };
+
+    Connection.prototype.update = function (dt) {
+        this.alpha = Math.min(1, this.alpha + dt * 4);
+        this.age  += dt;
+    };
+
+    Connection.prototype.draw = function () {
+        if (!this.a.alive || !this.b.alive) { return; }
+        var col = this.blendColor();
+        var pulse = 0.5 + Math.sin(this.age * 2.5) * 0.2;
+
+        ctx.save();
+        ctx.globalAlpha = this.alpha * pulse;
+
+        /* Glow line */
+        ctx.beginPath();
+        ctx.moveTo(this.a.x, this.a.y);
+        ctx.lineTo(this.b.x, this.b.y);
+        ctx.strokeStyle = hexWithAlpha(col, 0.25);
+        ctx.lineWidth = app.neuronRadius * 0.6;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+
+        /* Core line */
+        ctx.beginPath();
+        ctx.moveTo(this.a.x, this.a.y);
+        ctx.lineTo(this.b.x, this.b.y);
+        ctx.strokeStyle = col;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        /* Animated dash travelling along line */
+        var len   = Math.hypot(this.b.x - this.a.x, this.b.y - this.a.y);
+        var tPos  = (this.age * 0.5) % 1;
+        var px    = this.a.x + (this.b.x - this.a.x) * tPos;
+        var py    = this.a.y + (this.b.y - this.a.y) * tPos;
+        ctx.globalAlpha = this.alpha * 0.9;
+        ctx.beginPath();
+        ctx.arc(px, py, 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = lighten(col, 0.4);
+        ctx.fill();
+
+        ctx.restore();
+    };
+
+    /* ══════════════════════════════════════════════════════════════════════
+       PARTICLE CLASS
+    ══════════════════════════════════════════════════════════════════════ */
+    function Particle(x, y, vx, vy, color, r, maxAge) {
+        this.x      = x;
+        this.y      = y;
+        this.vx     = vx;
+        this.vy     = vy;
+        this.color  = color;
+        this.r      = r;
+        this.age    = 0;
+        this.maxAge = maxAge || 1.0;
+    }
+
+    Particle.prototype.update = function (dt) {
+        this.x   += this.vx * dt * 60;
+        this.y   += this.vy * dt * 60;
+        this.vx  *= 0.96;
+        this.vy  *= 0.96;
+        this.age += dt;
+    };
+
+    Particle.prototype.isDead = function () {
+        return this.age >= this.maxAge;
+    };
+
+    Particle.prototype.draw = function () {
+        var life = 1 - (this.age / this.maxAge);
+        ctx.save();
+        ctx.globalAlpha = life * life;
+        var r = this.r * (0.3 + life * 0.7);
+
+        /* Glow */
+        var g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, r * 2.5);
+        g.addColorStop(0, this.color);
+        g.addColorStop(1, hexWithAlpha(this.color, 0));
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, r * 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = g;
+        ctx.fill();
+
+        /* Core */
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
+        ctx.fillStyle = lighten(this.color, 0.3);
+        ctx.fill();
+        ctx.restore();
+    };
+
+    /* ══════════════════════════════════════════════════════════════════════
+       CANVAS RESIZE
+    ══════════════════════════════════════════════════════════════════════ */
+    function resizeCanvas() {
+        var rect = canvasWrap.getBoundingClientRect();
+        var dpr  = window.devicePixelRatio || 1;
+        var w    = rect.width;
+        var h    = Math.round(w * (520 / 600));
+        canvas.width  = w * dpr;
+        canvas.height = h * dpr;
+        canvas.style.width  = w + 'px';
+        canvas.style.height = h + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        positionNeurons(w, h);
+    }
+
+    function canvasSize() {
+        return {
+            w: canvas.width  / (window.devicePixelRatio || 1),
+            h: canvas.height / (window.devicePixelRatio || 1)
+        };
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       NEURON POSITIONING
+    ══════════════════════════════════════════════════════════════════════ */
+    function positionNeurons(w, h) {
+        if (!app.neurons.length) { return; }
+        var padX = w * 0.09;
+        var padY = h * 0.11;
+        var cellW = (w - padX * 2) / (GRID_COLS - 1);
+        var cellH = (h - padY * 2) / (GRID_ROWS - 1);
+        for (var i = 0; i < app.neurons.length; i++) {
+            var col = i % GRID_COLS;
+            var row = Math.floor(i / GRID_COLS);
+            app.neurons[i].x = padX + col * cellW;
+            app.neurons[i].y = padY + row * cellH;
+        }
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       INIT NETWORK
+    ══════════════════════════════════════════════════════════════════════ */
+    function initNetwork() {
+        app.neurons     = [];
+        app.connections = [];
+        app.particles   = [];
+        app.totalExplosions = 0;
+        app.shakeFrames = 0;
+
+        var size = canvasSize();
+        var padX = size.w * 0.09;
+        var padY = size.h * 0.11;
+        var cellW = (size.w - padX * 2) / (GRID_COLS - 1);
+        var cellH = (size.h - padY * 2) / (GRID_ROWS - 1);
+
+        for (var i = 0; i < TOTAL; i++) {
+            var col   = i % GRID_COLS;
+            var row   = Math.floor(i / GRID_COLS);
+            var x     = padX + col * cellW;
+            var y     = padY + row * cellH;
+            var color = PALETTE[Math.floor(Math.random() * PALETTE.length)];
+            app.neurons.push(new Neuron(i, x, y, color));
+        }
+
+        updateStats();
+        addLog('Network initialized — 30 neurons active', 'blend');
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       EXPLOSION SYSTEM
+    ══════════════════════════════════════════════════════════════════════ */
+    function triggerExplosion(neuron, power, depth) {
+        if (!neuron.alive) { return; }
+        if (depth === undefined) { depth = 0; }
+        if (depth > MAX_CASCADE_DEPTH) { return; } /* prevent infinite cascade */
+
+        neuron.alive = false;
+        app.totalExplosions++;
+
+        emitParticles(neuron, power);
+
+        /* Screen shake */
+        var shakeMag = (power / 100) * 12 * (1 - depth * 0.15);
+        app.shakeFrames    = Math.max(app.shakeFrames,    Math.round(14 - depth * 2));
+        app.shakeIntensity = Math.max(app.shakeIntensity, shakeMag);
+
+        /* Flash overlay */
+        if (depth === 0) {
+            var flashAlpha = 0.12 + (power / 100) * 0.28;
+            flashOverlay.style.opacity = flashAlpha;
+            setTimeout(function () { flashOverlay.style.opacity = 0; }, 80);
+        }
+
+        /* Damage radius scales with power */
+        var damageRadius = app.neuronRadius * (2 + power / 100 * 5);
+
+        /* Cascade to neighbours */
+        for (var i = 0; i < app.neurons.length; i++) {
+            var nb = app.neurons[i];
+            if (!nb.alive || nb === neuron) { continue; }
+            var dist = Math.hypot(nb.x - neuron.x, nb.y - neuron.y);
+            if (dist <= damageRadius) {
+                var damage = (1 - dist / damageRadius) * power * 0.008;
+                nb.health -= damage;
+                if (nb.health <= 0 || isEnemyPair(neuron.color, nb.color)) {
+                    /* Cascade — slight delay for visual effect */
+                    (function (n, d) {
+                        setTimeout(function () {
+                            triggerExplosion(n, power * 0.75, d + 1);
+                            updateStats();
+                        }, 80 + d * 40);
+                    })(nb, depth);
+                }
+            }
+        }
+
+        /* Remove connections to dead neuron */
+        app.connections = app.connections.filter(function (c) {
+            return c.a.alive && c.b.alive;
+        });
+
+        updateStats();
+    }
+
+    function emitParticles(neuron, power) {
+        var t      = power / 100;
+        var count  = Math.round(MIN_PARTICLES + t * (MAX_PARTICLES - MIN_PARTICLES));
+        var speed  = MIN_PART_SPEED + t * (MAX_PART_SPEED - MIN_PART_SPEED);
+        var rMax   = MIN_PART_R    + t * (MAX_PART_R    - MIN_PART_R);
+        var maxAge = 0.6 + t * 0.8;
+
+        for (var i = 0; i < count; i++) {
+            var angle = Math.random() * Math.PI * 2;
+            var s     = (0.4 + Math.random() * 0.6) * speed;
+            app.particles.push(new Particle(
+                neuron.x + (Math.random() - 0.5) * 4,
+                neuron.y + (Math.random() - 0.5) * 4,
+                Math.cos(angle) * s,
+                Math.sin(angle) * s,
+                neuron.color,
+                MIN_PART_R + Math.random() * (rMax - MIN_PART_R),
+                maxAge
+            ));
+        }
+
+        /* Extra bright core burst */
+        for (var j = 0; j < Math.round(count * 0.3); j++) {
+            var a2 = Math.random() * Math.PI * 2;
+            var s2 = speed * (0.1 + Math.random() * 0.3);
+            app.particles.push(new Particle(
+                neuron.x, neuron.y,
+                Math.cos(a2) * s2, Math.sin(a2) * s2,
+                lighten(neuron.color, 0.6),
+                rMax * 0.6,
+                maxAge * 0.5
+            ));
+        }
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       HIT DETECTION
+    ══════════════════════════════════════════════════════════════════════ */
+    function neuronAt(px, py) {
+        var bestDist = Infinity;
+        var best     = null;
+        var hitR     = app.neuronRadius * 1.6;
+        for (var i = 0; i < app.neurons.length; i++) {
+            var n = app.neurons[i];
+            if (!n.alive) { continue; }
+            var d = Math.hypot(px - n.x, py - n.y);
+            if (d < hitR && d < bestDist) {
+                bestDist = d;
+                best     = n;
+            }
+        }
+        return best;
+    }
+
+    function hasConnection(a, b) {
+        for (var i = 0; i < app.connections.length; i++) {
+            var c = app.connections[i];
+            if ((c.a === a && c.b === b) || (c.a === b && c.b === a)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       CONNECT NEURONS
+    ══════════════════════════════════════════════════════════════════════ */
+    function connectNeurons(a, b) {
+        if (!a.alive || !b.alive) { return; }
+        if (a === b)              { return; }
+        if (hasConnection(a, b))  { return; }
+
+        if (isEnemyPair(a.color, b.color)) {
+            addLog('⚡ ENEMY PAIR: ' + a.id + ' ↔ ' + b.id + ' — EXPLOSION!', 'boom');
+            triggerExplosion(a, app.power);
+            setTimeout(function () {
+                triggerExplosion(b, app.power);
+                updateStats();
+            }, 60);
+        } else {
+            var blend = blendColors(a.color, b.color, 0.5);
+            a.startBlend(blend);
+            b.startBlend(blend);
+            app.connections.push(new Connection(a, b));
+            addLog('Connected ' + a.id + ' ↔ ' + b.id + ' → ' + blend.toUpperCase(), 'blend');
+            updateStats();
+        }
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       STATS UPDATE
+    ══════════════════════════════════════════════════════════════════════ */
+    function updateStats() {
+        var dead = 0;
+        var colorSet = {};
+        for (var i = 0; i < app.neurons.length; i++) {
+            if (!app.neurons[i].alive) { dead++; }
+            else { colorSet[app.neurons[i].color.slice(1)] = 1; }
+        }
+        var alive      = TOTAL - dead;
+        var stability  = Math.round((alive / TOTAL) * 100);
+        var uniqueCol  = Object.keys(colorSet).length;
+        var activeConn = app.connections.filter(function (c) {
+            return c.a.alive && c.b.alive;
+        }).length;
+
+        statConnEl.textContent  = activeConn;
+        statDeadEl.textContent  = dead;
+        statExpEl.textContent   = app.totalExplosions;
+        statStabEl.textContent  = stability + '%';
+        stabBar.style.width     = stability + '%';
+        stabBar.style.background =
+            stability > 70 ? 'var(--electric-green)' :
+            stability > 35 ? 'var(--electric-yellow)' :
+                             'var(--electric-red)';
+        statStabEl.className = 'stat-value ' +
+            (stability > 70 ? 'green' : stability > 35 ? 'amber' : 'red');
+
+        statColEl.textContent = uniqueCol;
+
+        var p = app.power;
+        statPowerEl.textContent = p + '%';
+        powerBar.style.width    = p + '%';
+        powerBar.style.background =
+            p > 70 ? 'var(--electric-red)' :
+            p > 35 ? 'var(--electric-yellow)' :
+                     'var(--electric-cyan)';
+
+        statusBadge.textContent =
+            dead === TOTAL ? 'FLATLINE' :
+            stability < 50 ? 'Critical' :
+            stability < 80 ? 'Unstable' : 'Active';
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       EVENT LOG
+    ══════════════════════════════════════════════════════════════════════ */
+    var logStartTime = Date.now();
+    function addLog(msg, type) {
+        var elapsed = ((Date.now() - logStartTime) / 1000).toFixed(1);
+        var entry = document.createElement('div');
+        entry.className = 'log-entry';
+        entry.innerHTML =
+            '<span class="log-time">+' + elapsed + 's</span>' +
+            '<span class="log-msg ' + (type || '') + '">' + msg + '</span>';
+        eventLog.insertBefore(entry, eventLog.firstChild);
+        /* Trim log */
+        while (eventLog.children.length > 30) {
+            eventLog.removeChild(eventLog.lastChild);
+        }
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       RENDERING HELPERS
+    ══════════════════════════════════════════════════════════════════════ */
+    function hexWithAlpha(hex, alpha) {
+        var c = hexToRgb(hex);
+        return 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + alpha + ')';
+    }
+
+    function lighten(hex, amount) {
+        var c = hexToRgb(hex);
+        return rgbToHex(
+            c.r + (255 - c.r) * amount,
+            c.g + (255 - c.g) * amount,
+            c.b + (255 - c.b) * amount
+        );
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       MAIN RENDER LOOP
+    ══════════════════════════════════════════════════════════════════════ */
+    var lastTime = 0;
+
+    function frame(ts) {
+        var dt = Math.min((ts - lastTime) / 1000, 0.05);
+        lastTime = ts;
+
+        var size = canvasSize();
+
+        /* Screen shake */
+        var sx = 0, sy = 0;
+        if (app.shakeFrames > 0) {
+            sx = (Math.random() - 0.5) * app.shakeIntensity * 2;
+            sy = (Math.random() - 0.5) * app.shakeIntensity * 2;
+            app.shakeFrames--;
+            if (app.shakeFrames <= 0) { app.shakeIntensity = 0; }
+        }
+
+        ctx.save();
+        ctx.translate(sx, sy);
+
+        /* Clear */
+        ctx.clearRect(-Math.abs(sx) - 2, -Math.abs(sy) - 2,
+            size.w + Math.abs(sx) * 2 + 4, size.h + Math.abs(sy) * 2 + 4);
+
+        /* Background */
+        ctx.fillStyle = '#060f1c';
+        ctx.fillRect(-Math.abs(sx) - 2, -Math.abs(sy) - 2,
+            size.w + Math.abs(sx) * 2 + 4, size.h + Math.abs(sy) * 2 + 4);
+
+        /* Subtle grid */
+        drawGrid(size.w, size.h);
+
+        /* Update & draw connections */
+        for (var ci = app.connections.length - 1; ci >= 0; ci--) {
+            var conn = app.connections[ci];
+            if (!conn.a.alive || !conn.b.alive) {
+                app.connections.splice(ci, 1);
+                continue;
+            }
+            conn.update(dt);
+            conn.draw();
+        }
+
+        /* Drag line */
+        if (app.isDragging && app.dragFrom && app.dragFrom.alive) {
+            ctx.save();
+            ctx.globalAlpha = 0.65;
+            ctx.beginPath();
+            ctx.moveTo(app.dragFrom.x, app.dragFrom.y);
+            ctx.lineTo(app.dragX, app.dragY);
+            ctx.strokeStyle = app.dragFrom.color;
+            ctx.lineWidth = 2;
+            ctx.setLineDash([6, 5]);
+            ctx.lineDashOffset = -(Date.now() / 50) % 11;
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.restore();
+        }
+
+        /* Update & draw neurons */
+        for (var ni = 0; ni < app.neurons.length; ni++) {
+            app.neurons[ni].update(dt);
+            app.neurons[ni].draw();
+        }
+
+        /* Update & draw particles */
+        for (var pi = app.particles.length - 1; pi >= 0; pi--) {
+            var part = app.particles[pi];
+            part.update(dt);
+            if (part.isDead()) {
+                app.particles.splice(pi, 1);
+            } else {
+                part.draw();
+            }
+        }
+
+        ctx.restore();
+        app.raf = requestAnimationFrame(frame);
+    }
+
+    function drawGrid(w, h) {
+        var step = 40;
+        ctx.save();
+        ctx.strokeStyle = 'rgba(126,226,255,0.03)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (var gx = 0; gx <= w; gx += step) {
+            ctx.moveTo(gx, 0); ctx.lineTo(gx, h);
+        }
+        for (var gy = 0; gy <= h; gy += step) {
+            ctx.moveTo(0, gy); ctx.lineTo(w, gy);
+        }
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       POINTER EVENTS
+    ══════════════════════════════════════════════════════════════════════ */
+    function getCanvasPos(e) {
+        var rect = canvas.getBoundingClientRect();
+        var touch = e.touches ? e.touches[0] : e;
+        return {
+            x: (touch.clientX - rect.left),
+            y: (touch.clientY - rect.top)
+        };
+    }
+
+    canvas.addEventListener('pointerdown', function (e) {
+        e.preventDefault();
+        var pos = getCanvasPos(e);
+        var n   = neuronAt(pos.x, pos.y);
+        if (n) {
+            app.isDragging = true;
+            app.dragFrom   = n;
+            app.dragX      = pos.x;
+            app.dragY      = pos.y;
+            canvas.setPointerCapture(e.pointerId);
+        }
+    });
+
+    canvas.addEventListener('pointermove', function (e) {
+        if (!app.isDragging) { return; }
+        e.preventDefault();
+        var pos  = getCanvasPos(e);
+        app.dragX = pos.x;
+        app.dragY = pos.y;
+    });
+
+    canvas.addEventListener('pointerup', function (e) {
+        if (!app.isDragging) { return; }
+        e.preventDefault();
+        var pos = getCanvasPos(e);
+        var n   = neuronAt(pos.x, pos.y);
+        if (n && n !== app.dragFrom) {
+            connectNeurons(app.dragFrom, n);
+        }
+        app.isDragging = false;
+        app.dragFrom   = null;
+    });
+
+    canvas.addEventListener('pointercancel', function () {
+        app.isDragging = false;
+        app.dragFrom   = null;
+    });
+
+    /* ══════════════════════════════════════════════════════════════════════
+       CONTROLS
+    ══════════════════════════════════════════════════════════════════════ */
+    powerSlider.addEventListener('input', function () {
+        app.power = parseInt(this.value, 10);
+        powerValueEl.textContent = app.power + '%';
+        updateStats();
+    });
+
+    sizeSlider.addEventListener('input', function () {
+        app.neuronRadius = parseInt(this.value, 10);
+        /* Compute label from slider range: min=10, max=28, step=2 → 10 steps */
+        var min   = parseInt(sizeSlider.min, 10);
+        var step  = parseInt(sizeSlider.step, 10);
+        var val   = parseInt(this.value, 10);
+        var LABELS = ['XS', 'Sm', 'Med', 'Lg', 'XL', 'XXL', '3XL', 'Max'];
+        var idx   = Math.round((val - min) / step);
+        sizeValueEl.textContent = LABELS[Math.min(idx, LABELS.length - 1)];
+    });
+
+    resetBtn.addEventListener('click', function () {
+        cancelAnimationFrame(app.raf);
+        initNetwork();
+        logStartTime = Date.now();
+        lastTime = 0;
+        app.raf = requestAnimationFrame(frame);
+    });
+
+    chaosBtn.addEventListener('click', function () {
+        /* Pick a random alive neuron and explode it at current power */
+        var alive = app.neurons.filter(function (n) { return n.alive; });
+        if (!alive.length) {
+            addLog('No alive neurons to trigger chaos.', '');
+            return;
+        }
+        var target = alive[Math.floor(Math.random() * alive.length)];
+        addLog('🔥 CHAOS TRIGGER at neuron ' + target.id, 'boom');
+        triggerExplosion(target, app.power);
+        updateStats();
+    });
+
+    /* ══════════════════════════════════════════════════════════════════════
+       RESIZE
+    ══════════════════════════════════════════════════════════════════════ */
+    var resizeTimer = null;
+    window.addEventListener('resize', function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () { resizeCanvas(); }, 100);
+    });
+
+    /* ══════════════════════════════════════════════════════════════════════
+       BOOTSTRAP
+    ══════════════════════════════════════════════════════════════════════ */
+    resizeCanvas();
+    initNetwork();
+    app.raf = requestAnimationFrame(frame);
+
+})();
+</script>
+</body>
+</html>
