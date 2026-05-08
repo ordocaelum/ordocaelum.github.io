@@ -766,6 +766,12 @@
     var MIN_PART_R     = 2;
     var MAX_PART_R     = 7;
 
+    /* RGB Euclidean distance tolerance for enemy-pair detection on blended colors */
+    var ENEMY_PAIR_COLOR_THRESHOLD = 60;
+
+    /* Maximum chain-reaction depth to prevent infinite cascade loops */
+    var MAX_CASCADE_DEPTH = 6;
+
     /* ══════════════════════════════════════════════════════════════════════
        DOM REFS
     ══════════════════════════════════════════════════════════════════════ */
@@ -853,7 +859,7 @@
             var distAbp = colorDistance(colorA, pb);
             var distBpa = colorDistance(colorB, pa);
             var distBpb = colorDistance(colorB, pb);
-            var THRESH = 60; /* tolerance for blended colors */
+            var THRESH = ENEMY_PAIR_COLOR_THRESHOLD; /* RGB distance tolerance for blended colors */
             if ((distApa < THRESH && distBpb < THRESH) ||
                 (distAbp < THRESH && distBpa < THRESH)) {
                 return true;
@@ -1147,7 +1153,7 @@
     function triggerExplosion(neuron, power, depth) {
         if (!neuron.alive) { return; }
         if (depth === undefined) { depth = 0; }
-        if (depth > 6) { return; } /* prevent infinite cascade */
+        if (depth > MAX_CASCADE_DEPTH) { return; } /* prevent infinite cascade */
 
         neuron.alive = false;
         app.totalExplosions++;
@@ -1294,7 +1300,7 @@
         var colorSet = {};
         for (var i = 0; i < app.neurons.length; i++) {
             if (!app.neurons[i].alive) { dead++; }
-            else { colorSet[app.neurons[i].color.slice(1,4)] = 1; }
+            else { colorSet[app.neurons[i].color.slice(1)] = 1; }
         }
         var alive      = TOTAL - dead;
         var stability  = Math.round((alive / TOTAL) * 100);
@@ -1526,9 +1532,13 @@
 
     sizeSlider.addEventListener('input', function () {
         app.neuronRadius = parseInt(this.value, 10);
-        var labels = ['XS', 'Sm', 'Med', 'Lg', 'XL', 'XXL', '3XL', 'Max', 'Max', 'Max'];
-        var idx = Math.floor((parseInt(this.value, 10) - 10) / 2);
-        sizeValueEl.textContent = labels[Math.min(idx, labels.length - 1)] || 'XL';
+        /* Compute label from slider range: min=10, max=28, step=2 → 10 steps */
+        var min   = parseInt(sizeSlider.min, 10);
+        var step  = parseInt(sizeSlider.step, 10);
+        var val   = parseInt(this.value, 10);
+        var LABELS = ['XS', 'Sm', 'Med', 'Lg', 'XL', 'XXL', '3XL', 'Max'];
+        var idx   = Math.round((val - min) / step);
+        sizeValueEl.textContent = LABELS[Math.min(idx, LABELS.length - 1)];
     });
 
     resetBtn.addEventListener('click', function () {
