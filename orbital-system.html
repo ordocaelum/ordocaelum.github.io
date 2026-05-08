@@ -744,7 +744,7 @@
             <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
             <span>Resume</span>
         </a>
-        <div class="panel-badge">System Demo · L2 + L3</div>
+        <div class="panel-badge">System Demo — L2 + L3</div>
     </div>
 </div>
 
@@ -974,14 +974,20 @@
        CONFIGURATION
     ══════════════════════════════════════════════════════════════════════ */
     var TWO_PI       = Math.PI * 2;
-    var ANGLE_INC    = 0.018;   // base radians/frame at speed=1 (circular mode)
-    var GRAVITY      = 7;       // gravitational constant, tuned for visuals
+    var ANGLE_INC    = 0.018;   // radians/frame at speed=1; gives ~1 full orbit per ~350 frames at 60fps
+    var GRAVITY      = 7;       // gravitational constant, tuned so circular orbit at r=120, mass=100 ≈ speed 1
     var SAT_R        = 7;       // satellite draw radius (px)
-    var BODY_ORBT_R  = 62;      // secondary body orbit radius around barycenter
+    var BODY_ORBT_R  = 62;      // secondary body orbit radius around barycenter (px)
     var MAX_SATS     = 5;
-    var BODY_SPD     = 0.0075;  // secondary body angular speed
+    var BODY_SPD     = 0.0075;  // secondary body angular speed (rad/frame); ~840 frames per revolution
+    var FLASH_FRAMES = 22;      // total countdown frames when a collision occurs
+    var FLASH_TRIGGER = 18;     // frame count at which the CSS flash animation fires (22 - 4 frame delay)
+    var COLL_DEBOUNCE_MS = 800; // ignore repeat collision events within this window (ms)
+    var LP_HIT_RADIUS = 18;     // mouse hit radius for Lagrange point tooltip (px)
 
     var BODIES = {
+        // mass: relative gravitational pull; radius: visual px; periodBase: hours at r=120, speed=1
+        // altBase: display altitude in km (or Mkm for Sun); all values tuned for visual plausibility
         earth: { name: 'EARTH', mass: 100, radius: 28, color: '#5aa8ff', glow: 'rgba(90,168,255,0.85)',   hl: '#b8e3ff', periodBase: 100, altBase: 420 },
         moon:  { name: 'MOON',  mass: 17,  radius: 16, color: '#c8d8e8', glow: 'rgba(200,216,232,0.7)',  hl: '#e8f0f8', periodBase: 240, altBase: 100 },
         sun:   { name: 'SUN',   mass: 400, radius: 40, color: '#ffb340', glow: 'rgba(255,180,64,0.85)',   hl: '#ffe0a0', periodBase: 50,  altBase: 150000000 }
@@ -1243,6 +1249,8 @@
         var main = { px: 0, py: 0, mass: b.mass, radius: b.radius, color: b.color, glow: b.glow, hl: b.hl };
         if (app.mode === 'single') { return [main]; }
 
+        // Secondary mass/radius are 38%/48% of primary — chosen so the companion is visually
+        // distinct but still clearly smaller, without destabilising the satellite too quickly.
         var secMass = b.mass * 0.38;
         var secRad  = Math.max(9, b.radius * 0.48);
         var sec1 = {
@@ -1324,12 +1332,12 @@
     var _lastCollTime = 0;
     function triggerCollision(msg) {
         var now = Date.now();
-        // Deduplicate rapid-fire collisions (same message within 800ms)
-        if (msg === _lastCollMsg && now - _lastCollTime < 800) { return; }
+        // Deduplicate rapid-fire collisions (same message within debounce window)
+        if (msg === _lastCollMsg && now - _lastCollTime < COLL_DEBOUNCE_MS) { return; }
         _lastCollMsg  = msg;
         _lastCollTime = now;
 
-        app.flashFrames = 22;
+        app.flashFrames = FLASH_FRAMES;
 
         // Remove placeholder
         var placeholder = eventList.querySelector('.event-none');
@@ -1589,7 +1597,7 @@
         /* Collision flash overlay */
         if (app.flashFrames > 0) {
             app.flashFrames--;
-            if (app.flashFrames === 18) {
+            if (app.flashFrames === FLASH_TRIGGER) {
                 collisionOverlay.classList.remove('flash');
                 void collisionOverlay.offsetWidth; // reflow to restart animation
                 collisionOverlay.classList.add('flash');
@@ -1603,7 +1611,7 @@
         var lps = getLagrangePoints(w / 2, h / 2);
         var hov = null;
         lps.forEach(function (lp) {
-            if (Math.hypot(lp.x - app.mouseX, lp.y - app.mouseY) < 18) { hov = lp; }
+            if (Math.hypot(lp.x - app.mouseX, lp.y - app.mouseY) < LP_HIT_RADIUS) { hov = lp; }
         });
         app.hoveredLP = hov ? hov.label : null;
         if (hov) {
