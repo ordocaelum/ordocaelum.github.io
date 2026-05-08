@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORBITAL_SYSTEM — Leland E. Doss</title>
+    <meta name="description" content="Interactive orbital system demo for Leland E. Doss resume.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Material+Symbols+Rounded:FILL@0..1&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0e1a2b;
+            --bg-soft: #142640;
+            --panel: #1a2f4d;
+            --panel-2: #11233c;
+            --line: rgba(170, 200, 235, 0.14);
+            --line-strong: rgba(170, 200, 235, 0.28);
+            --accent: #5aa8ff;
+            --accent-2: #82c0ff;
+            --electric-cyan: #7ee2ff;
+            --electric-green: #6fffb0;
+            --electric-orange: #ffb167;
+            --electric-red: #ff7386;
+            --text: #eef3fa;
+            --text-soft: #c2cfe0;
+            --text-mute: #8a98ad;
+            --shadow: 0 24px 60px rgba(0, 0, 0, 0.38);
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body { margin: 0; min-height: 100%; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(126, 226, 255, 0.12), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(90, 168, 255, 0.10), transparent 30%),
+                var(--bg);
+            color: var(--text);
+            padding: 88px 24px 40px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .material-symbols-rounded {
+            font-family: 'Material Symbols Rounded';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 18px;
+            line-height: 1;
+            display: inline-block;
+            white-space: nowrap;
+            direction: ltr;
+            -webkit-font-smoothing: antialiased;
+            font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+        }
+
+        a { color: inherit; }
+
+        .top-nav {
+            position: fixed;
+            top: 14px;
+            left: 24px;
+            right: 24px;
+            z-index: 20;
+            background: rgba(13, 26, 44, 0.76);
+            border: 1px solid var(--line-strong);
+            border-radius: 10px;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .top-nav-inner {
+            max-width: 1220px;
+            margin: 0 auto;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .btn,
+        .stat-card,
+        .control-card,
+        .canvas-shell {
+            transition: border-color 0.35s ease, box-shadow 0.35s ease, background-color 0.35s ease, transform 0.35s ease;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: 1px solid var(--line-strong);
+            border-radius: 8px;
+            background: var(--panel);
+            color: var(--text-soft);
+            padding: 10px 16px;
+            text-decoration: none;
+            font: inherit;
+            font-size: 0.82rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .btn:hover,
+        .btn:focus-visible {
+            border-color: var(--accent);
+            background: var(--bg-soft);
+            color: var(--accent-2);
+            outline: none;
+        }
+
+        .page {
+            max-width: 1220px;
+            margin: 0 auto;
+            display: grid;
+            gap: 22px;
+        }
+
+        .hero {
+            padding: 14px 4px 0;
+        }
+
+        .eyebrow {
+            color: var(--electric-cyan);
+            font-size: 0.78rem;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(2rem, 4vw, 3.35rem);
+            line-height: 0.95;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .subcopy {
+            max-width: 760px;
+            margin: 16px 0 0;
+            color: var(--text-soft);
+            font-size: 1rem;
+        }
+
+        .system-layout {
+            display: grid;
+            grid-template-columns: 280px minmax(320px, 1fr) 280px;
+            gap: 22px;
+            align-items: start;
+        }
+
+        .control-card,
+        .stat-card,
+        .canvas-shell {
+            background: linear-gradient(180deg, rgba(26, 47, 77, 0.98), rgba(17, 35, 60, 0.98));
+            border: 1px solid var(--line-strong);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+        }
+
+        .control-card,
+        .stats-panel {
+            display: grid;
+            gap: 18px;
+        }
+
+        .control-card {
+            padding: 22px;
+        }
+
+        .panel-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .panel-title {
+            font-size: 0.82rem;
+            color: var(--electric-cyan);
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+        }
+
+        .panel-badge {
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(126, 226, 255, 0.22);
+            background: rgba(126, 226, 255, 0.08);
+            color: var(--accent-2);
+            font-size: 0.74rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .control-group {
+            display: grid;
+            gap: 10px;
+        }
+
+        .control-label-row {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .control-label {
+            color: var(--text-soft);
+            font-size: 0.8rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        .control-value {
+            color: var(--electric-cyan);
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            height: 8px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(126, 226, 255, 0.24), rgba(90, 168, 255, 0.45));
+            border: 1px solid rgba(170, 200, 235, 0.18);
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            margin-top: -6px;
+            border-radius: 50%;
+            background: var(--electric-cyan);
+            border: 2px solid #d8f7ff;
+            box-shadow: 0 0 18px rgba(126, 226, 255, 0.75);
+        }
+
+        input[type="range"]::-moz-range-track {
+            height: 8px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(126, 226, 255, 0.24), rgba(90, 168, 255, 0.45));
+            border: 1px solid rgba(170, 200, 235, 0.18);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--electric-cyan);
+            border: 2px solid #d8f7ff;
+            box-shadow: 0 0 18px rgba(126, 226, 255, 0.75);
+        }
+
+        .button-row {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .canvas-shell {
+            position: relative;
+            padding: 24px;
+            min-height: 100%;
+            overflow: hidden;
+        }
+
+        .canvas-shell::before {
+            content: '';
+            position: absolute;
+            inset: 18px;
+            border-radius: 16px;
+            border: 1px solid rgba(126, 226, 255, 0.08);
+            pointer-events: none;
+        }
+
+        .canvas-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .canvas-copy {
+            color: var(--text-mute);
+            font-size: 0.86rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .canvas-wrap {
+            position: relative;
+            aspect-ratio: 1 / 1;
+            width: min(100%, 460px);
+            margin: 0 auto;
+            border-radius: 22px;
+            background:
+                radial-gradient(circle at 50% 50%, rgba(126, 226, 255, 0.08), transparent 55%),
+                radial-gradient(circle at 30% 20%, rgba(90, 168, 255, 0.14), transparent 24%),
+                rgba(8, 16, 28, 0.95);
+            border: 1px solid rgba(170, 200, 235, 0.12);
+            box-shadow:
+                inset 0 0 24px rgba(126, 226, 255, 0.08),
+                0 0 30px rgba(90, 168, 255, 0.08);
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 22px;
+        }
+
+        .stats-panel {
+            gap: 14px;
+        }
+
+        .stat-card {
+            padding: 18px 20px;
+        }
+
+        .stat-label {
+            color: var(--text-mute);
+            font-size: 0.74rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            color: var(--text);
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .status-value {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+            letter-spacing: 0.15em;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            box-shadow: 0 0 14px currentColor;
+            background: currentColor;
+        }
+
+        .system-note {
+            color: var(--text-mute);
+            font-size: 0.8rem;
+            line-height: 1.7;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 1080px) {
+            .system-layout {
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                grid-template-areas:
+                    "canvas canvas"
+                    "controls stats";
+            }
+
+            .controls-panel { grid-area: controls; }
+            .canvas-shell { grid-area: canvas; }
+            .stats-panel { grid-area: stats; }
+        }
+
+        @media (max-width: 720px) {
+            body { padding: 78px 16px 28px; }
+            .top-nav { top: 10px; left: 16px; right: 16px; }
+            .top-nav-inner { padding: 8px 10px; }
+            .system-layout {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "controls"
+                    "canvas"
+                    "stats";
+            }
+            .control-card,
+            .canvas-shell,
+            .stat-card { border-radius: 16px; }
+            .button-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-nav" role="navigation" aria-label="Orbital system navigation">
+        <div class="top-nav-inner">
+            <a class="btn" href="index.html" aria-label="Back to resume">
+                <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
+                <span>Resume</span>
+            </a>
+            <div class="panel-badge">System Demo</div>
+        </div>
+    </div>
+
+    <main class="page">
+        <section class="hero" aria-labelledby="orbital-system-title">
+            <div class="eyebrow">Interactive Portfolio Module</div>
+            <h1 id="orbital-system-title">Orbital_System</h1>
+            <p class="subcopy">A stylized orbital mechanics toy built for the resume. It is intentionally simple: smooth circular motion, responsive controls, glowing telemetry, and just enough fake science to feel fun.</p>
+        </section>
+
+        <section class="system-layout" aria-label="Orbital system interface">
+            <aside class="control-card controls-panel" aria-labelledby="controls-title">
+                <div class="panel-heading">
+                    <div class="panel-title" id="controls-title">Controls</div>
+                    <div class="panel-badge" id="playbackMode">Live</div>
+                </div>
+
+                <div class="control-group">
+                    <div class="control-label-row">
+                        <label class="control-label" for="speedSlider">Orbital_Speed</label>
+                        <span class="control-value" id="speedValue">1.0x</span>
+                    </div>
+                    <input id="speedSlider" type="range" min="0.5" max="5" step="0.1" value="1">
+                </div>
+
+                <div class="control-group">
+                    <div class="control-label-row">
+                        <label class="control-label" for="angleSlider">Launch_Angle</label>
+                        <span class="control-value" id="angleValue">0°</span>
+                    </div>
+                    <input id="angleSlider" type="range" min="0" max="360" step="1" value="0">
+                </div>
+
+                <div class="button-row">
+                    <button class="btn" id="playPauseBtn" type="button">
+                        <span class="material-symbols-rounded" aria-hidden="true">pause_circle</span>
+                        <span>Pause</span>
+                    </button>
+                    <button class="btn" id="resetBtn" type="button">
+                        <span class="material-symbols-rounded" aria-hidden="true">replay</span>
+                        <span>Reset</span>
+                    </button>
+                </div>
+
+                <p class="system-note">K.I.S.S. mode enabled. This is a polished mock orbital system, not a real simulation.</p>
+            </aside>
+
+            <section class="canvas-shell" aria-labelledby="visual-title">
+                <div class="canvas-header">
+                    <div class="panel-title" id="visual-title">Visualization</div>
+                    <div class="canvas-copy">400 × 400 Canvas</div>
+                </div>
+                <div class="canvas-wrap">
+                    <canvas id="orbitalCanvas" width="400" height="400" aria-label="Animated orbital system"></canvas>
+                </div>
+            </section>
+
+            <aside class="stats-panel" aria-labelledby="stats-title">
+                <div class="control-card">
+                    <div class="panel-heading">
+                        <div class="panel-title" id="stats-title">Telemetry</div>
+                        <div class="panel-badge">Uppercase</div>
+                    </div>
+                    <p class="system-note">Realtime values update directly from the speed and angle controls.</p>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Speed</div>
+                    <div class="stat-value" id="statSpeed">1.0x</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Orbital Period</div>
+                    <div class="stat-value" id="statPeriod">100.0 Hours</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Altitude</div>
+                    <div class="stat-value" id="statAltitude">420 Km</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Status</div>
+                    <div class="stat-value status-value" id="statStatus">
+                        <span class="status-dot" id="statusDot"></span>
+                        <span id="statusText">Stable_Orbit</span>
+                    </div>
+                </div>
+            </aside>
+        </section>
+    </main>
+
+    <script>
+        (function () {
+            const canvas = document.getElementById('orbitalCanvas');
+            const ctx = canvas.getContext('2d');
+            const speedSlider = document.getElementById('speedSlider');
+            const angleSlider = document.getElementById('angleSlider');
+            const speedValue = document.getElementById('speedValue');
+            const angleValue = document.getElementById('angleValue');
+            const statSpeed = document.getElementById('statSpeed');
+            const statPeriod = document.getElementById('statPeriod');
+            const statAltitude = document.getElementById('statAltitude');
+            const statStatus = document.getElementById('statStatus');
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const playbackMode = document.getElementById('playbackMode');
+
+            const ORBIT_RADIUS = 120;
+            const SATELLITE_RADIUS = 8;
+            const ANGLE_INCREMENT = 0.02;
+            const TWO_PI = Math.PI * 2;
+
+            const state = {
+                speed: Number(speedSlider.value),
+                angle: 0,
+                isPlaying: true
+            };
+
+            function formatAngle(angleRadians) {
+                const degrees = ((angleRadians * 180 / Math.PI) % 360 + 360) % 360;
+                return Math.round(degrees);
+            }
+
+            function getStatus(speed) {
+                if (speed < 0.8) {
+                    return { label: 'DECAYING', color: 'var(--electric-orange)' };
+                }
+                if (speed > 3) {
+                    return { label: 'ESCAPE_VELOCITY', color: 'var(--electric-red)' };
+                }
+                return { label: 'STABLE_ORBIT', color: 'var(--electric-green)' };
+            }
+
+            function syncStats() {
+                const angleDegrees = formatAngle(state.angle);
+                const orbitPeriod = 100 / state.speed;
+                const altitude = 420 + Math.sin(state.angle * 1.5) * 12;
+                const status = getStatus(state.speed);
+
+                speedValue.textContent = state.speed.toFixed(1) + 'x';
+                angleValue.textContent = angleDegrees + '°';
+                statSpeed.textContent = state.speed.toFixed(1) + 'x';
+                statPeriod.textContent = orbitPeriod.toFixed(1) + ' HOURS';
+                statAltitude.textContent = altitude.toFixed(0) + ' KM';
+                statusText.textContent = status.label;
+                statStatus.style.color = status.color;
+                statusDot.style.color = status.color;
+                angleSlider.value = String(angleDegrees);
+                playbackMode.textContent = state.isPlaying ? 'Live' : 'Paused';
+            }
+
+            function resizeCanvas() {
+                const rect = canvas.getBoundingClientRect();
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width = rect.width * dpr;
+                canvas.height = rect.height * dpr;
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            }
+
+            function drawArrow(x1, y1, x2, y2, color) {
+                const angle = Math.atan2(y2 - y1, x2 - x1);
+                const headLength = 12;
+
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2.5;
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = color;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(x2, y2);
+                ctx.lineTo(
+                    x2 - headLength * Math.cos(angle - Math.PI / 6),
+                    y2 - headLength * Math.sin(angle - Math.PI / 6)
+                );
+                ctx.lineTo(
+                    x2 - headLength * Math.cos(angle + Math.PI / 6),
+                    y2 - headLength * Math.sin(angle + Math.PI / 6)
+                );
+                ctx.closePath();
+                ctx.fillStyle = color;
+                ctx.fill();
+            }
+
+            function render() {
+                const width = canvas.clientWidth;
+                const height = canvas.clientHeight;
+                const centerX = width / 2;
+                const centerY = height / 2;
+                const satelliteX = centerX + ORBIT_RADIUS * Math.cos(state.angle);
+                const satelliteY = centerY + ORBIT_RADIUS * Math.sin(state.angle);
+                const velocityAngle = state.angle + Math.PI / 2;
+                const vectorLength = 28 + state.speed * 10;
+                const arrowX = satelliteX + Math.cos(velocityAngle) * vectorLength;
+                const arrowY = satelliteY + Math.sin(velocityAngle) * vectorLength;
+
+                ctx.clearRect(0, 0, width, height);
+
+                for (let i = 0; i < 16; i += 1) {
+                    const starX = 28 + (i * 37) % (width - 56);
+                    const starY = 34 + (i * 59) % (height - 68);
+                    ctx.beginPath();
+                    ctx.arc(starX, starY, i % 4 === 0 ? 1.6 : 1, 0, TWO_PI);
+                    ctx.fillStyle = 'rgba(238, 243, 250, 0.45)';
+                    ctx.fill();
+                }
+
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, ORBIT_RADIUS, 0, TWO_PI);
+                ctx.strokeStyle = 'rgba(126, 226, 255, 0.85)';
+                ctx.lineWidth = 1.5;
+                ctx.shadowBlur = 18;
+                ctx.shadowColor = 'rgba(126, 226, 255, 0.35)';
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 30, 0, TWO_PI);
+                ctx.fillStyle = '#5aa8ff';
+                ctx.shadowBlur = 28;
+                ctx.shadowColor = 'rgba(90, 168, 255, 0.85)';
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 18, 0, TWO_PI);
+                ctx.fillStyle = '#b8e3ff';
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(satelliteX, satelliteY, SATELLITE_RADIUS, 0, TWO_PI);
+                ctx.fillStyle = '#7ee2ff';
+                ctx.shadowBlur = 18;
+                ctx.shadowColor = 'rgba(126, 226, 255, 0.85)';
+                ctx.fill();
+
+                drawArrow(satelliteX, satelliteY, arrowX, arrowY, '#7ee2ff');
+                ctx.shadowBlur = 0;
+            }
+
+            function frame() {
+                if (state.isPlaying) {
+                    state.angle = (state.angle + state.speed * ANGLE_INCREMENT) % TWO_PI;
+                }
+                syncStats();
+                render();
+                requestAnimationFrame(frame);
+            }
+
+            speedSlider.addEventListener('input', function () {
+                state.speed = Number(speedSlider.value);
+                syncStats();
+            });
+
+            angleSlider.addEventListener('input', function () {
+                state.angle = Number(angleSlider.value) * Math.PI / 180;
+                syncStats();
+                render();
+            });
+
+            playPauseBtn.addEventListener('click', function () {
+                state.isPlaying = !state.isPlaying;
+                playPauseBtn.innerHTML = state.isPlaying
+                    ? '<span class="material-symbols-rounded" aria-hidden="true">pause_circle</span><span>Pause</span>'
+                    : '<span class="material-symbols-rounded" aria-hidden="true">play_circle</span><span>Play</span>';
+                syncStats();
+            });
+
+            resetBtn.addEventListener('click', function () {
+                state.angle = 0;
+                angleSlider.value = '0';
+                syncStats();
+                render();
+            });
+
+            window.addEventListener('resize', function () {
+                resizeCanvas();
+                render();
+            });
+
+            resizeCanvas();
+            syncStats();
+            render();
+            requestAnimationFrame(frame);
+        })();
+    </script>
+</body>
+</html>
