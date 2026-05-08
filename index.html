@@ -7,7 +7,7 @@
     <meta name="description" content="Resume of Leland E. Doss — Senior Unreal Engine Developer, Data Visualization Specialist, and Technical Artist.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Material+Symbols+Rounded:FILL@0..1&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #0e1a2b;
@@ -43,17 +43,132 @@
             -moz-osx-font-smoothing: grayscale;
             font-feature-settings: 'kern', 'liga', 'calt';
             min-height: 100vh;
-            padding: 40px 24px 80px;
+            padding: 88px 24px 80px;
         }
 
-        /* Toolbar */
-        .toolbar {
-            max-width: 1100px;
-            margin: 0 auto 24px;
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
+        .material-symbols-rounded {
+            font-family: 'Material Symbols Rounded';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 18px;
+            line-height: 1;
+            display: inline-block;
+            letter-spacing: normal;
+            text-transform: none;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-smoothing: antialiased;
+            font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            position: fixed;
+            top: 14px;
+            left: 24px;
+            right: 24px;
+            z-index: 12;
+            background: rgba(13, 26, 44, 0.72);
+            border: 1px solid rgba(170, 200, 235, 0.24);
+            border-radius: 10px;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
             animation: slideInRight 0.7s ease-out both;
+        }
+
+        .top-nav-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .top-nav-links {
+            list-style: none;
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .top-nav-link {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-soft);
+            font-size: 0.8em;
+            letter-spacing: 1.7px;
+            text-transform: uppercase;
+            font-weight: 600;
+            padding: 9px 12px;
+            border-radius: 6px;
+            transition: color 0.6s ease, background-color 0.6s ease;
+        }
+
+        .top-nav-link::after {
+            content: '';
+            position: absolute;
+            left: 12px;
+            right: 12px;
+            bottom: 5px;
+            height: 2px;
+            border-radius: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            opacity: 0;
+            transform: scaleX(0.45);
+            transform-origin: center;
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .top-nav-link:hover,
+        .top-nav-link:focus-visible,
+        .top-nav-link.is-active {
+            color: var(--accent-2);
+            background: rgba(90, 168, 255, 0.12);
+        }
+
+        .top-nav-link:hover::after,
+        .top-nav-link:focus-visible::after,
+        .top-nav-link.is-active::after {
+            opacity: 1;
+            transform: scaleX(1);
+        }
+
+        body.effects-muted .electric-overlay {
+            opacity: 0.22;
+        }
+
+        body.effects-muted .experience-item:hover {
+            transform: translateX(2px) scale(1.01);
+            box-shadow:
+                0 14px 26px rgba(0, 0, 0, 0.20),
+                0 0 0 1px rgba(255, 196, 0, 0.08);
+            animation: none;
+        }
+
+        body.effects-muted .experience-item:hover::before {
+            opacity: 0.38;
+            animation: none;
+        }
+
+        .top-nav-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            justify-content: center;
         }
 
         .btn {
@@ -65,11 +180,12 @@
             font-size: 0.85em;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: color 0.6s ease, border-color 0.6s ease, background-color 0.6s ease, transform 0.6s ease;
             font-family: inherit;
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            text-decoration: none;
         }
 
         .btn:hover {
@@ -287,6 +403,10 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+
             .portfolio-reel-cta {
                 animation: none;
                 transform: none;
@@ -298,7 +418,9 @@
                 display: none !important;
             }
 
-            .toolbar,
+            .top-nav,
+            .top-nav-link,
+            .btn,
             aside,
             main,
             .section,
@@ -602,10 +724,12 @@
             background: rgba(90, 168, 255, 0.05);
             border-color: var(--line-strong);
             border-left-color: var(--accent-2);
-            transform: translateX(4px) scale(1.03);
+            transform: translate3d(6px, -2px, 0) scale(1.02);
             box-shadow:
                 0 16px 34px rgba(0, 0, 0, 0.24),
-                0 0 0 1px rgba(255, 196, 0, 0.10);
+                0 0 0 1px rgba(255, 196, 0, 0.10),
+                12px 12px 26px rgba(90, 168, 255, 0.11),
+                -12px 10px 22px rgba(130, 192, 255, 0.09);
             animation: experienceGlow 2.2s ease-in-out infinite;
         }
 
@@ -619,17 +743,23 @@
             0% {
                 box-shadow: 
                     0 14px 28px rgba(255, 221, 89, 0.18),
-                    0 22px 38px rgba(255, 221, 89, 0.10);
+                    0 22px 38px rgba(255, 221, 89, 0.10),
+                    10px 10px 24px rgba(90, 168, 255, 0.10),
+                    -10px 8px 20px rgba(130, 192, 255, 0.08);
             }
             50% {
                 box-shadow: 
                     0 16px 32px rgba(255, 170, 0, 0.24),
-                    0 24px 42px rgba(255, 136, 0, 0.14);
+                    0 24px 42px rgba(255, 136, 0, 0.14),
+                    -14px 12px 26px rgba(90, 168, 255, 0.12),
+                    14px 10px 22px rgba(130, 192, 255, 0.09);
             }
             100% {
                 box-shadow: 
                     0 14px 28px rgba(255, 200, 0, 0.18),
-                    0 22px 38px rgba(255, 170, 0, 0.10);
+                    0 22px 38px rgba(255, 170, 0, 0.10),
+                    10px 10px 24px rgba(90, 168, 255, 0.10),
+                    -10px 8px 20px rgba(130, 192, 255, 0.08);
             }
         }
         
@@ -905,12 +1035,19 @@
 
         /* ===== RESPONSIVE ===== */
         @media (max-width: 900px) {
-            body { padding: 20px 16px 60px; }
+            body { padding: 78px 16px 60px; }
+            .top-nav { top: 10px; left: 16px; right: 16px; }
+            .top-nav-inner { padding: 7px 10px; }
+            .top-nav .print-btn span { display: none; }
             .resume { grid-template-columns: 1fr; }
             aside { border-right: none; border-bottom: 1px solid var(--line); }
             main { padding: 40px 28px; }
             .quick-stats { grid-template-columns: repeat(2, 1fr); gap: 18px; }
             .projects-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (min-width: 901px) {
+            .top-nav-links { display: flex; }
         }
 
         @media (max-width: 540px) {
@@ -932,7 +1069,7 @@
                 font-size: 10.5pt;
             }
 
-            .toolbar { display: none !important; }
+            .top-nav { display: none !important; }
             .electric-overlay { display: none !important; }
 
             .resume {
@@ -1017,11 +1154,27 @@
 </head>
 <body>
 
-    <div class="toolbar">
-        <button class="btn" onclick="window.print()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-            Print / Save as PDF
-        </button>
+    <div class="top-nav" role="navigation" aria-label="Primary navigation">
+        <div class="top-nav-inner">
+            <ul class="top-nav-links">
+                <li><a class="top-nav-link" href="#terminal" aria-label="Jump to terminal summary">TERMINAL</a></li>
+                <li><a class="top-nav-link" href="#system" aria-label="Jump to system experience section">SYSTEM</a></li>
+                <li><a class="top-nav-link" href="#core" aria-label="Jump to core stack section">CORE</a></li>
+                <li><a class="top-nav-link" href="#logs" aria-label="Jump to logs and projects section">LOGS</a></li>
+            </ul>
+            <div class="top-nav-actions">
+                <button class="btn icon-btn" type="button" data-action="effects-toggle" aria-label="Toggle motion effects" aria-pressed="false">
+                    <span class="material-symbols-rounded" aria-hidden="true">settings</span>
+                </button>
+                <button class="btn icon-btn" type="button" data-action="power-focus" aria-label="Focus terminal section">
+                    <span class="material-symbols-rounded" aria-hidden="true">bolt</span>
+                </button>
+                <button class="btn print-btn" type="button" onclick="window.print()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                    <span>Print / Save as PDF</span>
+                </button>
+            </div>
+        </div>
     </div>
 
     <article class="resume">
@@ -1089,7 +1242,7 @@
                 <p class="about-text">Senior developer, technical artist, and founder. I build complex real-time systems, defense-grade visualization environments, and high-fidelity simulations in Unreal Engine 5 — and ship SaaS products end-to-end. Currently developing AgentSentinel and AgentLead.</p>
             </div>
 
-            <div class="side-section">
+            <div class="side-section" id="core">
                 <div class="side-title">Core Stack</div>
 
                 <div class="skill-group">
@@ -1151,7 +1304,7 @@
 
         <!-- =========== MAIN =========== -->
         <main>
-            <header class="main-header">
+            <header class="main-header" id="terminal">
                 <div class="availability-badge">
                     <span class="pulse"></span>
                     Available May 16, 2026 · Open to Senior &amp; Lead Roles
@@ -1179,7 +1332,7 @@
             </header>
 
             <!-- EXPERIENCE -->
-            <section class="section">
+            <section class="section" id="system">
                 <div class="section-heading">
                     <span class="section-num">01</span>
                     <h2>Experience</h2>
@@ -1276,7 +1429,7 @@
             </section>
 
             <!-- PROJECTS -->
-            <section class="section">
+            <section class="section" id="logs">
                 <div class="section-heading">
                     <span class="section-num">04</span>
                     <h2>Projects / Ventures</h2>
@@ -1313,7 +1466,7 @@
 
     <script>
         (function () {
-            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
             function parseMs(raw) {
                 const value = (raw || '0s').split(',')[0].trim();
@@ -1451,7 +1604,63 @@
                 });
             }
 
-            window.requestAnimationFrame(drawConnections);
+            const effectsToggle = document.querySelector('[data-action="effects-toggle"]');
+            if (prefersReducedMotion) {
+                document.body.classList.add('effects-muted');
+            }
+            if (effectsToggle) {
+                effectsToggle.setAttribute('aria-pressed', String(document.body.classList.contains('effects-muted')));
+                if (prefersReducedMotion) {
+                    effectsToggle.disabled = true;
+                    effectsToggle.setAttribute('aria-disabled', 'true');
+                }
+                effectsToggle.addEventListener('click', function () {
+                    const muted = document.body.classList.toggle('effects-muted');
+                    effectsToggle.setAttribute('aria-pressed', String(muted));
+                });
+            }
+
+            const powerFocus = document.querySelector('[data-action="power-focus"]');
+            if (powerFocus) {
+                powerFocus.addEventListener('click', function () {
+                    const terminal = document.getElementById('terminal');
+                    if (!terminal) return;
+                    terminal.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
+                });
+            }
+
+            const navLinks = Array.from(document.querySelectorAll('.top-nav-link'));
+            const navTargets = navLinks.map(function (link) {
+                const selector = link.getAttribute('href');
+                return { link: link, target: selector ? document.querySelector(selector) : null };
+            }).filter(function (entry) { return !!entry.target; });
+            const NAV_ACTIVE_THRESHOLD_RATIO = 0.28;
+
+            function setActiveNav(targetId) {
+                navTargets.forEach(function (entry) {
+                    entry.link.classList.toggle('is-active', entry.target.id === targetId);
+                });
+            }
+
+            function updateActiveNavFromScroll() {
+                if (!navTargets.length) return;
+                const threshold = window.innerHeight * NAV_ACTIVE_THRESHOLD_RATIO;
+                let activeId = navTargets[0].target.id;
+                navTargets.forEach(function (entry) {
+                    if (entry.target.getBoundingClientRect().top <= threshold) {
+                        activeId = entry.target.id;
+                    }
+                });
+                setActiveNav(activeId);
+            }
+
+            window.addEventListener('scroll', updateActiveNavFromScroll, { passive: true });
+            window.addEventListener('hashchange', updateActiveNavFromScroll);
+            updateActiveNavFromScroll();
+
+            if (!prefersReducedMotion) {
+                window.requestAnimationFrame(drawConnections);
+            }
         })();
     </script>
 
