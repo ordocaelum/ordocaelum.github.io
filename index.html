@@ -1314,11 +1314,13 @@
     <script>
         (function () {
             if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            const removalTimers = [];
 
             function parseMs(raw) {
                 const value = (raw || '0s').split(',')[0].trim();
                 if (value.endsWith('ms')) return parseFloat(value) || 0;
-                return (parseFloat(value) || 0) * 1000;
+                if (value.endsWith('s')) return (parseFloat(value) || 0) * 1000;
+                return parseFloat(value) || 0;
             }
 
             function rand(min, max) {
@@ -1379,7 +1381,8 @@
                     }
                 );
 
-                window.setTimeout(function () { path.remove(); }, removeAfter);
+                const timer = window.setTimeout(function () { path.remove(); }, removeAfter);
+                removalTimers.push(timer);
             }
 
             function buildBolt(layer, start, end, delay, duration, side) {
@@ -1410,9 +1413,11 @@
                 const layer = svg ? svg.querySelector('.electric-bolt-layer') : null;
                 if (!resume || !svg || !layer) return;
 
-                const elapsed = window.performance.now();
+                const nowMs = window.performance.now();
                 const resumeRect = resume.getBoundingClientRect();
                 svg.setAttribute('viewBox', '0 0 ' + resumeRect.width + ' ' + resumeRect.height);
+                removalTimers.forEach(function (timer) { window.clearTimeout(timer); });
+                removalTimers.length = 0;
                 layer.innerHTML = '';
 
                 const targets = [];
@@ -1433,7 +1438,7 @@
 
                 targets.forEach(function (target) {
                     const style = window.getComputedStyle(target.element);
-                    const delay = Math.max(0, parseMs(style.animationDelay) - elapsed);
+                    const delay = Math.max(0, parseMs(style.animationDelay) - nowMs);
                     const slideDuration = parseMs(style.animationDuration) || 720;
                     const boltDuration = clamp(slideDuration + 220, 800, 1200);
                     const rect = target.element.getBoundingClientRect();
