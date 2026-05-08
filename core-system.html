@@ -820,6 +820,7 @@
         dragY:          0,
         isDragging:     false,
         conflictTimer:  0,
+        conflictLockUntil: 0,
         raf:            0
     };
 
@@ -1127,10 +1128,6 @@
         var padY = h * 0.11;
         for (var i = 0; i < app.neurons.length; i++) {
             var n = app.neurons[i];
-            if (typeof n.nx !== 'number' || typeof n.ny !== 'number') {
-                n.nx = Math.random();
-                n.ny = Math.random();
-            }
             n.x = padX + n.nx * (w - padX * 2);
             n.y = padY + n.ny * (h - padY * 2);
         }
@@ -1148,6 +1145,7 @@
         app.shakeIntensity = 0;
         app.connectedCount = 0;
         app.conflictTimer = 0;
+        app.conflictLockUntil = 0;
 
         var size = canvasSize();
         var padX = size.w * 0.09;
@@ -1318,6 +1316,7 @@
     }
 
     function detectProximityConflicts() {
+        if (Date.now() < app.conflictLockUntil) { return false; }
         for (var i = 0; i < app.neurons.length; i++) {
             var a = app.neurons[i];
             if (!a.alive || !a.connected) { continue; }
@@ -1326,6 +1325,7 @@
                 if (!b.alive || !b.connected) { continue; }
                 if (!isEnemyPair(a.color, b.color)) { continue; }
                 if (Math.hypot(a.x - b.x, a.y - b.y) > CONFLICT_PROXIMITY_PX) { continue; }
+                app.conflictLockUntil = Date.now() + 320;
                 addLog('⚠ PROXIMITY CONFLICT: ' + a.id + ' near ' + b.id, 'boom');
                 triggerExplosion(a, app.power);
                 setTimeout(function (n) {
@@ -1569,7 +1569,7 @@
                 updateStats();
             }
             if (!n.connected) {
-                addLog('Connection source must already be connected.', '');
+                addLog('Can only connect from neurons already in your network.', '');
                 return;
             }
             app.isDragging = true;
