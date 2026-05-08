@@ -566,7 +566,7 @@
     <section class="hero" aria-labelledby="core-system-title">
         <div class="eyebrow">Interactive Portfolio Module — Core</div>
         <h1 id="core-system-title">Core_System</h1>
-        <p class="subcopy">Neural network color-mixing sandbox. Drag neurons together to blend colors — but beware enemy pairs. Crank the power and watch chain reactions cascade through the entire network.</p>
+        <p class="subcopy">Neural network equilibrium sandbox. Seed your first neuron, then grow outward through deliberate connections. Nearby enemy colors can destabilize the system into cascading chaos.</p>
     </section>
 
     <section class="system-layout" aria-label="Neural network interface">
@@ -582,7 +582,7 @@
             <div class="section-label">Power</div>
             <div class="control-group">
                 <div class="control-label-row">
-                    <label class="control-label" for="powerSlider">Power_Output</label>
+                    <label class="control-label" for="powerSlider">POWER_OUTPUT</label>
                     <span class="control-value" id="powerValue">50%</span>
                 </div>
                 <input id="powerSlider" type="range" min="0" max="100" step="1" value="50" aria-label="Power output">
@@ -592,7 +592,7 @@
             <div class="section-label">Display</div>
             <div class="control-group">
                 <div class="control-label-row">
-                    <label class="control-label" for="sizeSlider">Neuron_Size</label>
+                    <label class="control-label" for="sizeSlider">NEURON_SIZE</label>
                     <span class="control-value" id="sizeValue">Med</span>
                 </div>
                 <input id="sizeSlider" type="range" min="10" max="28" step="2" value="18" aria-label="Neuron size">
@@ -606,13 +606,6 @@
                     <span>Reset Network</span>
                 </button>
             </div>
-            <div class="button-row single">
-                <button class="btn btn-danger" id="chaosBtn" type="button">
-                    <span class="material-symbols-rounded" aria-hidden="true">bolt</span>
-                    <span>Trigger Chaos</span>
-                </button>
-            </div>
-
             <!-- Enemy pairs legend -->
             <div class="section-label">Enemy Pairs</div>
             <ul class="enemy-list" aria-label="Color incompatibility legend">
@@ -642,7 +635,7 @@
                 </li>
             </ul>
 
-            <p class="system-note">Drag between neurons to connect. Safe colors blend. Enemy colors cascade. Higher power = bigger blast radius.</p>
+            <p class="system-note">Click any neuron to seed your network. Then drag from connected neurons to unconnected targets. Power and size only affect connected neurons.</p>
         </aside>
 
         <!-- ══ CENTER: CANVAS ═════════════════════════════════════════════ -->
@@ -653,7 +646,7 @@
             </div>
             <div class="canvas-wrap" id="canvasWrap">
                 <canvas id="neuralCanvas" width="600" height="520"
-                    aria-label="Interactive neural network grid with colored neurons"></canvas>
+                    aria-label="Interactive neural network with scattered colored neurons"></canvas>
                 <div class="flash-overlay" id="flashOverlay"></div>
             </div>
         </section>
@@ -668,6 +661,12 @@
                 <div class="stat-label">Active Connections</div>
                 <div class="stat-value" id="statConnections">0</div>
                 <div class="stat-sub">neuron links</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Connected Neurons</div>
+                <div class="stat-value" id="statConnected">0</div>
+                <div class="stat-sub">in your network</div>
             </div>
 
             <div class="stat-card">
@@ -721,9 +720,15 @@
        CONSTANTS
     ══════════════════════════════════════════════════════════════════════ */
 
-    var GRID_COLS   = 6;
-    var GRID_ROWS   = 5;
-    var TOTAL       = GRID_COLS * GRID_ROWS; // 30
+    var TOTAL       = 30;
+    var BASE_NEURON_RADIUS = 8;
+    var PROXIMITY_CHECK_INTERVAL = 0.22; /* seconds */
+    var CONFLICT_PROXIMITY_PX = 78;
+    var MIN_SCATTER_SPACING_PX = 22;
+    var SCATTER_SPACING_SCALE = 0.065;
+    var MAX_PLACEMENT_ATTEMPTS = 120;
+    var DAMAGE_RADIUS_MULTIPLIER = 2.5;
+    var DAMAGE_RADIUS_BASE = 30;
 
     /* Base color palette — safe, vibrant, readable on dark BG */
     var PALETTE = [
@@ -784,10 +789,10 @@
     var powerValueEl = document.getElementById('powerValue');
     var sizeValueEl  = document.getElementById('sizeValue');
     var resetBtn     = document.getElementById('resetBtn');
-    var chaosBtn     = document.getElementById('chaosBtn');
     var statusBadge  = document.getElementById('statusBadge');
 
     var statConnEl   = document.getElementById('statConnections');
+    var statConnectedEl = document.getElementById('statConnected');
     var statDeadEl   = document.getElementById('statDead');
     var statExpEl    = document.getElementById('statExplosions');
     var statStabEl   = document.getElementById('statStability');
@@ -802,17 +807,20 @@
     ══════════════════════════════════════════════════════════════════════ */
     var app = {
         power:          50,  // 0-100
-        neuronRadius:   18,  // base visual radius
+        connectedRadius:18,  // radius used only for connected neurons
         neurons:        [],
         connections:    [],
         particles:      [],
         shakeFrames:    0,
         shakeIntensity: 0,
         totalExplosions:0,
+        connectedCount: 0,
         dragFrom:       null,  // neuron being dragged from
         dragX:          0,
         dragY:          0,
         isDragging:     false,
+        conflictTimer:  0,
+        conflictLockUntil: 0,
         raf:            0
     };
 
@@ -875,11 +883,14 @@
         this.id      = id;
         this.x       = x;
         this.y       = y;
+        this.nx      = 0;
+        this.ny      = 0;
         this.color   = color;
         this.targetColor = color;
         this.alive   = true;
+        this.connected = false;
         this.health  = 1.0;   // 0-1
-        this.glow    = 0.4;   // glow intensity
+        this.glow    = 0.08;  // glow intensity
         this.pulseT  = Math.random() * Math.PI * 2; // phase offset
         this.blendT  = 0;     // blend animation progress (0-1)
         this.fromColor = color;
@@ -900,7 +911,12 @@
         if (!this.alive) {
             this.glow = Math.max(0, this.glow - dt * 1.5);
         } else {
-            this.glow = 0.35 + Math.sin(this.pulseT) * 0.15;
+            if (this.connected) {
+                var powerT = app.power / 100;
+                this.glow = 0.16 + powerT * 0.62 + Math.sin(this.pulseT * (1 + powerT * 1.25)) * (0.06 + powerT * 0.22);
+            } else {
+                this.glow = 0.05 + Math.sin(this.pulseT * 0.75) * 0.02;
+            }
         }
     };
 
@@ -911,7 +927,7 @@
     };
 
     Neuron.prototype.draw = function () {
-        var r = app.neuronRadius;
+        var r = this.connected ? app.connectedRadius : BASE_NEURON_RADIUS;
 
         if (!this.alive) {
             /* Dead neuron — dark ring */
@@ -939,11 +955,12 @@
         ctx.save();
 
         /* Outer glow */
-        var glowR = r * 1.9;
+        var glowR = this.connected ? r * 1.95 : r * 1.45;
         var grad = ctx.createRadialGradient(this.x, this.y, r * 0.3, this.x, this.y, glowR);
         var alpha = this.glow.toFixed(2);
-        grad.addColorStop(0, hexWithAlpha(this.color, +alpha));
-        grad.addColorStop(1, hexWithAlpha(this.color, 0));
+        var drawColor = this.connected ? this.color : blendColors(this.color, '#55637a', 0.78);
+        grad.addColorStop(0, hexWithAlpha(drawColor, +alpha));
+        grad.addColorStop(1, hexWithAlpha(drawColor, 0));
         ctx.beginPath();
         ctx.arc(this.x, this.y, glowR, 0, Math.PI * 2);
         ctx.fillStyle = grad;
@@ -954,8 +971,8 @@
             this.x - r*0.25, this.y - r*0.25, r*0.05,
             this.x, this.y, r
         );
-        coreGrad.addColorStop(0, lighten(this.color, 0.4));
-        coreGrad.addColorStop(1, this.color);
+        coreGrad.addColorStop(0, lighten(drawColor, this.connected ? 0.4 : 0.2));
+        coreGrad.addColorStop(1, drawColor);
         ctx.beginPath();
         ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
         ctx.fillStyle = coreGrad;
@@ -964,8 +981,8 @@
         /* Border */
         ctx.beginPath();
         ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
-        ctx.strokeStyle = hexWithAlpha(lighten(this.color, 0.5), 0.7);
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = hexWithAlpha(lighten(drawColor, this.connected ? 0.5 : 0.3), this.connected ? 0.7 : 0.38);
+        ctx.lineWidth = this.connected ? 1.5 : 1.1;
         ctx.stroke();
 
         ctx.restore();
@@ -993,7 +1010,8 @@
     Connection.prototype.draw = function () {
         if (!this.a.alive || !this.b.alive) { return; }
         var col = this.blendColor();
-        var pulse = 0.5 + Math.sin(this.age * 2.5) * 0.2;
+        var powerT = app.power / 100;
+        var pulse = 0.45 + powerT * 0.55 + Math.sin(this.age * (2.1 + powerT * 2.4)) * (0.1 + powerT * 0.18);
 
         ctx.save();
         ctx.globalAlpha = this.alpha * pulse;
@@ -1003,7 +1021,7 @@
         ctx.moveTo(this.a.x, this.a.y);
         ctx.lineTo(this.b.x, this.b.y);
         ctx.strokeStyle = hexWithAlpha(col, 0.25);
-        ctx.lineWidth = app.neuronRadius * 0.6;
+        ctx.lineWidth = app.connectedRadius * 0.45;
         ctx.lineCap = 'round';
         ctx.stroke();
 
@@ -1108,13 +1126,10 @@
         if (!app.neurons.length) { return; }
         var padX = w * 0.09;
         var padY = h * 0.11;
-        var cellW = (w - padX * 2) / (GRID_COLS - 1);
-        var cellH = (h - padY * 2) / (GRID_ROWS - 1);
         for (var i = 0; i < app.neurons.length; i++) {
-            var col = i % GRID_COLS;
-            var row = Math.floor(i / GRID_COLS);
-            app.neurons[i].x = padX + col * cellW;
-            app.neurons[i].y = padY + row * cellH;
+            var n = app.neurons[i];
+            n.x = padX + n.nx * (w - padX * 2);
+            n.y = padY + n.ny * (h - padY * 2);
         }
     }
 
@@ -1127,24 +1142,50 @@
         app.particles   = [];
         app.totalExplosions = 0;
         app.shakeFrames = 0;
+        app.shakeIntensity = 0;
+        app.connectedCount = 0;
+        app.conflictTimer = 0;
+        app.conflictLockUntil = 0;
 
         var size = canvasSize();
         var padX = size.w * 0.09;
         var padY = size.h * 0.11;
-        var cellW = (size.w - padX * 2) / (GRID_COLS - 1);
-        var cellH = (size.h - padY * 2) / (GRID_ROWS - 1);
+        var spanW = size.w - padX * 2;
+        var spanH = size.h - padY * 2;
+        var minDist = Math.max(MIN_SCATTER_SPACING_PX, Math.min(size.w, size.h) * SCATTER_SPACING_SCALE);
 
         for (var i = 0; i < TOTAL; i++) {
-            var col   = i % GRID_COLS;
-            var row   = Math.floor(i / GRID_COLS);
-            var x     = padX + col * cellW;
-            var y     = padY + row * cellH;
+            var nx = 0.5;
+            var ny = 0.5;
+            var attempts = 0;
+            while (attempts < MAX_PLACEMENT_ATTEMPTS) {
+                nx = Math.random();
+                ny = Math.random();
+                var testX = padX + nx * spanW;
+                var testY = padY + ny * spanH;
+                var blocked = false;
+                for (var j = 0; j < app.neurons.length; j++) {
+                    var ex = app.neurons[j].x;
+                    var ey = app.neurons[j].y;
+                    if (Math.hypot(testX - ex, testY - ey) < minDist) {
+                        blocked = true;
+                        break;
+                    }
+                }
+                if (!blocked) { break; }
+                attempts++;
+            }
+            var x = padX + nx * spanW;
+            var y = padY + ny * spanH;
             var color = PALETTE[Math.floor(Math.random() * PALETTE.length)];
-            app.neurons.push(new Neuron(i, x, y, color));
+            var neuron = new Neuron(i, x, y, color);
+            neuron.nx = nx;
+            neuron.ny = ny;
+            app.neurons.push(neuron);
         }
 
         updateStats();
-        addLog('Network initialized — 30 neurons active', 'blend');
+        addLog('Equilibrium restored — 30 neurons in standby', 'blend');
     }
 
     /* ══════════════════════════════════════════════════════════════════════
@@ -1156,12 +1197,13 @@
         if (depth > MAX_CASCADE_DEPTH) { return; } /* prevent infinite cascade */
 
         neuron.alive = false;
+        neuron.connected = false;
         app.totalExplosions++;
 
         emitParticles(neuron, power);
 
         /* Screen shake */
-        var shakeMag = (power / 100) * 12 * (1 - depth * 0.15);
+        var shakeMag = (0.35 + (power / 100) * 0.65) * 12 * (1 - depth * 0.15);
         app.shakeFrames    = Math.max(app.shakeFrames,    Math.round(14 - depth * 2));
         app.shakeIntensity = Math.max(app.shakeIntensity, shakeMag);
 
@@ -1173,7 +1215,7 @@
         }
 
         /* Damage radius scales with power */
-        var damageRadius = app.neuronRadius * (2 + power / 100 * 5);
+        var damageRadius = app.connectedRadius * DAMAGE_RADIUS_MULTIPLIER + DAMAGE_RADIUS_BASE;
 
         /* Cascade to neighbours */
         for (var i = 0; i < app.neurons.length; i++) {
@@ -1244,7 +1286,7 @@
     function neuronAt(px, py) {
         var bestDist = Infinity;
         var best     = null;
-        var hitR     = app.neuronRadius * 1.6;
+        var hitR     = Math.max(app.connectedRadius, BASE_NEURON_RADIUS) * 1.6;
         for (var i = 0; i < app.neurons.length; i++) {
             var n = app.neurons[i];
             if (!n.alive) { continue; }
@@ -1267,6 +1309,37 @@
         return false;
     }
 
+    function safeBlendColor(colorA, colorB) {
+        var keyAB = colorA + colorB;
+        var keyBA = colorB + colorA;
+        return SAFE_BLENDS[keyAB] || SAFE_BLENDS[keyBA] || blendColors(colorA, colorB, 0.5);
+    }
+
+    function detectProximityConflicts() {
+        if (Date.now() < app.conflictLockUntil) { return false; }
+        for (var i = 0; i < app.neurons.length; i++) {
+            var a = app.neurons[i];
+            if (!a.alive || !a.connected) { continue; }
+            for (var j = i + 1; j < app.neurons.length; j++) {
+                var b = app.neurons[j];
+                if (!b.alive || !b.connected) { continue; }
+                if (!isEnemyPair(a.color, b.color)) { continue; }
+                if (Math.hypot(a.x - b.x, a.y - b.y) > CONFLICT_PROXIMITY_PX) { continue; }
+                app.conflictLockUntil = Date.now() + 320;
+                addLog('⚠ PROXIMITY CONFLICT: ' + a.id + ' near ' + b.id, 'boom');
+                triggerExplosion(a, app.power);
+                setTimeout(function (n) {
+                    if (n.alive) {
+                        triggerExplosion(n, app.power * 0.9);
+                        updateStats();
+                    }
+                }, 70, b);
+                return true;
+            }
+        }
+        return false;
+    }
+
     /* ══════════════════════════════════════════════════════════════════════
        CONNECT NEURONS
     ══════════════════════════════════════════════════════════════════════ */
@@ -1274,22 +1347,15 @@
         if (!a.alive || !b.alive) { return; }
         if (a === b)              { return; }
         if (hasConnection(a, b))  { return; }
+        if (!a.connected || b.connected) { return; }
 
-        if (isEnemyPair(a.color, b.color)) {
-            addLog('⚡ ENEMY PAIR: ' + a.id + ' ↔ ' + b.id + ' — EXPLOSION!', 'boom');
-            triggerExplosion(a, app.power);
-            setTimeout(function () {
-                triggerExplosion(b, app.power);
-                updateStats();
-            }, 60);
-        } else {
-            var blend = blendColors(a.color, b.color, 0.5);
-            a.startBlend(blend);
-            b.startBlend(blend);
-            app.connections.push(new Connection(a, b));
-            addLog('Connected ' + a.id + ' ↔ ' + b.id + ' → ' + blend.toUpperCase(), 'blend');
-            updateStats();
-        }
+        var blend = safeBlendColor(a.color, b.color);
+        a.startBlend(blend);
+        b.startBlend(blend);
+        b.connected = true;
+        app.connections.push(new Connection(a, b));
+        addLog('Connected ' + a.id + ' → ' + b.id + ' · ' + blend.toUpperCase(), 'blend');
+        updateStats();
     }
 
     /* ══════════════════════════════════════════════════════════════════════
@@ -1297,19 +1363,24 @@
     ══════════════════════════════════════════════════════════════════════ */
     function updateStats() {
         var dead = 0;
+        var connected = 0;
         var colorSet = {};
         for (var i = 0; i < app.neurons.length; i++) {
             if (!app.neurons[i].alive) { dead++; }
-            else { colorSet[app.neurons[i].color.slice(1)] = 1; }
+            else {
+                colorSet[app.neurons[i].color.slice(1)] = 1;
+                if (app.neurons[i].connected) { connected++; }
+            }
         }
-        var alive      = TOTAL - dead;
-        var stability  = Math.round((alive / TOTAL) * 100);
+        var stability  = Math.max(0, 100 - Math.round((dead / TOTAL) * 100));
         var uniqueCol  = Object.keys(colorSet).length;
         var activeConn = app.connections.filter(function (c) {
             return c.a.alive && c.b.alive;
         }).length;
+        app.connectedCount = connected;
 
         statConnEl.textContent  = activeConn;
+        statConnectedEl.textContent = connected;
         statDeadEl.textContent  = dead;
         statExpEl.textContent   = app.totalExplosions;
         statStabEl.textContent  = stability + '%';
@@ -1333,6 +1404,7 @@
 
         statusBadge.textContent =
             dead === TOTAL ? 'FLATLINE' :
+            connected === 0 ? 'Equilibrium' :
             stability < 50 ? 'Critical' :
             stability < 80 ? 'Unstable' : 'Active';
     }
@@ -1404,9 +1476,6 @@
         ctx.fillRect(-Math.abs(sx) - 2, -Math.abs(sy) - 2,
             size.w + Math.abs(sx) * 2 + 4, size.h + Math.abs(sy) * 2 + 4);
 
-        /* Subtle grid */
-        drawGrid(size.w, size.h);
-
         /* Update & draw connections */
         for (var ci = app.connections.length - 1; ci >= 0; ci--) {
             var conn = app.connections[ci];
@@ -1438,6 +1507,12 @@
         for (var ni = 0; ni < app.neurons.length; ni++) {
             app.neurons[ni].update(dt);
             app.neurons[ni].draw();
+        }
+
+        app.conflictTimer += dt;
+        if (app.conflictTimer >= PROXIMITY_CHECK_INTERVAL) {
+            app.conflictTimer = 0;
+            detectProximityConflicts();
         }
 
         /* Update & draw particles */
@@ -1488,6 +1563,15 @@
         var pos = getCanvasPos(e);
         var n   = neuronAt(pos.x, pos.y);
         if (n) {
+            if (app.connectedCount === 0 && n.alive) {
+                n.connected = true;
+                addLog('Seeded network at neuron ' + n.id, 'blend');
+                updateStats();
+            }
+            if (!n.connected) {
+                addLog('Can only connect from neurons already in your network.', '');
+                return;
+            }
             app.isDragging = true;
             app.dragFrom   = n;
             app.dragX      = pos.x;
@@ -1509,7 +1593,7 @@
         e.preventDefault();
         var pos = getCanvasPos(e);
         var n   = neuronAt(pos.x, pos.y);
-        if (n && n !== app.dragFrom) {
+        if (n && n !== app.dragFrom && app.dragFrom && app.dragFrom.connected) {
             connectNeurons(app.dragFrom, n);
         }
         app.isDragging = false;
@@ -1531,7 +1615,7 @@
     });
 
     sizeSlider.addEventListener('input', function () {
-        app.neuronRadius = parseInt(this.value, 10);
+        app.connectedRadius = parseInt(this.value, 10);
         /* Compute label from slider range: min=10, max=28, step=2 → 10 steps */
         var min   = parseInt(sizeSlider.min, 10);
         var step  = parseInt(sizeSlider.step, 10);
@@ -1547,19 +1631,6 @@
         logStartTime = Date.now();
         lastTime = 0;
         app.raf = requestAnimationFrame(frame);
-    });
-
-    chaosBtn.addEventListener('click', function () {
-        /* Pick a random alive neuron and explode it at current power */
-        var alive = app.neurons.filter(function (n) { return n.alive; });
-        if (!alive.length) {
-            addLog('No alive neurons to trigger chaos.', '');
-            return;
-        }
-        var target = alive[Math.floor(Math.random() * alive.length)];
-        addLog('🔥 CHAOS TRIGGER at neuron ' + target.id, 'boom');
-        triggerExplosion(target, app.power);
-        updateStats();
     });
 
     /* ══════════════════════════════════════════════════════════════════════
