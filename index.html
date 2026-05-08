@@ -111,6 +111,50 @@
                 0 0 0 1px rgba(90, 168, 255, 0.05);
             display: grid;
             grid-template-columns: 320px 1fr;
+            position: relative;
+        }
+
+        .resume > aside,
+        .resume > main {
+            position: relative;
+            z-index: 2;
+        }
+
+        .electric-overlay {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            overflow: visible;
+        }
+
+        .electric-bolt-main,
+        .electric-bolt-branch {
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: miter;
+            opacity: 0;
+        }
+
+        .electric-bolt-main {
+            stroke: rgba(126, 226, 255, 0.96);
+            stroke-width: 1.75;
+            filter: url(#electric-core);
+            animation: electricPulse 0.52s ease-in-out infinite;
+        }
+
+        .electric-bolt-branch {
+            stroke: rgba(107, 199, 255, 0.74);
+            stroke-width: 1.15;
+            filter: url(#electric-glow);
+            animation: electricPulse 0.44s ease-in-out infinite reverse;
+        }
+
+        @keyframes electricPulse {
+            0%, 100% { stroke-opacity: 0.58; }
+            50% { stroke-opacity: 1; }
         }
 
         /* ===== SIDEBAR ===== */
@@ -250,6 +294,10 @@
                 will-change: auto;
             }
 
+            .electric-overlay {
+                display: none !important;
+            }
+
             .toolbar,
             aside,
             main,
@@ -257,7 +305,10 @@
             .experience-item,
             .education-item,
             .project-card,
-            .experience-item::before {
+            .experience-item::before,
+            .electric-overlay,
+            .electric-bolt-main,
+            .electric-bolt-branch {
                 animation: none !important;
                 transition: none !important;
                 opacity: 1 !important;
@@ -882,6 +933,7 @@
             }
 
             .toolbar { display: none !important; }
+            .electric-overlay { display: none !important; }
 
             .resume {
                 background: white !important;
@@ -973,6 +1025,27 @@
     </div>
 
     <article class="resume">
+        <svg class="electric-overlay" aria-hidden="true" viewBox="0 0 1100 1200" preserveAspectRatio="none">
+            <defs>
+                <filter id="electric-glow" x="-30%" y="-30%" width="160%" height="160%">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="2.4" result="electricBlur"></feGaussianBlur>
+                    <feColorMatrix in="electricBlur" type="matrix" values="
+                        1.28 0    0    0    0
+                        0    1.32 0    0    0
+                        0    0    1.62 0    0
+                        0    0    0    1    0"></feColorMatrix>
+                </filter>
+                <filter id="electric-core" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="0.65" result="coreBlur"></feGaussianBlur>
+                    <feColorMatrix in="coreBlur" type="matrix" values="
+                        1.12 0    0    0    0
+                        0    1.18 0    0    0
+                        0    0    1.34 0    0
+                        0    0    0    1    0"></feColorMatrix>
+                </filter>
+            </defs>
+            <g class="electric-bolt-layer"></g>
+        </svg>
 
         <!-- =========== SIDEBAR =========== -->
         <aside>
@@ -1237,6 +1310,150 @@
         </main>
 
     </article>
+
+    <script>
+        (function () {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            function parseMs(raw) {
+                const value = (raw || '0s').split(',')[0].trim();
+                if (value.endsWith('ms')) return parseFloat(value) || 0;
+                return (parseFloat(value) || 0) * 1000;
+            }
+
+            function rand(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+
+            function clamp(value, min, max) {
+                return Math.min(max, Math.max(min, value));
+            }
+
+            function pointsToPath(points) {
+                return points.map(function (point, index) {
+                    return (index === 0 ? 'M ' : 'L ') + point.x.toFixed(2) + ' ' + point.y.toFixed(2);
+                }).join(' ');
+            }
+
+            function createJaggedPoints(start, end, segmentCount, jitter) {
+                const dx = end.x - start.x;
+                const dy = end.y - start.y;
+                const length = Math.hypot(dx, dy) || 1;
+                const nx = -dy / length;
+                const ny = dx / length;
+                const points = [start];
+
+                for (let i = 1; i < segmentCount; i += 1) {
+                    const t = i / segmentCount;
+                    const baseX = start.x + dx * t;
+                    const baseY = start.y + dy * t;
+                    const saw = (i % 2 === 0 ? 1 : -1) * jitter * rand(0.4, 1.1);
+                    const drift = jitter * 0.26 * (t - 0.5) * rand(-1, 1);
+                    points.push({
+                        x: baseX + nx * (saw + drift),
+                        y: baseY + ny * (saw + drift)
+                    });
+                }
+
+                points.push(end);
+                return points;
+            }
+
+            function animatePath(path, delay, duration, removeAfter) {
+                const totalLength = path.getTotalLength();
+                path.style.strokeDasharray = totalLength + ' ' + totalLength;
+                path.style.strokeDashoffset = String(totalLength);
+
+                path.animate(
+                    [
+                        { strokeDashoffset: String(totalLength), opacity: 0 },
+                        { offset: 0.14, strokeDashoffset: String(totalLength * 0.82), opacity: 1 },
+                        { offset: 0.84, strokeDashoffset: String(totalLength * 0.08), opacity: 0.96 },
+                        { strokeDashoffset: '0', opacity: 0 }
+                    ],
+                    {
+                        duration: duration,
+                        delay: delay,
+                        easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                        fill: 'forwards'
+                    }
+                );
+
+                window.setTimeout(function () { path.remove(); }, removeAfter);
+            }
+
+            function buildBolt(layer, start, end, delay, duration, side) {
+                const segmentCount = clamp(Math.round(Math.hypot(end.x - start.x, end.y - start.y) / 22), 5, 11);
+                const mainPoints = createJaggedPoints(start, end, segmentCount, rand(7.5, 12.5));
+                const main = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                main.setAttribute('class', 'electric-bolt-main');
+                main.setAttribute('d', pointsToPath(mainPoints));
+                layer.appendChild(main);
+                animatePath(main, delay, duration, delay + duration + 320);
+
+                const branchAnchor = mainPoints[Math.floor(mainPoints.length * rand(0.34, 0.62))];
+                const branchTarget = {
+                    x: branchAnchor.x + (side === 'left' ? rand(16, 44) : rand(-44, -16)),
+                    y: branchAnchor.y + rand(-38, 38)
+                };
+                const branchPoints = createJaggedPoints(branchAnchor, branchTarget, clamp(Math.floor(segmentCount * 0.6), 3, 6), rand(4.8, 8.2));
+                const branch = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                branch.setAttribute('class', 'electric-bolt-branch');
+                branch.setAttribute('d', pointsToPath(branchPoints));
+                layer.appendChild(branch);
+                animatePath(branch, delay + rand(70, 150), duration * 0.72, delay + duration + 320);
+            }
+
+            function drawConnections() {
+                const resume = document.querySelector('.resume');
+                const svg = resume ? resume.querySelector('.electric-overlay') : null;
+                const layer = svg ? svg.querySelector('.electric-bolt-layer') : null;
+                if (!resume || !svg || !layer) return;
+
+                const elapsed = window.performance.now();
+                const resumeRect = resume.getBoundingClientRect();
+                svg.setAttribute('viewBox', '0 0 ' + resumeRect.width + ' ' + resumeRect.height);
+                layer.innerHTML = '';
+
+                const targets = [];
+                const aside = resume.querySelector('aside');
+                const main = resume.querySelector('main');
+                if (aside) targets.push({ element: aside, side: 'left' });
+                if (main) targets.push({ element: main, side: 'right' });
+
+                resume.querySelectorAll('.experience-item').forEach(function (item, index) {
+                    targets.push({ element: item, side: index % 2 === 0 ? 'left' : 'right' });
+                });
+                resume.querySelectorAll('.education-item').forEach(function (item) {
+                    targets.push({ element: item, side: 'right' });
+                });
+                resume.querySelectorAll('.project-card').forEach(function (item, index) {
+                    targets.push({ element: item, side: index % 2 === 0 ? 'left' : 'right' });
+                });
+
+                targets.forEach(function (target) {
+                    const style = window.getComputedStyle(target.element);
+                    const delay = Math.max(0, parseMs(style.animationDelay) - elapsed);
+                    const slideDuration = parseMs(style.animationDuration) || 720;
+                    const boltDuration = clamp(slideDuration + 220, 800, 1200);
+                    const rect = target.element.getBoundingClientRect();
+                    const y = (rect.top - resumeRect.top) + rect.height * rand(0.33, 0.67);
+                    const x = target.side === 'left'
+                        ? (rect.left - resumeRect.left) + clamp(rect.width * 0.14, 14, 34)
+                        : (rect.right - resumeRect.left) - clamp(rect.width * 0.14, 14, 34);
+
+                    const start = {
+                        x: x + (target.side === 'left' ? -rand(58, 88) : rand(58, 88)),
+                        y: y + rand(-18, 18)
+                    };
+                    const end = { x: x, y: y };
+                    buildBolt(layer, start, end, delay, boltDuration, target.side);
+                });
+            }
+
+            window.requestAnimationFrame(drawConnections);
+        })();
+    </script>
 
 </body>
 </html>
