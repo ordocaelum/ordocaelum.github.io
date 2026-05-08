@@ -774,7 +774,7 @@
         {
             id:'ts_future_hr', tier:3,
             gen:() => {
-                const future = fmtTs(CTX.ts + 3600000);
+                const future = fmtTs(CTX.ts + ONE_HOUR_MS);
                 return { ev:'health_check', lv:'INFO', d:`{"service": "${rnd(CTX.svcs)}", "status": "healthy", "uptime_s": ${rndInt(1000,99999)}}`, overrideTs: future };
             },
             humor:'Timestamp is an hour in the future. Is this server... prophetic? 🔮',
@@ -795,7 +795,7 @@
         // Weight toward harder errors at higher levels
         let pool;
         if (level <= 4)  pool = ERRORS.filter(e => e.tier === 1);
-        else if (level <= 8)  pool = ERRORS.filter(e => e.tier <= 1 || (e.tier === 2 && Math.random() < .3));
+        else if (level <= 8)  pool = ERRORS.filter(e => e.tier === 1 || (e.tier === 2 && Math.random() < .3));
         else if (level <= 15) pool = ERRORS.filter(e => e.tier <= 2);
         else if (level <= 25) pool = ERRORS.filter(e => e.tier >= 2);
         else                  pool = ERRORS.filter(e => e.tier === 3 || (e.tier === 2 && Math.random() < .3));
