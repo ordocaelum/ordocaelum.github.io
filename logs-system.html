@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOGS_SYSTEM — Leland E. Doss</title>
+    <meta name="description" content="Spot-the-error debugging game — identify corrupted data streams before they propagate.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&family=Material+Symbols+Rounded:FILL@0..1&display=swap" rel="stylesheet">
+    <style>
+        /* ═══ ROOT ════════════════════════════════════════════════════════════ */
+        :root {
+            --bg:           #0e1a2b;
+            --bg-soft:      #142640;
+            --panel:        #1a2f4d;
+            --panel-2:      #11233c;
+            --line:         rgba(170, 200, 235, 0.12);
+            --line-strong:  rgba(170, 200, 235, 0.28);
+            --accent:       #5aa8ff;
+            --accent-2:     #82c0ff;
+            --cyan:         #7ee2ff;
+            --green:        #39ff6e;
+            --green-soft:   #6fffb0;
+            --yellow:       #ffe066;
+            --red:          #ff4466;
+            --red-soft:     #ff7386;
+            --text:         #eef3fa;
+            --text-soft:    #c2cfe0;
+            --text-mute:    #8a98ad;
+            --mono:         'JetBrains Mono', 'Courier New', Consolas, monospace;
+            --shadow:       0 24px 60px rgba(0,0,0,.38);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { min-height: 100%; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background:
+                radial-gradient(circle at top left,  rgba(126,226,255,.10), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(90,168,255,.08), transparent 30%),
+                var(--bg);
+            color: var(--text);
+            padding: 88px 24px 48px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
+
+        .material-symbols-rounded {
+            font-family: 'Material Symbols Rounded';
+            font-weight: normal; font-style: normal;
+            font-size: 18px; line-height: 1;
+            display: inline-block; white-space: nowrap;
+            direction: ltr; -webkit-font-smoothing: antialiased;
+            font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        /* ═══ NAV ════════════════════════════════════════════════════════════ */
+        .top-nav {
+            position: fixed; top: 14px; left: 24px; right: 24px; z-index: 20;
+            background: rgba(13,26,44,.76);
+            border: 1px solid var(--line-strong);
+            border-radius: 10px;
+            backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+            box-shadow: 0 10px 30px rgba(0,0,0,.25);
+        }
+        .top-nav-inner {
+            max-width: 1220px; margin: 0 auto;
+            padding: 8px 14px;
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        }
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+            border: 1px solid var(--line-strong); border-radius: 8px;
+            background: var(--panel); color: var(--text-soft);
+            padding: 9px 14px; font: inherit; font-size: .8rem;
+            letter-spacing: .12em; text-transform: uppercase;
+            cursor: pointer; transition: border-color .22s, background .22s, color .22s;
+            text-decoration: none;
+        }
+        .btn:hover, .btn:focus-visible {
+            border-color: var(--accent); background: rgba(90,168,255,.12); color: var(--accent);
+        }
+        .panel-badge {
+            font-size: .72rem; letter-spacing: .14em; text-transform: uppercase;
+            color: var(--text-mute); padding: 5px 10px;
+            border: 1px solid var(--line); border-radius: 6px; background: var(--panel-2);
+        }
+
+        /* ═══ LAYOUT ════════════════════════════════════════════════════════ */
+        .page { max-width: 1100px; margin: 0 auto; }
+
+        .hero {
+            text-align: center; padding: 10px 0 28px;
+        }
+        .eyebrow {
+            font-size: .72rem; letter-spacing: .22em; text-transform: uppercase;
+            color: var(--cyan); margin-bottom: 10px;
+        }
+        .hero h1 {
+            font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 700;
+            letter-spacing: .04em; color: var(--text); margin-bottom: 10px;
+        }
+        .hero h1 span { color: var(--cyan); }
+        .subcopy {
+            max-width: 600px; margin: 0 auto;
+            font-size: .9rem; color: var(--text-mute); line-height: 1.6;
+        }
+
+        /* ═══ STATS BAR ══════════════════════════════════════════════════════ */
+        .stats-bar {
+            display: flex; flex-wrap: wrap; gap: 10px;
+            justify-content: center; margin-bottom: 18px;
+        }
+        .stat-cell {
+            background: var(--panel); border: 1px solid var(--line-strong);
+            border-radius: 8px; padding: 8px 14px;
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+            min-width: 80px;
+        }
+        .stat-label {
+            font-size: .62rem; letter-spacing: .18em; text-transform: uppercase;
+            color: var(--text-mute);
+        }
+        .stat-value {
+            font-family: var(--mono); font-size: 1.1rem; font-weight: 600;
+            color: var(--cyan); transition: color .2s;
+        }
+        .stat-cell.streak-cell .stat-value { font-size: 1.5rem; color: var(--green-soft); }
+        .stat-cell.level-cell  .stat-value { color: var(--yellow); }
+        .stat-cell.score-cell  .stat-value { color: var(--accent-2); }
+
+        /* ═══ GAME CONTAINER ════════════════════════════════════════════════ */
+        .game-container {
+            position: relative;
+            background: var(--panel-2);
+            border: 1px solid var(--line-strong);
+            border-radius: 14px;
+            overflow: hidden;
+            min-height: 480px;
+        }
+
+        /* ═══ START SCREEN ══════════════════════════════════════════════════ */
+        #start-screen {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; gap: 20px;
+            padding: 60px 24px; text-align: center;
+        }
+        #start-screen h2 {
+            font-size: clamp(1.3rem, 3vw, 1.9rem); letter-spacing: .08em;
+            text-transform: uppercase; color: var(--text);
+        }
+        #start-screen h2 span { color: var(--cyan); }
+        #start-screen p {
+            max-width: 440px; font-size: .9rem;
+            color: var(--text-mute); line-height: 1.65;
+        }
+        .start-btn {
+            margin-top: 8px;
+            padding: 14px 36px; font-size: 1rem;
+            letter-spacing: .18em; text-transform: uppercase; font-weight: 700;
+            background: linear-gradient(135deg, rgba(90,168,255,.2), rgba(126,226,255,.1));
+            border: 2px solid var(--cyan); border-radius: 10px;
+            color: var(--cyan); cursor: pointer; font-family: inherit;
+            transition: background .25s, transform .15s, box-shadow .25s;
+            box-shadow: 0 0 20px rgba(126,226,255,.2);
+        }
+        .start-btn:hover { background: rgba(126,226,255,.2); transform: translateY(-2px); box-shadow: 0 0 36px rgba(126,226,255,.35); }
+        .start-btn:active { transform: translateY(0); }
+
+        /* ═══ PLAYING SCREEN ════════════════════════════════════════════════ */
+        #playing-screen { display: flex; flex-direction: column; }
+        #playing-screen.hidden { display: none; }
+
+        /* ─── Batch timer ─── */
+        .batch-timer-wrap {
+            padding: 12px 20px 8px;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .timer-label {
+            font-size: .68rem; letter-spacing: .18em; text-transform: uppercase;
+            color: var(--text-mute); white-space: nowrap; flex-shrink: 0;
+        }
+        .timer-track {
+            flex: 1; height: 6px;
+            background: rgba(255,255,255,.06);
+            border-radius: 3px; overflow: hidden;
+        }
+        #timer-fill {
+            height: 100%; width: 100%;
+            background: var(--cyan);
+            border-radius: 3px;
+            transition: background .3s;
+            transform-origin: left;
+        }
+        .timer-num {
+            font-family: var(--mono); font-size: .75rem;
+            color: var(--text-mute); min-width: 36px; text-align: right;
+        }
+
+        /* ─── Log stream ─── */
+        #log-stream {
+            padding: 6px 0 16px;
+            display: flex; flex-direction: column; gap: 0;
+        }
+
+        .log-line {
+            display: flex; align-items: baseline;
+            padding: 8px 20px; gap: 10px;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            transition: background .15s, border-color .15s, box-shadow .15s;
+            position: relative;
+            animation: line-enter .35s ease both;
+            user-select: none;
+        }
+        @keyframes line-enter {
+            from { opacity: 0; transform: translateX(-12px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        .log-line:hover {
+            background: rgba(126,226,255,.06);
+            border-left-color: var(--accent);
+        }
+        .log-line.error-hint {
+            box-shadow: inset 0 0 0 1px rgba(255,68,102,.25), 0 0 12px rgba(255,68,102,.08);
+        }
+        .log-line.correct-flash {
+            animation: correct-flash .5s ease forwards !important;
+        }
+        @keyframes correct-flash {
+            0%   { background: rgba(57,255,110,.20); border-left-color: var(--green); }
+            60%  { background: rgba(57,255,110,.10); border-left-color: var(--green); }
+            100% { background: transparent; }
+        }
+        .log-line.wrong-flash {
+            animation: wrong-flash .45s ease forwards !important;
+        }
+        @keyframes wrong-flash {
+            0%   { background: rgba(255,68,102,.22); border-left-color: var(--red); }
+            100% { background: transparent; }
+        }
+        .log-line.fade-out {
+            animation: line-fade-out .4s ease forwards !important;
+        }
+        @keyframes line-fade-out {
+            to { opacity: 0; transform: translateX(12px); }
+        }
+        .log-line.expiring {
+            animation: line-expiring 1s ease infinite !important;
+        }
+        @keyframes line-expiring {
+            0%, 100% { border-left-color: rgba(255,68,102,.6); }
+            50%       { border-left-color: rgba(255,68,102,1); background: rgba(255,68,102,.06); }
+        }
+
+        /* Log line parts */
+        .ll-ts {
+            font-family: var(--mono); font-size: .72rem; color: var(--text-mute);
+            white-space: nowrap; flex-shrink: 0;
+        }
+        .ll-lvl {
+            font-family: var(--mono); font-size: .7rem; font-weight: 600;
+            letter-spacing: .06em; white-space: nowrap; flex-shrink: 0; min-width: 44px;
+        }
+        .ll-lvl.INFO { color: var(--accent); }
+        .ll-lvl.WARN { color: var(--yellow); }
+        .ll-lvl.ERROR { color: var(--red-soft); }
+        .ll-lvl.DEBUG { color: var(--text-mute); }
+        .ll-event {
+            font-family: var(--mono); font-size: .73rem; color: var(--cyan);
+            white-space: nowrap; flex-shrink: 0; min-width: 120px;
+        }
+        .ll-data {
+            font-family: var(--mono); font-size: .73rem; color: var(--text-soft);
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .ll-click-hint {
+            font-size: .62rem; letter-spacing: .14em;
+            color: var(--text-mute); margin-left: auto; flex-shrink: 0;
+            opacity: 0; transition: opacity .2s;
+            text-transform: uppercase;
+        }
+        .log-line:hover .ll-click-hint { opacity: 1; }
+
+        /* ═══ FEEDBACK OVERLAY ═══════════════════════════════════════════════ */
+        #feedback-overlay {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 12px; padding: 24px;
+            pointer-events: none; z-index: 10;
+        }
+        #feedback-overlay.hidden { display: none; }
+
+        .feedback-badge {
+            font-size: clamp(1.6rem, 5vw, 2.5rem); font-weight: 800;
+            letter-spacing: .08em; text-transform: uppercase;
+            animation: badge-pop .5s cubic-bezier(.18,.89,.32,1.28) both;
+        }
+        @keyframes badge-pop {
+            from { opacity: 0; transform: scale(.4) translateY(20px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .feedback-badge.correct { color: var(--green); text-shadow: 0 0 30px rgba(57,255,110,.6); }
+        .feedback-badge.wrong   { color: var(--red);   text-shadow: 0 0 30px rgba(255,68,102,.6); }
+        .feedback-badge.missed  { color: var(--yellow); text-shadow: 0 0 30px rgba(255,224,102,.5); }
+
+        .feedback-humor {
+            max-width: 520px; text-align: center;
+            font-size: .88rem; color: var(--text-soft); line-height: 1.55;
+            font-family: var(--mono);
+            animation: humor-in .4s .2s ease both;
+            background: rgba(0,0,0,.3); border-radius: 8px;
+            padding: 10px 16px;
+            border: 1px solid var(--line);
+        }
+        @keyframes humor-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .feedback-sub {
+            font-size: .78rem; color: var(--text-mute); letter-spacing: .1em;
+            text-transform: uppercase;
+            animation: humor-in .4s .35s ease both;
+        }
+
+        /* ═══ MILESTONE BADGE ════════════════════════════════════════════════ */
+        #milestone-badge {
+            position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100; pointer-events: none;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+        }
+        #milestone-badge.hidden { display: none; }
+        .milestone-inner {
+            background: linear-gradient(135deg, rgba(90,168,255,.25), rgba(126,226,255,.15));
+            border: 2px solid var(--cyan);
+            border-radius: 16px; padding: 24px 48px;
+            text-align: center;
+            box-shadow: 0 0 60px rgba(126,226,255,.4), var(--shadow);
+            animation: milestone-in .6s cubic-bezier(.18,.89,.32,1.28) both;
+        }
+        @keyframes milestone-in {
+            from { opacity: 0; transform: scale(.5); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+        .milestone-emoji { font-size: 3rem; line-height: 1; }
+        .milestone-text  { font-size: 1.4rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--cyan); }
+        .milestone-sub   { font-size: .8rem; letter-spacing: .16em; text-transform: uppercase; color: var(--text-mute); margin-top: 4px; }
+
+        /* ═══ GAME OVER / STREAK BROKEN ══════════════════════════════════════ */
+        #result-screen {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; gap: 16px;
+            padding: 48px 24px; text-align: center;
+        }
+        #result-screen.hidden { display: none; }
+        .result-title {
+            font-size: clamp(1.3rem,4vw,2rem); font-weight: 800;
+            letter-spacing: .1em; text-transform: uppercase;
+        }
+        .result-stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 10px; width: 100%; max-width: 560px;
+        }
+        .result-stat {
+            background: var(--panel); border: 1px solid var(--line-strong);
+            border-radius: 8px; padding: 10px 14px;
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+        }
+        .result-stat-label { font-size: .62rem; letter-spacing: .16em; text-transform: uppercase; color: var(--text-mute); }
+        .result-stat-value { font-family: var(--mono); font-size: 1.3rem; font-weight: 700; color: var(--cyan); }
+        .result-btn {
+            margin-top: 8px; padding: 13px 32px;
+            font-size: .9rem; letter-spacing: .16em; text-transform: uppercase;
+            font-weight: 700; font-family: inherit;
+            background: rgba(90,168,255,.15); border: 1px solid var(--accent);
+            border-radius: 9px; color: var(--accent); cursor: pointer;
+            transition: background .2s, transform .15s;
+        }
+        .result-btn:hover { background: rgba(90,168,255,.28); transform: translateY(-1px); }
+
+        /* ═══ PARTICLES ══════════════════════════════════════════════════════ */
+        #particles { position: fixed; inset: 0; pointer-events: none; z-index: 50; overflow: hidden; }
+        .particle {
+            position: absolute; width: 8px; height: 8px;
+            border-radius: 50%; pointer-events: none;
+        }
+
+        /* ═══ SCANLINES (glitch) ════════════════════════════════════════════ */
+        body.glitch-fx::after {
+            content: ''; position: fixed; inset: 0; z-index: 200; pointer-events: none;
+            background: repeating-linear-gradient(0deg,
+                transparent 0px, transparent 2px,
+                rgba(0,0,0,.18) 2px, rgba(0,0,0,.18) 4px);
+            animation: scanlines-fade .55s ease forwards;
+        }
+        @keyframes scanlines-fade {
+            0%   { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        body.glitch-fx {
+            animation: rgb-shift .5s ease;
+        }
+        @keyframes rgb-shift {
+            0%   { filter: none; }
+            15%  { filter: hue-rotate(80deg) saturate(2.5) brightness(1.2); }
+            30%  { filter: hue-rotate(-80deg) saturate(1.5); transform: translateX(-3px); }
+            45%  { filter: hue-rotate(40deg); transform: translateX(3px); }
+            60%  { filter: none; transform: translateX(-1px); }
+            100% { filter: none; transform: none; }
+        }
+
+        /* ═══ RESPONSIVE ═════════════════════════════════════════════════════ */
+        @media (max-width: 720px) {
+            body { padding: 76px 12px 32px; }
+            .top-nav { top: 10px; left: 12px; right: 12px; }
+            .top-nav-inner { padding: 7px 10px; }
+            .stats-bar { gap: 6px; }
+            .stat-cell { min-width: 60px; padding: 6px 10px; }
+            .stat-value { font-size: .95rem; }
+            .stat-cell.streak-cell .stat-value { font-size: 1.25rem; }
+            .ll-ts { display: none; }
+            .ll-event { min-width: 90px; }
+            .log-line { padding: 9px 12px; gap: 7px; }
+            .ll-data { font-size: .68rem; }
+        }
+        @media (max-width: 440px) {
+            .ll-event { min-width: 70px; font-size: .67rem; }
+            .ll-data { font-size: .64rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══ NAV ═══════════════════════════════════════════════════════════════ -->
+<nav class="top-nav" role="navigation" aria-label="Logs system navigation">
+    <div class="top-nav-inner">
+        <a class="btn" href="index.html" aria-label="Back to resume">
+            <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
+            <span>Resume</span>
+        </a>
+        <div class="panel-badge">Interactive Demo — LOGS</div>
+    </div>
+</nav>
+
+<!-- ══ PARTICLES LAYER ═══════════════════════════════════════════════════ -->
+<div id="particles" aria-hidden="true"></div>
+
+<!-- ══ MILESTONE BADGE ═══════════════════════════════════════════════════ -->
+<div id="milestone-badge" class="hidden" role="status" aria-live="assertive"></div>
+
+<!-- ══ PAGE ═══════════════════════════════════════════════════════════════ -->
+<main class="page">
+
+    <!-- Hero -->
+    <section class="hero" aria-labelledby="logs-title">
+        <div class="eyebrow">Interactive Portfolio Module — Logs</div>
+        <h1 id="logs-title"><span>Logs</span>_System</h1>
+        <p class="subcopy">SYSTEM DEBUG MODE — AI CORE INTEGRITY CHECK. Corrupted data is slipping through the pipeline. Identify the bad entries before they propagate.</p>
+    </section>
+
+    <!-- Live Stats Bar -->
+    <div class="stats-bar" role="status" aria-live="polite" aria-label="Game statistics">
+        <div class="stat-cell streak-cell">
+            <span class="stat-label">Streak</span>
+            <span class="stat-value" id="stat-streak">0</span>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Best</span>
+            <span class="stat-value" id="stat-best">0</span>
+        </div>
+        <div class="stat-cell score-cell">
+            <span class="stat-label">Score</span>
+            <span class="stat-value" id="stat-score">0</span>
+        </div>
+        <div class="stat-cell level-cell">
+            <span class="stat-label">Level</span>
+            <span class="stat-value" id="stat-level">1</span>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Accuracy</span>
+            <span class="stat-value" id="stat-acc">--%</span>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Caught</span>
+            <span class="stat-value" id="stat-caught">0</span>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Missed</span>
+            <span class="stat-value" id="stat-missed">0</span>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Time</span>
+            <span class="stat-value" id="stat-time">0s</span>
+        </div>
+    </div>
+
+    <!-- Game Container -->
+    <div class="game-container" id="game-container">
+
+        <!-- Start Screen -->
+        <div id="start-screen" role="main">
+            <h2>Debugging an <span>AI System</span></h2>
+            <p>You're monitoring the AI core data pipeline. Corrupted log entries are being injected into the stream.<br><br>Find the error line and click it before it expires. Wrong clicks lose your streak. The glitches get subtler the longer you last.</p>
+            <button class="start-btn" id="start-btn" type="button" aria-label="Start the debugging game">
+                ▶ &nbsp;START DEBUGGING
+            </button>
+        </div>
+
+        <!-- Playing Screen -->
+        <div id="playing-screen" class="hidden" aria-label="Active log stream">
+            <div class="batch-timer-wrap">
+                <span class="timer-label">Time remaining</span>
+                <div class="timer-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" id="timer-track">
+                    <div id="timer-fill"></div>
+                </div>
+                <span class="timer-num" id="timer-num">--</span>
+            </div>
+            <div id="log-stream" aria-label="Log entries — click the error"></div>
+        </div>
+
+        <!-- Feedback Overlay -->
+        <div id="feedback-overlay" class="hidden" aria-live="assertive"></div>
+
+        <!-- Result Screen -->
+        <div id="result-screen" class="hidden" role="main"></div>
+
+    </div><!-- /game-container -->
+
+</main>
+
+<script>
+(function () {
+    'use strict';
+
+    /* ══════════════════════════════════════════════════════════════════════
+       CONSTANTS & TUNABLES
+    ══════════════════════════════════════════════════════════════════════ */
+    const BATCH_MS = lvl =>
+        lvl <= 5  ? 14000 :
+        lvl <= 10 ? 11000 :
+        lvl <= 20 ? 9000  :
+        lvl <= 30 ? 7000  :
+        lvl <= 50 ? 5500  : 4500;
+
+    const LINES_N = lvl => lvl <= 3 ? 5 : lvl <= 8 ? 6 : 7;
+
+    const ERROR_GLOW = lvl =>
+        lvl <= 2 ? .9 :
+        lvl <= 4 ? .55 :
+        lvl <= 6 ? .22 : 0;
+
+    // Rounds of correct answers before each level-up
+    const LVL_EVERY = round =>
+        round <= 10 ? 3 :
+        round <= 25 ? 2 : 1;
+
+    /* ══════════════════════════════════════════════════════════════════════
+       STATE
+    ══════════════════════════════════════════════════════════════════════ */
+    const G = {
+        phase:           'start',
+        streak:          0,
+        bestStreak:      0,
+        score:           0,
+        level:           1,
+        round:           0,
+        roundsSinceUp:   0,
+        totalClicks:     0,
+        correctClicks:   0,
+        missedErrors:    0,
+        caughtErrors:    0,
+        startTime:       0,
+        batch:           null,
+        errorIdx:        -1,
+        batchStart:      0,
+        batchDur:        0,
+        timerRaf:        null,
+        elapsedIval:     null,
+        answered:        false,
+        lastHumor:       '',
+    };
+
+    /* ══════════════════════════════════════════════════════════════════════
+       SESSION CONTEXT (for coherent-looking log lines)
+    ══════════════════════════════════════════════════════════════════════ */
+    const CTX = {
+        users:    [8421, 3847, 9012, 2956, 7731, 5503, 6614, 4472],
+        unames:   ['alice','bob_k','charlie','dave_j','eve_m','frank_t','grace_l','henry_v'],
+        tables:   ['users','sessions','products','orders','analytics','events','audit_log'],
+        eps:      ['/api/v2/users','/api/v2/data','/api/v2/auth','/api/v2/events','/api/v2/metrics'],
+        svcs:     ['user-service','data-pipeline','auth-service','api-gateway','cache-service','worker-01'],
+        sess:     ['sess_abc123','sess_def456','sess_ghi789','sess_jkl012','sess_mno345'],
+        jobs:     ['job_001','job_002','job_003','job_004','job_005'],
+        ts:       Date.now() - 3600000,   // start from 1h ago
+    };
+
+    function advanceTs(addMs) {
+        CTX.ts += (addMs !== undefined ? addMs : 800 + rndInt(0, 600));
+        return fmtTs(CTX.ts);
+    }
+    function fmtTs(ms) {
+        return new Date(ms).toISOString().replace(/\.\d{3}Z$/, 'Z');
+    }
+    function rnd(arr)        { return arr[Math.floor(Math.random() * arr.length)]; }
+    function rndInt(a, b)    { return Math.floor(Math.random() * (b - a + 1)) + a; }
+    function rndFloat(a, b)  { return +(Math.random() * (b - a) + a).toFixed(2); }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       NORMAL LINE TEMPLATES
+    ══════════════════════════════════════════════════════════════════════ */
+    const NORMAL_TMPL = [
+        () => ({ ev:'user_login',     lv:'INFO',  d:`{"user_id": ${rnd(CTX.users)}, "ip": "10.${rndInt(0,5)}.${rndInt(1,9)}.${rndInt(1,200)}", "latency_ms": ${rndInt(18,95)}}` }),
+        () => ({ ev:'db_query',       lv:'INFO',  d:`{"table": "${rnd(CTX.tables)}", "rows_returned": ${rndInt(1,480)}, "duration_ms": ${rndInt(4,42)}}` }),
+        () => ({ ev:'cache_hit',      lv:'INFO',  d:`{"key": "usr:${rnd(CTX.users)}", "ttl_remaining": ${rndInt(200,7200)}, "hit": true}` }),
+        () => ({ ev:'api_response',   lv:'INFO',  d:`{"endpoint": "${rnd(CTX.eps)}", "status": 200, "bytes": ${rndInt(512,8192)}}` }),
+        () => ({ ev:'session_create', lv:'INFO',  d:`{"session_id": "${rnd(CTX.sess)}", "user_id": ${rnd(CTX.users)}, "expires_in": 3600}` }),
+        () => ({ ev:'rate_limit_chk', lv:'WARN',  d:`{"user_id": ${rnd(CTX.users)}, "requests": ${rndInt(10,78)}, "limit": 100}` }),
+        () => ({ ev:'token_validate', lv:'INFO',  d:`{"user_id": ${rnd(CTX.users)}, "token_age_s": ${rndInt(100,3550)}, "valid": true}` }),
+        () => ({ ev:'health_check',   lv:'INFO',  d:`{"service": "${rnd(CTX.svcs)}", "status": "healthy", "uptime_s": ${rndInt(1000,99999)}}` }),
+        () => ({ ev:'metric_record',  lv:'INFO',  d:`{"cpu_pct": ${rndInt(8,55)}, "mem_mb": ${rndInt(256,1020)}, "conns": ${rndInt(2,28)}}` }),
+        () => ({ ev:'bg_job',         lv:'INFO',  d:`{"job_id": "${rnd(CTX.jobs)}", "status": "running", "progress": ${rndInt(5,94)}}` }),
+        () => ({ ev:'log_rotate',     lv:'INFO',  d:`{"file": "app.log", "size_kb": ${rndInt(100,2000)}, "archived": true}` }),
+        () => ({ ev:'data_sync',      lv:'INFO',  d:`{"source": "${rnd(CTX.tables)}", "records": ${rndInt(10,4800)}, "duration_ms": ${rndInt(50,490)}}` }),
+        () => ({ ev:'cache_miss',     lv:'WARN',  d:`{"key": "usr:${rnd(CTX.users)}", "reason": "expired", "ttl_was": ${rndInt(1,30)}}` }),
+        () => ({ ev:'conn_open',      lv:'DEBUG', d:`{"service": "${rnd(CTX.svcs)}", "port": ${rndInt(3000,9999)}, "protocol": "TCP"}` }),
+        () => ({ ev:'auth_ok',        lv:'INFO',  d:`{"user_id": ${rnd(CTX.users)}, "method": "jwt", "role": "${rnd(['admin','user','viewer'])}"}` }),
+    ];
+
+    function genNormalLine() {
+        const { ev, lv, d } = rnd(NORMAL_TMPL)();
+        return { ts: advanceTs(), ev, lv, d, isError: false };
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       ERROR DEFINITIONS
+       Each: { id, tier, gen(prevCtxTs), humor }
+    ══════════════════════════════════════════════════════════════════════ */
+    const ERRORS = [
+        /* ── EASY (tier 1) ─────────────────────────────────────────── */
+        {
+            id:'temp_425', tier:1,
+            gen:() => ({ ev:'sensor_read',   lv:'INFO', d:`{"sensor": "temp_01", "temperature_f": 425, "unit": "F"}` }),
+            humor:'OOPS | Temperature at 425°F — the sensor thinks it\'s inside a volcano. It is not 🌋',
+        },
+        {
+            id:'neg_user_id', tier:1,
+            gen:() => ({ ev:'user_login',     lv:'INFO', d:`{"user_id": -999, "ip": "10.0.1.${rndInt(1,200)}", "latency_ms": ${rndInt(20,80)}}` }),
+            humor:'NAH | User ID -999? IDs can\'t be negative (unless they owe us money 💸)',
+        },
+        {
+            id:'age_1500', tier:1,
+            gen:() => ({ ev:'user_profile',   lv:'INFO', d:`{"user_id": ${rnd(CTX.users)}, "username": "${rnd(CTX.unames)}", "age": 1500}` }),
+            humor:'WAIT | This user is 1,500 years old. Impressive lifespan, but probably wrong 🧛',
+        },
+        {
+            id:'battery_150', tier:1,
+            gen:() => ({ ev:'device_metric',  lv:'INFO', d:`{"device_id": "dev_${rndInt(1,50)}", "battery_pct": 150, "charging": false}` }),
+            humor:'HUH | 150% battery charge. Physics would like a word 🔋',
+        },
+        {
+            id:'mem_neg', tier:1,
+            gen:() => ({ ev:'metric_record',  lv:'INFO', d:`{"cpu_pct": ${rndInt(10,55)}, "mem_mb": -256, "conns": ${rndInt(2,20)}}` }),
+            humor:'YIKES | Negative memory usage. The process is borrowing RAM from the future ⏳',
+        },
+        {
+            id:'http_999', tier:1,
+            gen:() => ({ ev:'api_response',   lv:'INFO', d:`{"endpoint": "${rnd(CTX.eps)}", "status": 999, "bytes": ${rndInt(512,2048)}}` }),
+            humor:'NAH | HTTP 999 is not a real status code. We checked. Twice. 🤔',
+        },
+        {
+            id:'cpu_200', tier:1,
+            gen:() => ({ ev:'metric_record',  lv:'INFO', d:`{"cpu_pct": 200, "mem_mb": ${rndInt(256,1020)}, "conns": ${rndInt(2,20)}}` }),
+            humor:'CRISPY | 200% CPU — the server is filing for early retirement 🔥',
+        },
+        {
+            id:'port_99999', tier:1,
+            gen:() => ({ ev:'conn_open',       lv:'INFO', d:`{"service": "${rnd(CTX.svcs)}", "port": 99999, "protocol": "TCP"}` }),
+            humor:'NOPE | Port 99999 doesn\'t exist. Valid range is 0–65535. Nice try 🚪',
+        },
+        {
+            id:'neg_bytes', tier:1,
+            gen:() => ({ ev:'api_response',   lv:'INFO', d:`{"endpoint": "${rnd(CTX.eps)}", "status": 200, "bytes": -1024}` }),
+            humor:'WAIT | -1024 bytes transferred? The client is sending data backwards 📤',
+        },
+
+        /* ── MEDIUM (tier 2) ────────────────────────────────────────── */
+        {
+            id:'userid_string', tier:2,
+            gen:() => ({ ev:'user_login',     lv:'INFO', d:`{"user_id": "${rnd(CTX.unames)}", "ip": "10.0.1.${rndInt(1,200)}", "latency_ms": ${rndInt(20,80)}}` }),
+            humor:'NOPE | user_id should be a number, not someone\'s username. Different field 📱',
+        },
+        {
+            id:'duration_str', tier:2,
+            gen:() => ({ ev:'db_query',       lv:'INFO', d:`{"table": "${rnd(CTX.tables)}", "rows_returned": ${rndInt(1,100)}, "duration_ms": "fast"}` }),
+            humor:'"fast" is not a unit of time. Milliseconds exist for a reason ⏱️',
+        },
+        {
+            id:'valid_number', tier:2,
+            gen:() => ({ ev:'token_validate', lv:'INFO', d:`{"user_id": ${rnd(CTX.users)}, "token_age_s": ${rndInt(100,3550)}, "valid": 1}` }),
+            humor:'"valid" should be true/false, not 1. Booleans are free, use them 🆓',
+        },
+        {
+            id:'rows_neg', tier:2,
+            gen:() => ({ ev:'db_query',       lv:'INFO', d:`{"table": "${rnd(CTX.tables)}", "rows_returned": -1, "duration_ms": ${rndInt(5,45)}}` }),
+            humor:'-1 rows returned. A database that owes you data? Bold concept 📚',
+        },
+        {
+            id:'ts_backward_60', tier:2,
+            gen:() => {
+                const bad = fmtTs(CTX.ts - 60000);
+                return { ev:'health_check', lv:'INFO', d:`{"service": "${rnd(CTX.svcs)}", "status": "healthy", "uptime_s": ${rndInt(1000,99999)}}`, overrideTs: bad };
+            },
+            humor:'ERROR | Timestamp jumped back 60 seconds. Time travel detected ⏰',
+        },
+        {
+            id:'status_UPPER', tier:2,
+            gen:() => ({ ev:'health_check',   lv:'INFO', d:`{"service": "${rnd(CTX.svcs)}", "status": "HEALTHY", "uptime_s": ${rndInt(1000,99999)}}` }),
+            humor:'"HEALTHY" should be lowercase "healthy". Capslock was not the bug we expected 🔐',
+        },
+        {
+            id:'progress_110', tier:2,
+            gen:() => ({ ev:'bg_job',         lv:'INFO', d:`{"job_id": "${rnd(CTX.jobs)}", "status": "running", "progress": 110}` }),
+            humor:'Progress at 110% — went past done and kept going. Overachiever 🏅',
+        },
+        {
+            id:'latency_str', tier:2,
+            gen:() => ({ ev:'user_login',     lv:'INFO', d:`{"user_id": ${rnd(CTX.users)}, "ip": "10.0.1.${rndInt(1,200)}", "latency_ms": "slow"}` }),
+            humor:'"slow" is not a valid latency value. Try a number, maybe in milliseconds 🐢',
+        },
+        {
+            id:'neg_ttl', tier:2,
+            gen:() => ({ ev:'cache_hit',      lv:'INFO', d:`{"key": "usr:${rnd(CTX.users)}", "ttl_remaining": -300, "hit": true}` }),
+            humor:'TTL of -300 seconds. This cached entry expired 5 minutes ago and is still here haunting us 👻',
+        },
+
+        /* ── HARD (tier 3) ──────────────────────────────────────────── */
+        {
+            id:'ts_1s_back', tier:3,
+            gen:() => {
+                const bad = fmtTs(CTX.ts - 1000);
+                return { ev:'metric_record', lv:'INFO', d:`{"cpu_pct": ${rndInt(10,55)}, "mem_mb": ${rndInt(256,1020)}, "conns": ${rndInt(2,28)}}`, overrideTs: bad };
+            },
+            humor:'SUBTLE | Timestamp went back exactly 1 second. The system is having a senior moment 🕐',
+        },
+        {
+            id:'status_201_get', tier:3,
+            gen:() => ({ ev:'api_response',   lv:'INFO', d:`{"endpoint": "${rnd(CTX.eps)}", "status": 201, "bytes": ${rndInt(512,2048)}}` }),
+            humor:'MILD | 201 Created on a read endpoint? Interesting interpretation of REST 🤨',
+        },
+        {
+            id:'cpu_zero_busy', tier:3,
+            gen:() => ({ ev:'metric_record',  lv:'INFO', d:`{"cpu_pct": 0, "mem_mb": ${rndInt(400,1020)}, "conns": ${rndInt(8,28)}}` }),
+            humor:'ODD | CPU at 0% while handling many connections. Suspicious silence 🤫',
+        },
+        {
+            id:'latency_neg', tier:3,
+            gen:() => ({ ev:'user_login',     lv:'INFO', d:`{"user_id": ${rnd(CTX.users)}, "ip": "10.0.1.${rndInt(1,200)}", "latency_ms": -3}` }),
+            humor:'-3ms latency. The response arrived before the request. Precognition API 🔮',
+        },
+        {
+            id:'expires_neg', tier:3,
+            gen:() => ({ ev:'session_create', lv:'INFO', d:`{"session_id": "${rnd(CTX.sess)}", "user_id": ${rnd(CTX.users)}, "expires_in": -1}` }),
+            humor:'Session expires in -1 seconds. It was already dead when it arrived 💀',
+        },
+        {
+            id:'ts_future_hr', tier:3,
+            gen:() => {
+                const future = fmtTs(CTX.ts + 3600000);
+                return { ev:'health_check', lv:'INFO', d:`{"service": "${rnd(CTX.svcs)}", "status": "healthy", "uptime_s": ${rndInt(1000,99999)}}`, overrideTs: future };
+            },
+            humor:'Timestamp is an hour in the future. Is this server... prophetic? 🔮',
+        },
+        {
+            id:'rows_0_query', tier:3,
+            gen:() => ({ ev:'db_query',       lv:'INFO', d:`{"table": "${rnd(CTX.tables)}", "rows_returned": 0, "duration_ms": ${rndInt(80,200)}}` }),
+            humor:'0 rows returned on a busy table. Either perfectly empty or the query is gaslighting us 🕵️',
+        },
+        {
+            id:'hit_false_ttl', tier:3,
+            gen:() => ({ ev:'cache_hit',      lv:'INFO', d:`{"key": "usr:${rnd(CTX.users)}", "ttl_remaining": ${rndInt(200,7200)}, "hit": false}` }),
+            humor:'Event is cache_hit but hit=false. A very transparent lie 🎭',
+        },
+    ];
+
+    function pickError(level) {
+        // Weight toward harder errors at higher levels
+        let pool;
+        if (level <= 4)  pool = ERRORS.filter(e => e.tier === 1);
+        else if (level <= 8)  pool = ERRORS.filter(e => e.tier <= 1 || (e.tier === 2 && Math.random() < .3));
+        else if (level <= 15) pool = ERRORS.filter(e => e.tier <= 2);
+        else if (level <= 25) pool = ERRORS.filter(e => e.tier >= 2);
+        else                  pool = ERRORS.filter(e => e.tier === 3 || (e.tier === 2 && Math.random() < .3));
+        return rnd(pool);
+    }
+
+    function genBatch(level) {
+        const n   = LINES_N(level);
+        const eIdx = rndInt(0, n - 1);
+        const err  = pickError(level);
+        const lines = [];
+
+        for (let i = 0; i < n; i++) {
+            if (i === eIdx) {
+                const ts   = advanceTs();
+                const info = err.gen();
+                lines.push({
+                    ts:      info.overrideTs || ts,
+                    ev:      info.ev,
+                    lv:      info.lv,
+                    d:       info.d,
+                    isError: true,
+                    humor:   err.humor,
+                });
+            } else {
+                lines.push(genNormalLine());
+            }
+        }
+        return { lines, eIdx };
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       DOM REFS
+    ══════════════════════════════════════════════════════════════════════ */
+    const $startScreen    = document.getElementById('start-screen');
+    const $playingScreen  = document.getElementById('playing-screen');
+    const $feedbackOv     = document.getElementById('feedback-overlay');
+    const $resultScreen   = document.getElementById('result-screen');
+    const $logStream      = document.getElementById('log-stream');
+    const $timerFill      = document.getElementById('timer-fill');
+    const $timerNum       = document.getElementById('timer-num');
+    const $timerTrack     = document.getElementById('timer-track');
+    const $milestoneBadge = document.getElementById('milestone-badge');
+    const $particles      = document.getElementById('particles');
+    const $startBtn       = document.getElementById('start-btn');
+
+    // Stats
+    const $sSt    = document.getElementById('stat-streak');
+    const $sBest  = document.getElementById('stat-best');
+    const $sScore = document.getElementById('stat-score');
+    const $sLvl   = document.getElementById('stat-level');
+    const $sAcc   = document.getElementById('stat-acc');
+    const $sCaught= document.getElementById('stat-caught');
+    const $sMissed= document.getElementById('stat-missed');
+    const $sTime  = document.getElementById('stat-time');
+
+    /* ══════════════════════════════════════════════════════════════════════
+       STATS UPDATE
+    ══════════════════════════════════════════════════════════════════════ */
+    function updateStats() {
+        $sSt.textContent    = G.streak;
+        $sBest.textContent  = G.bestStreak;
+        $sScore.textContent = G.score;
+        $sLvl.textContent   = G.level;
+        $sAcc.textContent   = G.totalClicks > 0
+            ? Math.round((G.correctClicks / G.totalClicks) * 100) + '%'
+            : '--%';
+        $sCaught.textContent = G.caughtErrors;
+        $sMissed.textContent = G.missedErrors;
+        if (G.startTime) {
+            const s = Math.floor((Date.now() - G.startTime) / 1000);
+            $sTime.textContent = s < 60 ? s + 's' : Math.floor(s/60) + 'm ' + (s%60) + 's';
+        }
+        // Colour streak indicator
+        $sSt.style.color =
+            G.streak >= 25 ? '#ffe066' :
+            G.streak >= 10 ? '#39ff6e' :
+            G.streak >= 5  ? '#7ee2ff' : '#6fffb0';
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       TIMER
+    ══════════════════════════════════════════════════════════════════════ */
+    function startTimer() {
+        if (G.timerRaf) cancelAnimationFrame(G.timerRaf);
+
+        function tick() {
+            const elapsed  = performance.now() - G.batchStart;
+            const remaining = Math.max(0, G.batchDur - elapsed);
+            const frac     = remaining / G.batchDur;
+
+            $timerFill.style.width = (frac * 100) + '%';
+            $timerFill.style.background =
+                frac > .5  ? 'var(--cyan)'   :
+                frac > .25 ? 'var(--yellow)'  : 'var(--red)';
+            $timerTrack.setAttribute('aria-valuenow', Math.round(frac * 100));
+            $timerNum.textContent = (remaining / 1000).toFixed(1) + 's';
+
+            // Warn player: flash error line red when <25% time left
+            if (!G.answered && frac < .25) {
+                const errLine = $logStream.querySelector('.log-line[data-err="1"]');
+                if (errLine && !errLine.classList.contains('expiring')) {
+                    errLine.classList.add('expiring');
+                }
+            }
+
+            if (remaining > 0 && !G.answered) {
+                G.timerRaf = requestAnimationFrame(tick);
+            } else if (!G.answered) {
+                handleTimeout();
+            }
+        }
+        G.timerRaf = requestAnimationFrame(tick);
+    }
+
+    function stopTimer() {
+        if (G.timerRaf) { cancelAnimationFrame(G.timerRaf); G.timerRaf = null; }
+        $timerFill.style.width = '0%';
+        $timerNum.textContent  = '--';
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       RENDER BATCH
+    ══════════════════════════════════════════════════════════════════════ */
+    function renderBatch(batch) {
+        $logStream.innerHTML = '';
+        const glowOpacity = ERROR_GLOW(G.level);
+
+        batch.lines.forEach((line, i) => {
+            const el = document.createElement('div');
+            el.className = 'log-line';
+            el.style.animationDelay = (i * 60) + 'ms';
+            el.dataset.idx = i;
+
+            if (line.isError) {
+                el.dataset.err = '1';
+                if (glowOpacity > 0) {
+                    el.classList.add('error-hint');
+                    el.style.boxShadow =
+                        `inset 0 0 0 1px rgba(255,68,102,${glowOpacity * .45}),` +
+                        `0 0 ${Math.round(glowOpacity * 20)}px rgba(255,68,102,${glowOpacity * .2})`;
+                }
+            }
+
+            // Format timestamp short
+            const tsShort = line.ts.replace('T', ' ').replace('Z', '');
+
+            el.innerHTML =
+                `<span class="ll-ts" aria-hidden="true">[${tsShort}]</span>` +
+                `<span class="ll-lvl ${line.lv}">[${line.lv}]</span>` +
+                `<span class="ll-event">${escHtml(line.ev)}</span>` +
+                `<span class="ll-data">${escHtml(line.d)}</span>` +
+                `<span class="ll-click-hint" aria-hidden="true">click</span>`;
+
+            el.addEventListener('click', () => handleLineClick(i));
+            el.setAttribute('role', 'button');
+            el.setAttribute('tabindex', '0');
+            el.setAttribute('aria-label', `Log entry ${i+1}: ${line.ev} — click if you think this is the error`);
+            el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleLineClick(i); } });
+
+            $logStream.appendChild(el);
+        });
+    }
+
+    function escHtml(s) {
+        return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       GAME FLOW
+    ══════════════════════════════════════════════════════════════════════ */
+    function startGame() {
+        G.phase        = 'playing';
+        G.startTime    = Date.now();
+
+        $startScreen.style.display   = 'none';
+        $resultScreen.classList.add('hidden');
+        $playingScreen.classList.remove('hidden');
+        $feedbackOv.classList.add('hidden');
+
+        // Elapsed time ticker
+        if (G.elapsedIval) clearInterval(G.elapsedIval);
+        G.elapsedIval = setInterval(updateStats, 1000);
+
+        startBatch();
+    }
+
+    function startBatch() {
+        G.answered   = false;
+        G.batchDur   = BATCH_MS(G.level);
+        G.batchStart = performance.now();
+
+        const b = genBatch(G.level);
+        G.batch    = b;
+        G.errorIdx = b.eIdx;
+
+        renderBatch(b);
+        startTimer();
+        updateStats();
+    }
+
+    function handleLineClick(idx) {
+        if (G.answered || G.phase !== 'playing') return;
+        G.answered   = true;
+        G.totalClicks++;
+
+        stopTimer();
+
+        const lines = $logStream.querySelectorAll('.log-line');
+        const correct = (idx === G.errorIdx);
+
+        if (correct) {
+            handleCorrect(lines[idx]);
+        } else {
+            handleWrong(lines[idx]);
+        }
+    }
+
+    function handleCorrect(clickedEl) {
+        G.correctClicks++;
+        G.caughtErrors++;
+        G.streak++;
+        if (G.streak > G.bestStreak) G.bestStreak = G.streak;
+
+        // Score: base + time bonus × level multiplier
+        const timeBonus = Math.floor((G.batchDur - (performance.now() - G.batchStart)) / 100);
+        const mult = Math.floor(G.streak / 5) + 1;
+        G.score += (15 + timeBonus) * mult * G.level;
+
+        G.round++;
+        G.roundsSinceUp++;
+
+        // Level up logic
+        const needed = LVL_EVERY(G.round);
+        if (G.roundsSinceUp >= needed) {
+            G.level++;
+            G.roundsSinceUp = 0;
+        }
+
+        // Visual: flash clicked line green
+        clickedEl.classList.remove('expiring');
+        clickedEl.classList.add('correct-flash');
+
+        // Also reveal the error line if they clicked by luck (same as errorIdx here so no-op)
+
+        updateStats();
+        checkMilestone();
+
+        const humor = G.batch.lines[G.errorIdx].humor;
+        showFeedback('correct', '✓ CORRECT', humor, () => {
+            $feedbackOv.classList.add('hidden');
+            startBatch();
+        });
+        spawnParticles(clickedEl);
+    }
+
+    function handleWrong(clickedEl) {
+        const prevStreak = G.streak;
+        G.streak  = 0;
+        G.missedErrors++;
+
+        // Flash wrong line red
+        if (clickedEl) clickedEl.classList.add('wrong-flash');
+
+        // Reveal the actual error line
+        const errLine = $logStream.querySelector('.log-line[data-err="1"]');
+        if (errLine) {
+            errLine.style.borderLeftColor   = 'var(--red)';
+            errLine.style.background        = 'rgba(255,68,102,.08)';
+            errLine.style.boxShadow         = '0 0 14px rgba(255,68,102,.3)';
+        }
+
+        updateStats();
+        triggerGlitch();
+
+        const humor = G.batch.lines[G.errorIdx].humor;
+        showFeedback('wrong', '✗ WRONG', humor, () => {
+            $feedbackOv.classList.add('hidden');
+            startBatch();
+        }, `Streak reset${prevStreak > 0 ? ' (was ' + prevStreak + ')' : ''}`);
+    }
+
+    function handleTimeout() {
+        if (G.answered) return;
+        G.answered    = true;
+        G.missedErrors++;
+        G.streak      = 0;
+
+        stopTimer();
+
+        // Flash the error line so player sees it
+        const errLine = $logStream.querySelector('.log-line[data-err="1"]');
+        if (errLine) {
+            errLine.classList.remove('expiring');
+            errLine.style.borderLeftColor = 'var(--yellow)';
+            errLine.style.background      = 'rgba(255,224,102,.07)';
+            errLine.style.boxShadow       = '0 0 18px rgba(255,224,102,.3)';
+        }
+
+        updateStats();
+
+        const humor = G.batch.lines[G.errorIdx].humor;
+        showFeedback('missed', '⏱ MISSED', humor, () => {
+            $feedbackOv.classList.add('hidden');
+            startBatch();
+        }, 'Streak reset — too slow');
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       FEEDBACK OVERLAY
+    ══════════════════════════════════════════════════════════════════════ */
+    function showFeedback(type, headline, humor, cb, sub) {
+        $feedbackOv.innerHTML =
+            `<div class="feedback-badge ${type}">${headline}</div>` +
+            (humor ? `<div class="feedback-humor">${escHtml(humor)}</div>` : '') +
+            (sub   ? `<div class="feedback-sub">${escHtml(sub)}</div>` : '');
+
+        $feedbackOv.classList.remove('hidden');
+        G.lastHumor = humor || '';
+
+        const delay = type === 'correct' ? 1600 : 2000;
+        setTimeout(() => {
+            $feedbackOv.classList.add('hidden');
+            if (cb) cb();
+        }, delay);
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       MILESTONE BADGES
+    ══════════════════════════════════════════════════════════════════════ */
+    const MILESTONES = {
+        10:  { emoji:'🔥', text:'ON FIRE',      sub:'10 streak' },
+        25:  { emoji:'⚡', text:'UNSTOPPABLE',  sub:'25 streak' },
+        50:  { emoji:'🌟', text:'LEGEND',        sub:'50 streak' },
+        100: { emoji:'🏆', text:'GODMODE',       sub:'100 streak' },
+        200: { emoji:'🧠', text:'AI DEBUGGER',   sub:'200 streak' },
+    };
+
+    function checkMilestone() {
+        const m = MILESTONES[G.streak];
+        if (!m) return;
+
+        $milestoneBadge.innerHTML =
+            `<div class="milestone-inner">` +
+            `<div class="milestone-emoji">${m.emoji}</div>` +
+            `<div class="milestone-text">${m.text}</div>` +
+            `<div class="milestone-sub">${m.sub}</div>` +
+            `</div>`;
+        $milestoneBadge.classList.remove('hidden');
+
+        setTimeout(() => $milestoneBadge.classList.add('hidden'), 2200);
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       EFFECTS
+    ══════════════════════════════════════════════════════════════════════ */
+    function triggerGlitch() {
+        document.body.classList.remove('glitch-fx');
+        // Force reflow
+        void document.body.offsetWidth;
+        document.body.classList.add('glitch-fx');
+        setTimeout(() => document.body.classList.remove('glitch-fx'), 560);
+    }
+
+    function spawnParticles(anchorEl) {
+        if (!anchorEl) return;
+        const rect   = anchorEl.getBoundingClientRect();
+        const cx     = rect.left + rect.width  / 2;
+        const cy     = rect.top  + rect.height / 2;
+        const colours = ['#39ff6e','#7ee2ff','#ffe066','#6fffb0','#82c0ff'];
+        const count  = G.streak >= 10 ? 28 : G.streak >= 5 ? 18 : 12;
+
+        for (let i = 0; i < count; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            const angle  = (Math.PI * 2 / count) * i + Math.random() * .5;
+            const speed  = 80 + Math.random() * 120;
+            const dx     = Math.cos(angle) * speed;
+            const dy     = Math.sin(angle) * speed;
+            const size   = 5 + Math.random() * 7;
+            const colour = rnd(colours);
+            const dur    = 600 + Math.random() * 500;
+
+            p.style.cssText =
+                `left:${cx}px; top:${cy}px; width:${size}px; height:${size}px;` +
+                `background:${colour}; box-shadow:0 0 6px ${colour};` +
+                `transform:translate(-50%,-50%);` +
+                `transition: transform ${dur}ms ease-out, opacity ${dur}ms ease-out;`;
+
+            $particles.appendChild(p);
+
+            // Trigger animation after a micro tick
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    p.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+                    p.style.opacity   = '0';
+                });
+            });
+
+            setTimeout(() => p.remove(), dur + 50);
+        }
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       RESULT SCREEN (session stats)
+    ══════════════════════════════════════════════════════════════════════ */
+    function showResult() {
+        clearInterval(G.elapsedIval);
+        stopTimer();
+        G.phase = 'result';
+        $playingScreen.classList.add('hidden');
+        $feedbackOv.classList.add('hidden');
+
+        const elapsed = Math.floor((Date.now() - G.startTime) / 1000);
+        const acc = G.totalClicks > 0
+            ? Math.round((G.correctClicks / G.totalClicks) * 100)
+            : 0;
+
+        $resultScreen.innerHTML =
+            `<div class="result-title" style="color:var(--cyan)">SESSION COMPLETE</div>` +
+            `<div class="result-stats-grid">` +
+            rStat('Final Score',   G.score)             +
+            rStat('Best Streak',   G.bestStreak)        +
+            rStat('Level Reached', G.level)             +
+            rStat('Errors Caught', G.caughtErrors)      +
+            rStat('Errors Missed', G.missedErrors)      +
+            rStat('Accuracy',      acc + '%')           +
+            rStat('Time Played',   elapsed + 's')       +
+            `</div>` +
+            `<button class="result-btn" id="play-again-btn" type="button">▶ Play Again</button>`;
+
+        $resultScreen.classList.remove('hidden');
+
+        document.getElementById('play-again-btn').addEventListener('click', resetAndStart);
+    }
+
+    function rStat(label, value) {
+        return `<div class="result-stat"><span class="result-stat-label">${label}</span><span class="result-stat-value">${value}</span></div>`;
+    }
+
+    function resetAndStart() {
+        G.phase          = 'start';
+        G.streak         = 0;
+        G.score          = 0;
+        G.level          = 1;
+        G.round          = 0;
+        G.roundsSinceUp  = 0;
+        G.totalClicks    = 0;
+        G.correctClicks  = 0;
+        G.missedErrors   = 0;
+        G.caughtErrors   = 0;
+        G.bestStreak     = 0;
+
+        CTX.ts = Date.now() - 3600000;
+
+        $resultScreen.classList.add('hidden');
+        updateStats();
+        startGame();
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       INIT
+    ══════════════════════════════════════════════════════════════════════ */
+    $startBtn.addEventListener('click', startGame);
+    updateStats();
+
+})();
+</script>
+
+</body>
+</html>
