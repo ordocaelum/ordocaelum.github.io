@@ -480,9 +480,23 @@
             background: rgba(90, 168, 255, 0.05);
             border-color: var(--line-strong);
             border-left-color: var(--accent-2);
-            transform: translateX(2px);
+            transform: translateX(2px) scale(1.02);
+            box-shadow: 0 8px 20px rgba(255, 200, 0, 0.4);
+            animation: experienceGlow 1.5s ease-in-out;
         }
 
+        @keyframes experienceGlow {
+            0% {
+                box-shadow: 0 8px 20px rgba(255, 255, 0, 0.5);
+            }
+            50% {
+                box-shadow: 0 8px 20px rgba(255, 165, 0, 0.6);
+            }
+            100% {
+                box-shadow: 0 8px 20px rgba(255, 200, 0, 0.4);
+            }
+        }
+            
         .exp-header {
             display: flex;
             justify-content: space-between;
