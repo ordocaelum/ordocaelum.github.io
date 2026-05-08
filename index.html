@@ -135,6 +135,14 @@
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
         }
 
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            display: block;
+        }
+
         .avatar::after {
             content: '';
             position: absolute;
@@ -822,7 +830,9 @@
         <!-- =========== SIDEBAR =========== -->
         <aside>
             <div class="identity">
-                <div class="avatar">LD</div>
+                <div class="avatar">
+                    <img src="Screenshot_20240726_170227.jpg" alt="Leland E. Doss" />
+                </div>
                 <div class="name">Leland E. Doss</div>
                 <div class="role">Sr. Unreal Engine Developer<br>Technical Artist · Data Visualization</div>
             </div>
