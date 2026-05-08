@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Material+Symbols+Rounded:FILL@0..1&display=swap" rel="stylesheet">
     <style>
-        /* ═══ ROOT ═══════════════════════════════════════════════════════════ */
+        /* ═══ ROOT ═════════════════════════════════════════════════════════ */
         :root {
             --bg: #0e1a2b;
             --bg-soft: #142640;
@@ -60,7 +60,7 @@
 
         a { color: inherit; text-decoration: none; }
 
-        /* ═══ NAV ════════════════════════════════════════════════════════════ */
+        /* ═══ NAV ═════════════════════════════════════════════════════════ */
         .top-nav {
             position: fixed;
             top: 14px; left: 24px; right: 24px;
@@ -83,7 +83,7 @@
             gap: 12px;
         }
 
-        /* ═══ BUTTONS ════════════════════════════════════════════════════════ */
+        /* ═══ BUTTONS ══════════════════════════════════════════════════════ */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -130,7 +130,7 @@
             text-transform: uppercase;
         }
 
-        /* ═══ PAGE LAYOUT ════════════════════════════════════════════════════ */
+        /* ═══ PAGE LAYOUT ══════════════════════════════════════════════════ */
         .page {
             max-width: 1220px;
             margin: 0 auto;
@@ -171,7 +171,7 @@
             align-items: start;
         }
 
-        /* ═══ CARDS ══════════════════════════════════════════════════════════ */
+        /* ═══ CARDS ════════════════════════════════════════════════════════ */
         .control-card, .stat-card, .canvas-shell {
             background: linear-gradient(180deg, rgba(26, 47, 77, 0.98), rgba(17, 35, 60, 0.98));
             border: 1px solid var(--line-strong);
@@ -179,7 +179,7 @@
             box-shadow: var(--shadow);
         }
 
-        /* ═══ CONTROLS PANEL ═════════════════════════════════════════════════ */
+        /* ═══ CONTROLS PANEL ═══════════════════════════════════════════════ */
         .controls-panel {
             display: grid;
             gap: 14px;
@@ -291,7 +291,7 @@
 
         .button-row.single { grid-template-columns: 1fr; }
 
-        /* ═══ ENEMY PAIRS LEGEND ═════════════════════════════════════════════ */
+        /* ═══ ENEMY PAIRS LEGEND ═══════════════════════════════════════════ */
         .enemy-list {
             display: grid;
             gap: 6px;
@@ -332,7 +332,7 @@
             padding-top: 12px;
         }
 
-        /* ═══ CANVAS SECTION ═════════════════════════════════════════════════ */
+        /* ═══ CANVAS SECTION ═══════════════════════════════════════════════ */
         .canvas-shell {
             position: relative;
             padding: 22px;
@@ -388,7 +388,7 @@
             transition: opacity 0.08s ease-out;
         }
 
-        /* ═══ STATS PANEL ════════════════════════════════════════════════════ */
+        /* ═══ STATS PANEL ══════════════════════════════════════════════════ */
         .stats-panel {
             display: grid;
             gap: 10px;
@@ -521,7 +521,7 @@
         .log-msg.boom { color: var(--electric-red); }
         .log-msg.blend { color: var(--electric-cyan); }
 
-        /* ═══ RESPONSIVE ═════════════════════════════════════════════════════ */
+        /* ═══ RESPONSIVE ═══════════════════════════════════════════════════ */
         @media (max-width: 1100px) {
             .system-layout {
                 grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -566,12 +566,12 @@
     <section class="hero" aria-labelledby="core-system-title">
         <div class="eyebrow">Interactive Portfolio Module — Core</div>
         <h1 id="core-system-title">Core_System</h1>
-        <p class="subcopy">Neural network equilibrium sandbox. Seed your first neuron, then grow outward through deliberate connections. Nearby enemy colors can destabilize the system into cascading chaos.</p>
+        <p class="subcopy">Neural network equilibrium sandbox. Seed your first neuron, then grow outward through deliberate connections. Nearby enemy colors can destabilize the system into cascading explosions. Control the power to adjust glow and pulse intensity.</p>
     </section>
 
     <section class="system-layout" aria-label="Neural network interface">
 
-        <!-- ══ LEFT: CONTROLS ═════════════════════════════════════════════ -->
+        <!-- ══ LEFT: CONTROLS ════════════════════════════════════════════ -->
         <aside class="control-card controls-panel" aria-labelledby="controls-title">
             <div class="panel-heading">
                 <div class="panel-title" id="controls-title">Controls</div>
@@ -638,7 +638,7 @@
             <p class="system-note">Click any neuron to seed your network. Then drag from connected neurons to unconnected targets. Power and size only affect connected neurons.</p>
         </aside>
 
-        <!-- ══ CENTER: CANVAS ═════════════════════════════════════════════ -->
+        <!-- ══ CENTER: CANVAS ═══════════════════════════════════════════ -->
         <section class="canvas-shell" aria-labelledby="visual-title">
             <div class="canvas-header">
                 <div class="panel-title" id="visual-title">Neural Network</div>
@@ -651,7 +651,7 @@
             </div>
         </section>
 
-        <!-- ══ RIGHT: STATS ════════════════════════════════════════════════ -->
+        <!-- ══ RIGHT: STATS ══════════════════════════════════════════════ -->
         <aside class="stats-panel" aria-labelledby="stats-title">
             <div class="panel-heading">
                 <div class="panel-title" id="stats-title">Telemetry</div>
@@ -716,14 +716,14 @@
 (function () {
     'use strict';
 
-    /* ══════════════════════════════════════════════════════════════════════
+    /* ══════════════════════════════════════════════════════════════════
        CONSTANTS
-    ══════════════════════════════════════════════════════════════════════ */
+    ══════════════════════════════════════════════════════════════════ */
 
     var TOTAL       = 30;
     var BASE_NEURON_RADIUS = 8;
     var PROXIMITY_CHECK_INTERVAL = 0.22; /* seconds */
-    var CONFLICT_PROXIMITY_PX = 78;
+    var CONFLICT_PROXIMITY_PX = 48;  /* LOWERED from 78 for more chaos */
     var MIN_SCATTER_SPACING_PX = 22;
     var SCATTER_SPACING_SCALE = 0.065;
     var MAX_PLACEMENT_ATTEMPTS = 120;
@@ -764,12 +764,12 @@
     };
 
     /* Particle counts and sizes relative to power */
-    var MIN_PARTICLES  = 8;
-    var MAX_PARTICLES  = 60;
-    var MIN_PART_SPEED = 1.5;
-    var MAX_PART_SPEED = 9;
-    var MIN_PART_R     = 2;
-    var MAX_PART_R     = 7;
+    var MIN_PARTICLES  = 12;
+    var MAX_PARTICLES  = 80;
+    var MIN_PART_SPEED = 2.0;
+    var MAX_PART_SPEED = 12;
+    var MIN_PART_R     = 2.5;
+    var MAX_PART_R     = 9;
 
     /* RGB Euclidean distance tolerance for enemy-pair detection on blended colors */
     var ENEMY_PAIR_COLOR_THRESHOLD = 60;
@@ -777,9 +777,9 @@
     /* Maximum chain-reaction depth to prevent infinite cascade loops */
     var MAX_CASCADE_DEPTH = 6;
 
-    /* ══════════════════════════════════════════════════════════════════════
+    /* ══════════════════════════════════════════════════════════════════
        DOM REFS
-    ══════════════════════════════════════════════════════════════════════ */
+    ══════════════════════════════════════════════════════════════════ */
     var canvas       = document.getElementById('neuralCanvas');
     var ctx          = canvas.getContext('2d');
     var canvasWrap   = document.getElementById('canvasWrap');
@@ -802,9 +802,9 @@
     var statColEl    = document.getElementById('statColors');
     var eventLog     = document.getElementById('eventLog');
 
-    /* ══════════════════════════════════════════════════════════════════════
+    /* ══════════════════════════════════════════════════════════════════
        STATE
-    ══════════════════════════════════════════════════════════════════════ */
+    ══════════════════════════════════════════════════════════════════ */
     var app = {
         power:          50,  // 0-100
         connectedRadius:18,  // radius used only for connected neurons
@@ -824,9 +824,9 @@
         raf:            0
     };
 
-    /* ══════════════════════════════════════════════════════════════════════
+    /* ══════════════════════════════════════════════════════════════════
        COLOR UTILITIES
-    ══════════════════════════════════════════════════════════════════════ */
+    ══════════════════════════════════════════════════════════════════ */
 
     function hexToRgb(hex) {
         var r = parseInt(hex.slice(1, 3), 16);
@@ -876,9 +876,9 @@
         return false;
     }
 
-    /* ══════════════════════════════════════════════════════════════════════
+    /* ══════════════════════════════════════════════════════════════════
        NEURON CLASS
-    ══════════════════════════════════════════════════════════════════════ */
+    ══════════════════════════════════════════════════════════════════ */
     function Neuron(id, x, y, color) {
         this.id      = id;
         this.x       = x;
@@ -988,9 +988,9 @@
         ctx.restore();
     };
 
-    /* ══════════════════════════════════════════════════════════════════════
+    /* ══════════════════════════════════════════════════════════════════
        CONNECTION CLASS
-    ══════════════════════════════════════════════════════════════════════ */
+    ══════════════════════════════════════════════════════════════════ */
     function Connection(a, b) {
         this.a     = a;
         this.b     = b;
@@ -998,616 +998,366 @@
         this.age   = 0;
     }
 
-    Connection.prototype.blendColor = function () {
-        return blendColors(this.a.color, this.b.color, 0.5);
-    };
-
     Connection.prototype.update = function (dt) {
-        this.alpha = Math.min(1, this.alpha + dt * 4);
-        this.age  += dt;
+        if (this.alpha < 0.88) {
+            this.alpha = Math.min(0.88, this.alpha + dt * 2.8);
+        }
+        this.age += dt;
     };
 
     Connection.prototype.draw = function () {
-        if (!this.a.alive || !this.b.alive) { return; }
-        var col = this.blendColor();
-        var powerT = app.power / 100;
-        var pulse = 0.45 + powerT * 0.55 + Math.sin(this.age * (2.1 + powerT * 2.4)) * (0.1 + powerT * 0.18);
-
+        if (!this.a.alive || !this.b.alive) return;
         ctx.save();
-        ctx.globalAlpha = this.alpha * pulse;
-
-        /* Glow line */
-        ctx.beginPath();
-        ctx.moveTo(this.a.x, this.a.y);
-        ctx.lineTo(this.b.x, this.b.y);
-        ctx.strokeStyle = hexWithAlpha(col, 0.25);
-        ctx.lineWidth = app.connectedRadius * 0.45;
+        var blendedColor = blendColors(this.a.color, this.b.color, 0.5);
+        ctx.strokeStyle = hexWithAlpha(blendedColor, this.alpha);
+        ctx.lineWidth = 2.2;
         ctx.lineCap = 'round';
-        ctx.stroke();
-
-        /* Core line */
+        ctx.lineJoin = 'round';
         ctx.beginPath();
         ctx.moveTo(this.a.x, this.a.y);
         ctx.lineTo(this.b.x, this.b.y);
-        ctx.strokeStyle = col;
-        ctx.lineWidth = 1.5;
         ctx.stroke();
-
-        /* Animated dash travelling along line */
-        var len   = Math.hypot(this.b.x - this.a.x, this.b.y - this.a.y);
-        var tPos  = (this.age * 0.5) % 1;
-        var px    = this.a.x + (this.b.x - this.a.x) * tPos;
-        var py    = this.a.y + (this.b.y - this.a.y) * tPos;
-        ctx.globalAlpha = this.alpha * 0.9;
-        ctx.beginPath();
-        ctx.arc(px, py, 2.5, 0, Math.PI * 2);
-        ctx.fillStyle = lighten(col, 0.4);
-        ctx.fill();
-
+        /* Glow */
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = hexWithAlpha(blendedColor, this.alpha * 0.6);
+        ctx.stroke();
         ctx.restore();
     };
 
-    /* ══════════════════════════════════════════════════════════════════════
+    /* ══════════════════════════════════════════════════════════════════
        PARTICLE CLASS
-    ══════════════════════════════════════════════════════════════════════ */
-    function Particle(x, y, vx, vy, color, r, maxAge) {
+    ══════════════════════════════════════════════════════════════════ */
+    function Particle(x, y, vx, vy, color, radius) {
         this.x      = x;
         this.y      = y;
         this.vx     = vx;
         this.vy     = vy;
         this.color  = color;
-        this.r      = r;
+        this.radius = radius;
         this.age    = 0;
-        this.maxAge = maxAge || 1.0;
+        this.life   = 0.6 + Math.random() * 0.4;
     }
 
     Particle.prototype.update = function (dt) {
-        this.x   += this.vx * dt * 60;
-        this.y   += this.vy * dt * 60;
-        this.vx  *= 0.96;
-        this.vy  *= 0.96;
+        this.x  += this.vx * dt;
+        this.y  += this.vy * dt;
+        this.vy += 12 * dt; /* gravity */
         this.age += dt;
     };
 
-    Particle.prototype.isDead = function () {
-        return this.age >= this.maxAge;
-    };
-
     Particle.prototype.draw = function () {
-        var life = 1 - (this.age / this.maxAge);
+        if (this.age >= this.life) return;
+        var alpha = Math.max(0, 1 - (this.age / this.life));
         ctx.save();
-        ctx.globalAlpha = life * life;
-        var r = this.r * (0.3 + life * 0.7);
-
-        /* Glow */
-        var g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, r * 2.5);
-        g.addColorStop(0, this.color);
-        g.addColorStop(1, hexWithAlpha(this.color, 0));
+        ctx.fillStyle = hexWithAlpha(this.color, alpha * 0.8);
         ctx.beginPath();
-        ctx.arc(this.x, this.y, r * 2.5, 0, Math.PI * 2);
-        ctx.fillStyle = g;
-        ctx.fill();
-
-        /* Core */
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
-        ctx.fillStyle = lighten(this.color, 0.3);
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
     };
 
-    /* ══════════════════════════════════════════════════════════════════════
-       CANVAS RESIZE
-    ══════════════════════════════════════════════════════════════════════ */
-    function resizeCanvas() {
-        var rect = canvasWrap.getBoundingClientRect();
-        var dpr  = window.devicePixelRatio || 1;
-        var w    = rect.width;
-        var h    = Math.round(w * (520 / 600));
-        canvas.width  = w * dpr;
-        canvas.height = h * dpr;
-        canvas.style.width  = w + 'px';
-        canvas.style.height = h + 'px';
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        positionNeurons(w, h);
+    /* ══════════════════════════════════════════════════════════════════
+       HELPERS
+    ══════════════════════════════════════════════════════════════════ */
+
+    function lighten(hex, amt) {
+        var rgb = hexToRgb(hex);
+        var max = 255;
+        rgb.r = Math.min(max, Math.round(rgb.r + (max - rgb.r) * amt));
+        rgb.g = Math.min(max, Math.round(rgb.g + (max - rgb.g) * amt));
+        rgb.b = Math.min(max, Math.round(rgb.b + (max - rgb.b) * amt));
+        return rgbToHex(rgb.r, rgb.g, rgb.b);
     }
 
-    function canvasSize() {
-        return {
-            w: canvas.width  / (window.devicePixelRatio || 1),
-            h: canvas.height / (window.devicePixelRatio || 1)
-        };
-    }
-
-    /* ══════════════════════════════════════════════════════════════════════
-       NEURON POSITIONING
-    ══════════════════════════════════════════════════════════════════════ */
-    function positionNeurons(w, h) {
-        if (!app.neurons.length) { return; }
-        var padX = w * 0.09;
-        var padY = h * 0.11;
-        for (var i = 0; i < app.neurons.length; i++) {
-            var n = app.neurons[i];
-            n.x = padX + n.nx * (w - padX * 2);
-            n.y = padY + n.ny * (h - padY * 2);
-        }
-    }
-
-    /* ══════════════════════════════════════════════════════════════════════
-       INIT NETWORK
-    ══════════════════════════════════════════════════════════════════════ */
-    function initNetwork() {
-        app.neurons     = [];
-        app.connections = [];
-        app.particles   = [];
-        app.totalExplosions = 0;
-        app.shakeFrames = 0;
-        app.shakeIntensity = 0;
-        app.connectedCount = 0;
-        app.conflictTimer = 0;
-        app.conflictLockUntil = 0;
-
-        var size = canvasSize();
-        var padX = size.w * 0.09;
-        var padY = size.h * 0.11;
-        var spanW = size.w - padX * 2;
-        var spanH = size.h - padY * 2;
-        var minDist = Math.max(MIN_SCATTER_SPACING_PX, Math.min(size.w, size.h) * SCATTER_SPACING_SCALE);
-
-        for (var i = 0; i < TOTAL; i++) {
-            var nx = 0.5;
-            var ny = 0.5;
-            var attempts = 0;
-            while (attempts < MAX_PLACEMENT_ATTEMPTS) {
-                nx = Math.random();
-                ny = Math.random();
-                var testX = padX + nx * spanW;
-                var testY = padY + ny * spanH;
-                var blocked = false;
-                for (var j = 0; j < app.neurons.length; j++) {
-                    var ex = app.neurons[j].x;
-                    var ey = app.neurons[j].y;
-                    if (Math.hypot(testX - ex, testY - ey) < minDist) {
-                        blocked = true;
-                        break;
-                    }
-                }
-                if (!blocked) { break; }
-                attempts++;
-            }
-            var x = padX + nx * spanW;
-            var y = padY + ny * spanH;
-            var color = PALETTE[Math.floor(Math.random() * PALETTE.length)];
-            var neuron = new Neuron(i, x, y, color);
-            neuron.nx = nx;
-            neuron.ny = ny;
-            app.neurons.push(neuron);
-        }
-
-        updateStats();
-        addLog('Equilibrium restored — 30 neurons in standby', 'blend');
-    }
-
-    /* ══════════════════════════════════════════════════════════════════════
-       EXPLOSION SYSTEM
-    ══════════════════════════════════════════════════════════════════════ */
-    function triggerExplosion(neuron, power, depth) {
-        if (!neuron.alive) { return; }
-        if (depth === undefined) { depth = 0; }
-        if (depth > MAX_CASCADE_DEPTH) { return; } /* prevent infinite cascade */
-
-        neuron.alive = false;
-        neuron.connected = false;
-        app.totalExplosions++;
-
-        emitParticles(neuron, power);
-
-        /* Screen shake */
-        var shakeMag = (0.35 + (power / 100) * 0.65) * 12 * (1 - depth * 0.15);
-        app.shakeFrames    = Math.max(app.shakeFrames,    Math.round(14 - depth * 2));
-        app.shakeIntensity = Math.max(app.shakeIntensity, shakeMag);
-
-        /* Flash overlay */
-        if (depth === 0) {
-            var flashAlpha = 0.12 + (power / 100) * 0.28;
-            flashOverlay.style.opacity = flashAlpha;
-            setTimeout(function () { flashOverlay.style.opacity = 0; }, 80);
-        }
-
-        /* Damage radius scales with power */
-        var damageRadius = app.connectedRadius * DAMAGE_RADIUS_MULTIPLIER + DAMAGE_RADIUS_BASE;
-
-        /* Cascade to neighbours */
-        for (var i = 0; i < app.neurons.length; i++) {
-            var nb = app.neurons[i];
-            if (!nb.alive || nb === neuron) { continue; }
-            var dist = Math.hypot(nb.x - neuron.x, nb.y - neuron.y);
-            if (dist <= damageRadius) {
-                var damage = (1 - dist / damageRadius) * power * 0.008;
-                nb.health -= damage;
-                if (nb.health <= 0 || isEnemyPair(neuron.color, nb.color)) {
-                    /* Cascade — slight delay for visual effect */
-                    (function (n, d) {
-                        setTimeout(function () {
-                            triggerExplosion(n, power * 0.75, d + 1);
-                            updateStats();
-                        }, 80 + d * 40);
-                    })(nb, depth);
-                }
-            }
-        }
-
-        /* Remove connections to dead neuron */
-        app.connections = app.connections.filter(function (c) {
-            return c.a.alive && c.b.alive;
-        });
-
-        updateStats();
-    }
-
-    function emitParticles(neuron, power) {
-        var t      = power / 100;
-        var count  = Math.round(MIN_PARTICLES + t * (MAX_PARTICLES - MIN_PARTICLES));
-        var speed  = MIN_PART_SPEED + t * (MAX_PART_SPEED - MIN_PART_SPEED);
-        var rMax   = MIN_PART_R    + t * (MAX_PART_R    - MIN_PART_R);
-        var maxAge = 0.6 + t * 0.8;
-
-        for (var i = 0; i < count; i++) {
-            var angle = Math.random() * Math.PI * 2;
-            var s     = (0.4 + Math.random() * 0.6) * speed;
-            app.particles.push(new Particle(
-                neuron.x + (Math.random() - 0.5) * 4,
-                neuron.y + (Math.random() - 0.5) * 4,
-                Math.cos(angle) * s,
-                Math.sin(angle) * s,
-                neuron.color,
-                MIN_PART_R + Math.random() * (rMax - MIN_PART_R),
-                maxAge
-            ));
-        }
-
-        /* Extra bright core burst */
-        for (var j = 0; j < Math.round(count * 0.3); j++) {
-            var a2 = Math.random() * Math.PI * 2;
-            var s2 = speed * (0.1 + Math.random() * 0.3);
-            app.particles.push(new Particle(
-                neuron.x, neuron.y,
-                Math.cos(a2) * s2, Math.sin(a2) * s2,
-                lighten(neuron.color, 0.6),
-                rMax * 0.6,
-                maxAge * 0.5
-            ));
-        }
-    }
-
-    /* ══════════════════════════════════════════════════════════════════════
-       HIT DETECTION
-    ══════════════════════════════════════════════════════════════════════ */
-    function neuronAt(px, py) {
-        var bestDist = Infinity;
-        var best     = null;
-        var hitR     = Math.max(app.connectedRadius, BASE_NEURON_RADIUS) * 1.6;
-        for (var i = 0; i < app.neurons.length; i++) {
-            var n = app.neurons[i];
-            if (!n.alive) { continue; }
-            var d = Math.hypot(px - n.x, py - n.y);
-            if (d < hitR && d < bestDist) {
-                bestDist = d;
-                best     = n;
-            }
-        }
-        return best;
-    }
-
-    function hasConnection(a, b) {
-        for (var i = 0; i < app.connections.length; i++) {
-            var c = app.connections[i];
-            if ((c.a === a && c.b === b) || (c.a === b && c.b === a)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    function safeBlendColor(colorA, colorB) {
-        var keyAB = colorA + colorB;
-        var keyBA = colorB + colorA;
-        return SAFE_BLENDS[keyAB] || SAFE_BLENDS[keyBA] || blendColors(colorA, colorB, 0.5);
-    }
-
-    function detectProximityConflicts() {
-        if (Date.now() < app.conflictLockUntil) { return false; }
-        for (var i = 0; i < app.neurons.length; i++) {
-            var a = app.neurons[i];
-            if (!a.alive || !a.connected) { continue; }
-            for (var j = i + 1; j < app.neurons.length; j++) {
-                var b = app.neurons[j];
-                if (!b.alive || !b.connected) { continue; }
-                if (!isEnemyPair(a.color, b.color)) { continue; }
-                if (Math.hypot(a.x - b.x, a.y - b.y) > CONFLICT_PROXIMITY_PX) { continue; }
-                app.conflictLockUntil = Date.now() + 320;
-                addLog('⚠ PROXIMITY CONFLICT: ' + a.id + ' near ' + b.id, 'boom');
-                triggerExplosion(a, app.power);
-                setTimeout(function (n) {
-                    if (n.alive) {
-                        triggerExplosion(n, app.power * 0.9);
-                        updateStats();
-                    }
-                }, 70, b);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /* ══════════════════════════════════════════════════════════════════════
-       CONNECT NEURONS
-    ══════════════════════════════════════════════════════════════════════ */
-    function connectNeurons(a, b) {
-        if (!a.alive || !b.alive) { return; }
-        if (a === b)              { return; }
-        if (hasConnection(a, b))  { return; }
-        if (!a.connected || b.connected) { return; }
-
-        var blend = safeBlendColor(a.color, b.color);
-        a.startBlend(blend);
-        b.startBlend(blend);
-        b.connected = true;
-        app.connections.push(new Connection(a, b));
-        addLog('Connected ' + a.id + ' → ' + b.id + ' · ' + blend.toUpperCase(), 'blend');
-        updateStats();
-    }
-
-    /* ══════════════════════════════════════════════════════════════════════
-       STATS UPDATE
-    ══════════════════════════════════════════════════════════════════════ */
-    function updateStats() {
-        var dead = 0;
-        var connected = 0;
-        var colorSet = {};
-        for (var i = 0; i < app.neurons.length; i++) {
-            if (!app.neurons[i].alive) { dead++; }
-            else {
-                colorSet[app.neurons[i].color.slice(1)] = 1;
-                if (app.neurons[i].connected) { connected++; }
-            }
-        }
-        var stability  = Math.max(0, 100 - Math.round((dead / TOTAL) * 100));
-        var uniqueCol  = Object.keys(colorSet).length;
-        var activeConn = app.connections.filter(function (c) {
-            return c.a.alive && c.b.alive;
-        }).length;
-        app.connectedCount = connected;
-
-        statConnEl.textContent  = activeConn;
-        statConnectedEl.textContent = connected;
-        statDeadEl.textContent  = dead;
-        statExpEl.textContent   = app.totalExplosions;
-        statStabEl.textContent  = stability + '%';
-        stabBar.style.width     = stability + '%';
-        stabBar.style.background =
-            stability > 70 ? 'var(--electric-green)' :
-            stability > 35 ? 'var(--electric-yellow)' :
-                             'var(--electric-red)';
-        statStabEl.className = 'stat-value ' +
-            (stability > 70 ? 'green' : stability > 35 ? 'amber' : 'red');
-
-        statColEl.textContent = uniqueCol;
-
-        var p = app.power;
-        statPowerEl.textContent = p + '%';
-        powerBar.style.width    = p + '%';
-        powerBar.style.background =
-            p > 70 ? 'var(--electric-red)' :
-            p > 35 ? 'var(--electric-yellow)' :
-                     'var(--electric-cyan)';
-
-        statusBadge.textContent =
-            dead === TOTAL ? 'FLATLINE' :
-            connected === 0 ? 'Equilibrium' :
-            stability < 50 ? 'Critical' :
-            stability < 80 ? 'Unstable' : 'Active';
-    }
-
-    /* ══════════════════════════════════════════════════════════════════════
-       EVENT LOG
-    ══════════════════════════════════════════════════════════════════════ */
-    var logStartTime = Date.now();
-    function addLog(msg, type) {
-        var elapsed = ((Date.now() - logStartTime) / 1000).toFixed(1);
-        var entry = document.createElement('div');
-        entry.className = 'log-entry';
-        entry.innerHTML =
-            '<span class="log-time">+' + elapsed + 's</span>' +
-            '<span class="log-msg ' + (type || '') + '">' + msg + '</span>';
-        eventLog.insertBefore(entry, eventLog.firstChild);
-        /* Trim log */
-        while (eventLog.children.length > 30) {
-            eventLog.removeChild(eventLog.lastChild);
-        }
-    }
-
-    /* ══════════════════════════════════════════════════════════════════════
-       RENDERING HELPERS
-    ══════════════════════════════════════════════════════════════════════ */
     function hexWithAlpha(hex, alpha) {
-        var c = hexToRgb(hex);
-        return 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + alpha + ')';
+        var rgb = hexToRgb(hex);
+        return 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',' + alpha + ')';
     }
 
-    function lighten(hex, amount) {
-        var c = hexToRgb(hex);
-        return rgbToHex(
-            c.r + (255 - c.r) * amount,
-            c.g + (255 - c.g) * amount,
-            c.b + (255 - c.b) * amount
-        );
+    function distance(x1, y1, x2, y2) {
+        var dx = x1 - x2, dy = y1 - y2;
+        return Math.sqrt(dx*dx + dy*dy);
     }
 
-    /* ══════════════════════════════════════════════════════════════════════
-       MAIN RENDER LOOP
-    ══════════════════════════════════════════════════════════════════════ */
-    var lastTime = 0;
+    function randomInRange(min, max) {
+        return min + Math.random() * (max - min);
+    }
 
-    function frame(ts) {
-        var dt = Math.min((ts - lastTime) / 1000, 0.05);
-        lastTime = ts;
+    /* ══════════════════════════════════════════════════════════════════
+       INIT
+    ══════════════════════════════════════════════════════════════════ */
 
-        var size = canvasSize();
+    function initNeurons() {
+        app.neurons = [];
+        app.connections = [];
+        app.particles = [];
+        app.connectedCount = 0;
+        app.totalExplosions = 0;
 
-        /* Screen shake */
-        var sx = 0, sy = 0;
-        if (app.shakeFrames > 0) {
-            sx = (Math.random() - 0.5) * app.shakeIntensity * 2;
-            sy = (Math.random() - 0.5) * app.shakeIntensity * 2;
-            app.shakeFrames--;
-            if (app.shakeFrames <= 0) { app.shakeIntensity = 0; }
-        }
+        var width = canvas.width, height = canvas.height;
+        var placed = 0;
 
-        ctx.save();
-        ctx.translate(sx, sy);
+        for (var attempt = 0; attempt < MAX_PLACEMENT_ATTEMPTS && placed < TOTAL; attempt++) {
+            var x = Math.random() * (width - 60) + 30;
+            var y = Math.random() * (height - 60) + 30;
 
-        /* Clear */
-        ctx.clearRect(-Math.abs(sx) - 2, -Math.abs(sy) - 2,
-            size.w + Math.abs(sx) * 2 + 4, size.h + Math.abs(sy) * 2 + 4);
-
-        /* Background */
-        ctx.fillStyle = '#060f1c';
-        ctx.fillRect(-Math.abs(sx) - 2, -Math.abs(sy) - 2,
-            size.w + Math.abs(sx) * 2 + 4, size.h + Math.abs(sy) * 2 + 4);
-
-        /* Update & draw connections */
-        for (var ci = app.connections.length - 1; ci >= 0; ci--) {
-            var conn = app.connections[ci];
-            if (!conn.a.alive || !conn.b.alive) {
-                app.connections.splice(ci, 1);
-                continue;
+            var tooClose = false;
+            for (var i = 0; i < app.neurons.length; i++) {
+                var n = app.neurons[i];
+                var minDist = MIN_SCATTER_SPACING_PX + (TOTAL - placed) * SCATTER_SPACING_SCALE;
+                if (distance(x, y, n.x, n.y) < minDist) {
+                    tooClose = true;
+                    break;
+                }
             }
-            conn.update(dt);
-            conn.draw();
-        }
 
-        /* Drag line */
-        if (app.isDragging && app.dragFrom && app.dragFrom.alive) {
-            ctx.save();
-            ctx.globalAlpha = 0.65;
-            ctx.beginPath();
-            ctx.moveTo(app.dragFrom.x, app.dragFrom.y);
-            ctx.lineTo(app.dragX, app.dragY);
-            ctx.strokeStyle = app.dragFrom.color;
-            ctx.lineWidth = 2;
-            ctx.setLineDash([6, 5]);
-            ctx.lineDashOffset = -(Date.now() / 50) % 11;
-            ctx.stroke();
-            ctx.setLineDash([]);
-            ctx.restore();
-        }
-
-        /* Update & draw neurons */
-        for (var ni = 0; ni < app.neurons.length; ni++) {
-            app.neurons[ni].update(dt);
-            app.neurons[ni].draw();
-        }
-
-        app.conflictTimer += dt;
-        if (app.conflictTimer >= PROXIMITY_CHECK_INTERVAL) {
-            app.conflictTimer = 0;
-            detectProximityConflicts();
-        }
-
-        /* Update & draw particles */
-        for (var pi = app.particles.length - 1; pi >= 0; pi--) {
-            var part = app.particles[pi];
-            part.update(dt);
-            if (part.isDead()) {
-                app.particles.splice(pi, 1);
-            } else {
-                part.draw();
+            if (!tooClose) {
+                var colorIdx = Math.floor(Math.random() * PALETTE.length);
+                app.neurons.push(new Neuron(placed, x, y, PALETTE[colorIdx]));
+                placed++;
             }
         }
 
-        ctx.restore();
-        app.raf = requestAnimationFrame(frame);
+        updateStats();
+        addLog('INIT', 'Network initialized with ' + placed + ' neurons');
     }
 
-    function drawGrid(w, h) {
-        var step = 40;
-        ctx.save();
-        ctx.strokeStyle = 'rgba(126,226,255,0.03)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        for (var gx = 0; gx <= w; gx += step) {
-            ctx.moveTo(gx, 0); ctx.lineTo(gx, h);
-        }
-        for (var gy = 0; gy <= h; gy += step) {
-            ctx.moveTo(0, gy); ctx.lineTo(w, gy);
-        }
-        ctx.stroke();
-        ctx.restore();
-    }
+    /* ══════════════════════════════════════════════════════════════════
+       CONNECTION LOGIC
+    ══════════════════════════════════════════════════════════════════ */
 
-    /* ══════════════════════════════════════════════════════════════════════
-       POINTER EVENTS
-    ══════════════════════════════════════════════════════════════════════ */
-    function getCanvasPos(e) {
-        var rect = canvas.getBoundingClientRect();
-        var touch = e.touches ? e.touches[0] : e;
-        return {
-            x: (touch.clientX - rect.left),
-            y: (touch.clientY - rect.top)
-        };
-    }
-
-    canvas.addEventListener('pointerdown', function (e) {
-        e.preventDefault();
-        var pos = getCanvasPos(e);
-        var n   = neuronAt(pos.x, pos.y);
-        if (n) {
-            if (app.connectedCount === 0 && n.alive) {
-                n.connected = true;
-                addLog('Seeded network at neuron ' + n.id, 'blend');
-                updateStats();
+    function findNeuronAt(x, y, radius) {
+        for (var i = app.neurons.length - 1; i >= 0; i--) {
+            var n = app.neurons[i];
+            var r = n.connected ? app.connectedRadius : BASE_NEURON_RADIUS;
+            if (distance(x, y, n.x, n.y) <= r + radius) {
+                return n;
             }
-            if (!n.connected) {
-                addLog('Can only connect from neurons already in your network.', '');
+        }
+        return null;
+    }
+
+    function connectNeurons(source, target) {
+        if (!source || !target || source === target) return;
+
+        /* Mark both as connected */
+        if (!source.connected) {
+            source.connected = true;
+            app.connectedCount++;
+        }
+        if (!target.connected) {
+            target.connected = true;
+            app.connectedCount++;
+        }
+
+        /* Already connected? */
+        for (var i = 0; i < app.connections.length; i++) {
+            if ((app.connections[i].a === source && app.connections[i].b === target) ||
+                (app.connections[i].a === target && app.connections[i].b === source)) {
                 return;
             }
-            app.isDragging = true;
-            app.dragFrom   = n;
-            app.dragX      = pos.x;
-            app.dragY      = pos.y;
-            canvas.setPointerCapture(e.pointerId);
         }
-    });
 
-    canvas.addEventListener('pointermove', function (e) {
-        if (!app.isDragging) { return; }
-        e.preventDefault();
-        var pos  = getCanvasPos(e);
-        app.dragX = pos.x;
-        app.dragY = pos.y;
-    });
+        /* Create connection */
+        app.connections.push(new Connection(source, target));
 
-    canvas.addEventListener('pointerup', function (e) {
-        if (!app.isDragging) { return; }
-        e.preventDefault();
-        var pos = getCanvasPos(e);
-        var n   = neuronAt(pos.x, pos.y);
-        if (n && n !== app.dragFrom && app.dragFrom && app.dragFrom.connected) {
-            connectNeurons(app.dragFrom, n);
+        /* Blend colors */
+        var blended = blendColors(source.color, target.color, 0.5);
+        source.startBlend(blended);
+        target.startBlend(blended);
+
+        addLog('BLEND', 'Connected ' + source.id + ' ↔ ' + target.id);
+        updateStats();
+    }
+
+    /* ══════════════════════════════════════════════════════════════════
+       EXPLOSION LOGIC
+    ══════════════════════════════════════════════════════════════════ */
+
+    function triggerExplosion(neuron, powerMult, depth) {
+        if (!depth) depth = 0;
+        if (depth > MAX_CASCADE_DEPTH) return;
+        if (!neuron.alive) return;
+
+        neuron.alive = false;
+        app.totalExplosions++;
+
+        /* Particles */
+        var particleCount = Math.round(MIN_PARTICLES + (MAX_PARTICLES - MIN_PARTICLES) * (app.power / 100));
+        var particleSpeed = MIN_PART_SPEED + (MAX_PART_SPEED - MIN_PART_SPEED) * (app.power / 100);
+        var particleRadius = MIN_PART_R + (MAX_PART_R - MIN_PART_R) * (app.power / 100);
+
+        for (var i = 0; i < particleCount; i++) {
+            var angle = Math.random() * Math.PI * 2;
+            var speed = randomInRange(particleSpeed * 0.5, particleSpeed);
+            var vx = Math.cos(angle) * speed;
+            var vy = Math.sin(angle) * speed - particleSpeed * 0.3;
+            var r = randomInRange(particleRadius * 0.6, particleRadius);
+            app.particles.push(new Particle(neuron.x, neuron.y, vx, vy, neuron.color, r));
         }
-        app.isDragging = false;
-        app.dragFrom   = null;
+
+        /* Screen shake */
+        app.shakeIntensity = Math.max(app.shakeIntensity, (app.power / 100) * 8);
+        app.shakeFrames = Math.max(app.shakeFrames, Math.round((app.power / 100) * 12));
+
+        /* Flash overlay */
+        flashOverlay.style.opacity = '0.35';
+
+        /* Damage nearby neurons */
+        var dmgRadius = DAMAGE_RADIUS_BASE + (app.power / 100) * DAMAGE_RADIUS_MULTIPLIER * 80;
+
+        for (var j = 0; j < app.neurons.length; j++) {
+            var n = app.neurons[j];
+            if (!n.alive || n === neuron) continue;
+
+            var dist = distance(neuron.x, neuron.y, n.x, n.y);
+            if (dist < dmgRadius) {
+                var dmg = 0.4 + (1 - (dist / dmgRadius)) * 0.6;
+                n.health = Math.max(0, n.health - dmg);
+
+                if (n.health <= 0) {
+                    triggerExplosion(n, powerMult * 0.9, depth + 1);
+                }
+            }
+        }
+
+        updateStats();
+    }
+
+    /* ══════════════════════════════════════════════════════════════════
+       PROXIMITY CONFLICT CHECK
+    ══════════════════════════════════════════════════════════════════ */
+
+    function checkConflicts() {
+        if (app.conflictLockUntil > app.conflictTimer) return;
+
+        for (var i = 0; i < app.neurons.length; i++) {
+            if (!app.neurons[i].alive) continue;
+
+            for (var j = i + 1; j < app.neurons.length; j++) {
+                var n2 = app.neurons[j];
+                if (!n2.alive) continue;
+
+                var dist = distance(app.neurons[i].x, app.neurons[i].y, n2.x, n2.y);
+
+                if (dist < CONFLICT_PROXIMITY_PX) {
+                    if (isEnemyPair(app.neurons[i].color, n2.color)) {
+                        triggerExplosion(app.neurons[i], 1, 0);
+                        triggerExplosion(n2, 1, 0);
+                        app.conflictLockUntil = app.conflictTimer + 0.4;
+                        addLog('BOOM', 'Enemy pair collision!');
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    /* ══════════════════════════════════════════════════════════════════
+       STATS & UI
+    ══════════════════════════════════════════════════════════════════ */
+
+    function updateStats() {
+        var connCount = 0;
+        for (var i = 0; i < app.connections.length; i++) {
+            if (app.connections[i].a.alive && app.connections[i].b.alive) {
+                connCount++;
+            }
+        }
+        statConnEl.textContent = connCount;
+
+        var deadCount = 0;
+        var uniqueColors = {};
+        for (var i = 0; i < app.neurons.length; i++) {
+            if (!app.neurons[i].alive) {
+                deadCount++;
+            } else {
+                uniqueColors[app.neurons[i].color] = true;
+            }
+        }
+        statConnectedEl.textContent = app.connectedCount;
+        statDeadEl.textContent = deadCount;
+        statExpEl.textContent = app.totalExplosions;
+
+        var stability = Math.max(0, 100 - (deadCount / TOTAL * 100));
+        stabBar.style.width = stability + '%';
+        statStabEl.textContent = Math.round(stability) + '%';
+
+        statPowerEl.textContent = app.power + '%';
+        powerBar.style.width = app.power + '%';
+
+        var colorCount = Object.keys(uniqueColors).length;
+        statColEl.textContent = colorCount;
+    }
+
+    function addLog(prefix, msg) {
+        var now = new Date();
+        var time = ('0' + now.getHours()).slice(-2) + ':' + ('0' + now.getMinutes()).slice(-2) + ':' + ('0' + now.getSeconds()).slice(-2);
+        var entry = document.createElement('div');
+        entry.className = 'log-entry';
+        entry.innerHTML = '<span class="log-time">[' + time + ']</span> <span class="log-msg ' + (prefix === 'BOOM' ? 'boom' : prefix === 'BLEND' ? 'blend' : '') + '">' + prefix + ': ' + msg + '</span>';
+        eventLog.appendChild(entry);
+        eventLog.scrollTop = eventLog.scrollHeight;
+
+        while (eventLog.children.length > 12) {
+            eventLog.removeChild(eventLog.firstChild);
+        }
+    }
+
+    /* ══════════════════════════════════════════════════════════════════
+       EVENTS
+    ══════════════════════════════════════════════════════════════════ */
+
+    canvas.addEventListener('mousedown', function (e) {
+        var rect = canvas.getBoundingClientRect();
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+
+        var neuron = findNeuronAt(x, y, 2);
+        if (!neuron || !neuron.alive) return;
+
+        /* Can only drag from connected neurons or first one */
+        if (!neuron.connected && app.connectedCount === 0) {
+            neuron.connected = true;
+            app.connectedCount++;
+            updateStats();
+            addLog('SEED', 'Network seeded at neuron ' + neuron.id);
+        } else if (!neuron.connected) {
+            return;
+        }
+
+        app.dragFrom = neuron;
+        app.isDragging = true;
+        app.dragX = x;
+        app.dragY = y;
     });
 
-    canvas.addEventListener('pointercancel', function () {
-        app.isDragging = false;
-        app.dragFrom   = null;
+    canvas.addEventListener('mousemove', function (e) {
+        var rect = canvas.getBoundingClientRect();
+        app.dragX = e.clientX - rect.left;
+        app.dragY = e.clientY - rect.top;
     });
 
-    /* ══════════════════════════════════════════════════════════════════════
-       CONTROLS
-    ══════════════════════════════════════════════════════════════════════ */
+    canvas.addEventListener('mouseup', function (e) {
+        if (!app.isDragging || !app.dragFrom) {
+            app.isDragging = false;
+            app.dragFrom = null;
+            return;
+        }
+
+        var rect = canvas.getBoundingClientRect();
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+
+        var targetNeuron = findNeuronAt(x, y, 4);
+        if (targetNeuron && targetNeuron.alive && targetNeuron !== app.dragFrom) {
+            connectNeurons(app.dragFrom, targetNeuron);
+        }
+
+        app.isDragging = false;
+        app.dragFrom = null;
+    });
+
     powerSlider.addEventListener('input', function () {
         app.power = parseInt(this.value, 10);
         powerValueEl.textContent = app.power + '%';
@@ -1615,41 +1365,103 @@
     });
 
     sizeSlider.addEventListener('input', function () {
-        app.connectedRadius = parseInt(this.value, 10);
-        /* Compute label from slider range: min=10, max=28, step=2 → 10 steps */
-        var min   = parseInt(sizeSlider.min, 10);
-        var step  = parseInt(sizeSlider.step, 10);
-        var val   = parseInt(this.value, 10);
-        var LABELS = ['XS', 'Sm', 'Med', 'Lg', 'XL', 'XXL', '3XL', 'Max'];
-        var idx   = Math.round((val - min) / step);
-        sizeValueEl.textContent = LABELS[Math.min(idx, LABELS.length - 1)];
+        var sz = parseInt(this.value, 10);
+        app.connectedRadius = sz;
+        var labels = ['Tiny', 'Small', 'Med', 'Large', 'Huge'];
+        var idx = Math.floor((sz - 10) / (28 - 10) * (labels.length - 1));
+        sizeValueEl.textContent = labels[Math.max(0, Math.min(labels.length - 1, idx))];
     });
 
     resetBtn.addEventListener('click', function () {
-        cancelAnimationFrame(app.raf);
-        initNetwork();
-        logStartTime = Date.now();
-        lastTime = 0;
-        app.raf = requestAnimationFrame(frame);
+        initNeurons();
+        addLog('RESET', 'Network reset');
     });
 
-    /* ══════════════════════════════════════════════════════════════════════
-       RESIZE
-    ══════════════════════════════════════════════════════════════════════ */
-    var resizeTimer = null;
-    window.addEventListener('resize', function () {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(function () { resizeCanvas(); }, 100);
-    });
+    /* ══════════════════════════════════════════════════════════════════
+       RENDER & ANIMATION
+    ══════════════════════════════════════════════════════════════════ */
 
-    /* ══════════════════════════════════════════════════════════════════════
-       BOOTSTRAP
-    ══════════════════════════════════════════════════════════════════════ */
-    resizeCanvas();
-    initNetwork();
-    app.raf = requestAnimationFrame(frame);
+    var lastTime = Date.now();
+
+    function animate() {
+        var now = Date.now();
+        var dt = Math.min((now - lastTime) / 1000, 0.016); /* clamp to 60fps */
+        lastTime = now;
+
+        app.conflictTimer += dt;
+
+        /* Update */
+        for (var i = 0; i < app.neurons.length; i++) {
+            app.neurons[i].update(dt);
+        }
+        for (var i = 0; i < app.connections.length; i++) {
+            app.connections[i].update(dt);
+        }
+        for (var i = 0; i < app.particles.length; i++) {
+            app.particles[i].update(dt);
+        }
+
+        /* Check conflicts every PROXIMITY_CHECK_INTERVAL */
+        if (Math.floor(app.conflictTimer / PROXIMITY_CHECK_INTERVAL) > Math.floor((app.conflictTimer - dt) / PROXIMITY_CHECK_INTERVAL)) {
+            checkConflicts();
+        }
+
+        /* Decay shake */
+        if (app.shakeFrames > 0) {
+            app.shakeFrames--;
+        } else {
+            app.shakeIntensity *= 0.92;
+        }
+
+        /* Decay flash */
+        flashOverlay.style.opacity = Math.max(0, parseFloat(flashOverlay.style.opacity) - dt * 1.4);
+
+        /* Clear canvas */
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        /* Apply shake */
+        if (app.shakeIntensity > 0.01) {
+            ctx.save();
+            var sx = (Math.random() - 0.5) * app.shakeIntensity;
+            var sy = (Math.random() - 0.5) * app.shakeIntensity;
+            ctx.translate(sx, sy);
+        }
+
+        /* Draw connections */
+        for (var i = 0; i < app.connections.length; i++) {
+            app.connections[i].draw();
+        }
+
+        /* Draw neurons */
+        for (var i = 0; i < app.neurons.length; i++) {
+            app.neurons[i].draw();
+        }
+
+        /* Draw particles */
+        for (var i = app.particles.length - 1; i >= 0; i--) {
+            if (app.particles[i].age >= app.particles[i].life) {
+                app.particles.splice(i, 1);
+            } else {
+                app.particles[i].draw();
+            }
+        }
+
+        if (app.shakeIntensity > 0.01) {
+            ctx.restore();
+        }
+
+        app.raf = requestAnimationFrame(animate);
+    }
+
+    /* ══════════════════════════════════════════════════════════════════
+       START
+    ══════════════════════════════════════════════════════════════════ */
+
+    initNeurons();
+    animate();
 
 })();
 </script>
+
 </body>
 </html>
