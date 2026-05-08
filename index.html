@@ -233,6 +233,9 @@
 
         /* Electric Bolt Animation */
         @keyframes dash {
+            from {
+                stroke-dashoffset: 1000;
+            }
             to {
                 stroke-dashoffset: 0;
             }
@@ -241,20 +244,19 @@
         .electric-bolt {
             stroke-dasharray: 1000;
             stroke-dashoffset: 1000;
-            animation: dash 3s linear infinite;
+            animation: dash 0.8s ease-out forwards;
         }
 
-        .electric-bolt-delay-1 { animation-delay: -1.5s; }
-        .electric-bolt-delay-2 { animation-delay: -0.5s; }
-        .electric-bolt-delay-3 { animation-delay: -2.2s; }
+        .electric-card-delay-1 .electric-bolt { animation-delay: 0.1s; }
+        .electric-card-delay-2 .electric-bolt { animation-delay: 0.3s; }
+        .electric-card-delay-3 .electric-bolt { animation-delay: 0.5s; }
 
         .electric-card-svg {
             position: absolute;
-            inset: -16px;
-            width: calc(100% + 32px);
-            height: calc(100% + 32px);
+            inset: -4px;
             pointer-events: none;
             overflow: visible;
+            z-index: 0;
         }
 
         /* Smokey Hover Effect */
@@ -685,6 +687,11 @@
             isolation: isolate;
             overflow: visible;
             animation: slideInLeft 0.7s ease-out both;
+        }
+
+        .experience-item .card {
+            position: relative;
+            z-index: 20;
         }
 
         .experience-item:nth-of-type(even) {
@@ -1231,66 +1238,72 @@
                 </div>
 
                 <div class="experience-item smokey-hover">
-                    <svg class="electric-card-svg" aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 500 200">
+                    <svg class="electric-card-svg electric-card-delay-1" aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 500 200">
                         <path class="electric-bolt" d="M 20 20 L 480 20 L 480 180 L 20 180 Z" fill="none" filter="url(#glow-blue)" stroke="#6bc7ff" stroke-width="1.5"></path>
-                        <path class="electric-bolt electric-bolt-delay-1" d="M 15 25 L 15 50 L 5 60 L 15 70 L 15 150 L 25 160 L 15 175" fill="none" filter="url(#glow-cyan)" stroke="#7ee2ff" stroke-width="1"></path>
+                        <path class="electric-bolt" d="M 15 25 L 15 50 L 5 60 L 15 70 L 15 150 L 25 160 L 15 175" fill="none" filter="url(#glow-cyan)" stroke="#7ee2ff" stroke-width="1"></path>
                     </svg>
-                    <div class="exp-header">
-                        <div>
-                            <div class="exp-title">Sr. Unreal Engine Developer · Data Visualization Consultant</div>
-                            <div class="exp-company">Logistics Management Institute (LMI)<span class="separator">·</span>Tysons, VA</div>
+                    <div class="card">
+                        <div class="exp-header">
+                            <div>
+                                <div class="exp-title">Sr. Unreal Engine Developer · Data Visualization Consultant</div>
+                                <div class="exp-company">Logistics Management Institute (LMI)<span class="separator">·</span>Tysons, VA</div>
+                            </div>
+                            <div class="exp-period">Jul 2023 — Present</div>
                         </div>
-                        <div class="exp-period">Jul 2023 — Present</div>
+                        <ul class="exp-bullets">
+                            <li>Designed and shipped <strong>data visualization software for SWAC</strong>, surfacing actionable intelligence on space defense systems for analyst and command audiences.</li>
+                            <li>Integrated complex, multi-source datasets into real-time visual representations of defense assets across the air, land, sea, and space domains.</li>
+                            <li>Built immersive virtual production pipelines in Unreal Engine 5, leveraging real-time rendering, custom VFX, and live-driven cinematic workflows.</li>
+                            <li>Led development of a <strong>satellite-data visualization platform</strong> used to communicate connectivity and capability gaps directly to funding decision-makers.</li>
+                            <li>Produced high-impact briefing media for military clients, combining advanced graphics, motion design, and narrative pacing tailored for executive audiences.</li>
+                        </ul>
                     </div>
-                    <ul class="exp-bullets">
-                        <li>Designed and shipped <strong>data visualization software for SWAC</strong>, surfacing actionable intelligence on space defense systems for analyst and command audiences.</li>
-                        <li>Integrated complex, multi-source datasets into real-time visual representations of defense assets across the air, land, sea, and space domains.</li>
-                        <li>Built immersive virtual production pipelines in Unreal Engine 5, leveraging real-time rendering, custom VFX, and live-driven cinematic workflows.</li>
-                        <li>Led development of a <strong>satellite-data visualization platform</strong> used to communicate connectivity and capability gaps directly to funding decision-makers.</li>
-                        <li>Produced high-impact briefing media for military clients, combining advanced graphics, motion design, and narrative pacing tailored for executive audiences.</li>
-                    </ul>
                 </div>
 
                 <div class="experience-item smokey-hover">
-                    <svg class="electric-card-svg" aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 500 200">
+                    <svg class="electric-card-svg electric-card-delay-2" aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 500 200">
                         <path class="electric-bolt" d="M 20 20 L 480 20 L 480 180 L 20 180 Z" fill="none" filter="url(#glow-blue)" stroke="#6bc7ff" stroke-width="1.5"></path>
-                        <path class="electric-bolt electric-bolt-delay-2" d="M 485 30 L 495 45 L 485 60 L 485 140 L 495 155 L 485 170" fill="none" filter="url(#glow-cyan)" stroke="#7ee2ff" stroke-width="1"></path>
+                        <path class="electric-bolt" d="M 485 30 L 495 45 L 485 60 L 485 140 L 495 155 L 485 170" fill="none" filter="url(#glow-cyan)" stroke="#7ee2ff" stroke-width="1"></path>
                     </svg>
-                    <div class="exp-header">
-                        <div>
-                            <div class="exp-title">Production Coordinator &amp; Technical Artist</div>
-                            <div class="exp-company">Sequin AR<span class="separator">·</span>Remote</div>
+                    <div class="card">
+                        <div class="exp-header">
+                            <div>
+                                <div class="exp-title">Production Coordinator &amp; Technical Artist</div>
+                                <div class="exp-company">Sequin AR<span class="separator">·</span>Remote</div>
+                            </div>
+                            <div class="exp-period">Nov 2022 — Jun 2023</div>
                         </div>
-                        <div class="exp-period">Nov 2022 — Jun 2023</div>
+                        <ul class="exp-bullets">
+                            <li>Coordinated production across game development and virtual production projects, owning workflow definition, schedule integrity, and on-time delivery.</li>
+                            <li>Evaluated and integrated emerging real-time technologies to compress production cycles and unlock <strong>cutting-edge visual results</strong>.</li>
+                            <li>Designed and implemented complex technical art systems that optimized runtime performance and improved end-user experience.</li>
+                            <li>Partnered closely with artists, engineers, and designers to ensure seamless technology integration across cross-disciplinary teams.</li>
+                            <li>Contributed to the creation of photoreal, immersive virtual environments using advanced 3D modeling, texturing, and lighting techniques.</li>
+                        </ul>
                     </div>
-                    <ul class="exp-bullets">
-                        <li>Coordinated production across game development and virtual production projects, owning workflow definition, schedule integrity, and on-time delivery.</li>
-                        <li>Evaluated and integrated emerging real-time technologies to compress production cycles and unlock <strong>cutting-edge visual results</strong>.</li>
-                        <li>Designed and implemented complex technical art systems that optimized runtime performance and improved end-user experience.</li>
-                        <li>Partnered closely with artists, engineers, and designers to ensure seamless technology integration across cross-disciplinary teams.</li>
-                        <li>Contributed to the creation of photoreal, immersive virtual environments using advanced 3D modeling, texturing, and lighting techniques.</li>
-                    </ul>
                 </div>
 
                 <div class="experience-item smokey-hover">
-                    <svg class="electric-card-svg" aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 500 200">
+                    <svg class="electric-card-svg electric-card-delay-3" aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 500 200">
                         <path class="electric-bolt" d="M 20 20 L 480 20 L 480 180 L 20 180 Z" fill="none" filter="url(#glow-blue)" stroke="#6bc7ff" stroke-width="1.5"></path>
-                        <path class="electric-bolt electric-bolt-delay-3" d="M 100 15 L 120 5 L 140 15 L 360 15 L 380 5 L 400 15" fill="none" filter="url(#glow-cyan)" stroke="#7ee2ff" stroke-width="1"></path>
+                        <path class="electric-bolt" d="M 100 15 L 120 5 L 140 15 L 360 15 L 380 5 L 400 15" fill="none" filter="url(#glow-cyan)" stroke="#7ee2ff" stroke-width="1"></path>
                     </svg>
-                    <div class="exp-header">
-                        <div>
-                            <div class="exp-title">Founder &amp; CEO</div>
-                            <div class="exp-company">Version 5 Games, LLC<span class="separator">·</span>St. George, UT</div>
+                    <div class="card">
+                        <div class="exp-header">
+                            <div>
+                                <div class="exp-title">Founder &amp; CEO</div>
+                                <div class="exp-company">Version 5 Games, LLC<span class="separator">·</span>St. George, UT</div>
+                            </div>
+                            <div class="exp-period">Jan 2018 — Present</div>
                         </div>
-                        <div class="exp-period">Jan 2018 — Present</div>
+                        <ul class="exp-bullets">
+                            <li>Founded and lead an independent game studio, specializing in <strong>Blueprint-driven gameplay systems</strong> and immersive real-time experiences.</li>
+                            <li>Published multiple products on the <strong>Epic Games Marketplace</strong>, recognized for innovation, polish, and developer-utility value.</li>
+                            <li>Building and operating SaaS products end-to-end — including <strong>AgentSentinel</strong> and the upcoming <strong>AgentLead</strong> — from infrastructure and pricing to onboarding and iteration.</li>
+                            <li>Managed a YouTube channel producing tutorials and dev-log content, growing a developer-focused community and reinforcing brand authority.</li>
+                            <li>Developed and executed marketing strategies that drove sales growth, expanded the customer base, and sustained recurring revenue.</li>
+                        </ul>
                     </div>
-                    <ul class="exp-bullets">
-                        <li>Founded and lead an independent game studio, specializing in <strong>Blueprint-driven gameplay systems</strong> and immersive real-time experiences.</li>
-                        <li>Published multiple products on the <strong>Epic Games Marketplace</strong>, recognized for innovation, polish, and developer-utility value.</li>
-                        <li>Building and operating SaaS products end-to-end — including <strong>AgentSentinel</strong> and the upcoming <strong>AgentLead</strong> — from infrastructure and pricing to onboarding and iteration.</li>
-                        <li>Managed a YouTube channel producing tutorials and dev-log content, growing a developer-focused community and reinforcing brand authority.</li>
-                        <li>Developed and executed marketing strategies that drove sales growth, expanded the customer base, and sustained recurring revenue.</li>
-                    </ul>
                 </div>
             </section>
 
