@@ -287,16 +287,10 @@
         }
         .log-line:hover .ll-click-hint { opacity: 1; }
 
-        /* ═══ FEEDBACK OVERLAY ═══════════════════════════════════════════════ */
-        #feedback-overlay {
-            position: absolute; inset: 0;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            gap: 12px; padding: 24px;
-            pointer-events: none; z-index: 10;
-        }
-        #feedback-overlay.hidden { display: none; }
+        /* ═══ FEEDBACK OVERLAY (now a fixed modal) ══════════════════════════ */
+        /* The old inline #feedback-overlay is replaced; CSS now comes from .modal-overlay above */
 
+        /* Old badge classes kept for milestone badge only */
         .feedback-badge {
             font-size: clamp(1.6rem, 5vw, 2.5rem); font-weight: 800;
             letter-spacing: .08em; text-transform: uppercase;
@@ -305,28 +299,6 @@
         @keyframes badge-pop {
             from { opacity: 0; transform: scale(.4) translateY(20px); }
             to   { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        .feedback-badge.correct { color: var(--green); text-shadow: 0 0 30px rgba(57,255,110,.6); }
-        .feedback-badge.wrong   { color: var(--red);   text-shadow: 0 0 30px rgba(255,68,102,.6); }
-        .feedback-badge.missed  { color: var(--yellow); text-shadow: 0 0 30px rgba(255,224,102,.5); }
-
-        .feedback-humor {
-            max-width: 520px; text-align: center;
-            font-size: .88rem; color: var(--text-soft); line-height: 1.55;
-            font-family: var(--mono);
-            animation: humor-in .4s .2s ease both;
-            background: rgba(0,0,0,.3); border-radius: 8px;
-            padding: 10px 16px;
-            border: 1px solid var(--line);
-        }
-        @keyframes humor-in {
-            from { opacity: 0; transform: translateY(10px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        .feedback-sub {
-            font-size: .78rem; color: var(--text-mute); letter-spacing: .1em;
-            text-transform: uppercase;
-            animation: humor-in .4s .35s ease both;
         }
 
         /* ═══ MILESTONE BADGE ════════════════════════════════════════════════ */
@@ -416,6 +388,220 @@
             100% { filter: none; transform: none; }
         }
 
+        /* ═══ LIVES DISPLAY ══════════════════════════════════════════════════ */
+        .stat-cell.lives-cell .stat-value { color: var(--red-soft); font-size: 1.2rem; letter-spacing: .04em; }
+        .stat-cell.lives-cell .stat-value.gain-pulse {
+            animation: life-gain .6s ease;
+        }
+        @keyframes life-gain {
+            0%   { transform: scale(1); filter: brightness(1); }
+            30%  { transform: scale(1.3); filter: brightness(1.8) drop-shadow(0 0 8px #39ff6e); }
+            100% { transform: scale(1); filter: brightness(1); }
+        }
+
+        /* ═══ MODAL OVERLAY ══════════════════════════════════════════════════ */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 300;
+            background: rgba(10,18,32,.80);
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            display: flex; align-items: center; justify-content: center;
+            padding: 24px;
+        }
+        .modal-overlay.hidden { display: none; }
+
+        /* ─── Feedback modal (correct / wrong / missed) ─── */
+        #feedback-modal {
+            background: var(--panel-2);
+            border: 2px solid var(--line-strong);
+            border-radius: 18px;
+            padding: 36px 40px 28px;
+            max-width: 500px; width: 100%;
+            text-align: center;
+            box-shadow: 0 32px 80px rgba(0,0,0,.55);
+            animation: modal-pop .38s cubic-bezier(.18,.89,.32,1.28) both;
+        }
+        @keyframes modal-pop {
+            from { opacity: 0; transform: scale(.7) translateY(20px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        #feedback-modal.correct-modal { border-color: var(--green); box-shadow: 0 0 60px rgba(57,255,110,.25), 0 32px 80px rgba(0,0,0,.55); }
+        #feedback-modal.wrong-modal   { border-color: var(--red);   box-shadow: 0 0 60px rgba(255,68,102,.25), 0 32px 80px rgba(0,0,0,.55); }
+        #feedback-modal.missed-modal  { border-color: var(--yellow); box-shadow: 0 0 60px rgba(255,224,102,.2), 0 32px 80px rgba(0,0,0,.55); }
+
+        .modal-icon { font-size: 3rem; line-height: 1; margin-bottom: 10px; }
+        .modal-headline {
+            font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 800;
+            letter-spacing: .1em; text-transform: uppercase; margin-bottom: 14px;
+        }
+        .modal-headline.correct { color: var(--green); text-shadow: 0 0 24px rgba(57,255,110,.5); }
+        .modal-headline.wrong   { color: var(--red);   text-shadow: 0 0 24px rgba(255,68,102,.5); }
+        .modal-headline.missed  { color: var(--yellow); text-shadow: 0 0 24px rgba(255,224,102,.4); }
+        .modal-explanation {
+            font-family: var(--mono); font-size: .85rem; color: var(--text-soft);
+            line-height: 1.6; background: rgba(0,0,0,.3);
+            border-radius: 8px; padding: 12px 16px;
+            border: 1px solid var(--line); margin-bottom: 10px;
+        }
+        .modal-sub {
+            font-size: .75rem; color: var(--text-mute);
+            letter-spacing: .1em; text-transform: uppercase; margin-bottom: 18px;
+        }
+        .modal-lives-change {
+            font-size: .82rem; font-weight: 700; letter-spacing: .08em;
+            text-transform: uppercase; margin-bottom: 14px;
+        }
+        .modal-lives-change.lost { color: var(--red-soft); }
+        .modal-lives-change.gained { color: var(--green); }
+        .modal-ok-btn {
+            padding: 12px 44px; font-size: .9rem;
+            letter-spacing: .18em; text-transform: uppercase;
+            font-weight: 700; font-family: inherit;
+            border-radius: 9px; cursor: pointer;
+            transition: background .2s, transform .15s;
+            border: 2px solid;
+        }
+        .modal-ok-btn.correct { background: rgba(57,255,110,.18); border-color: var(--green); color: var(--green); }
+        .modal-ok-btn.correct:hover { background: rgba(57,255,110,.32); transform: translateY(-1px); }
+        .modal-ok-btn.wrong   { background: rgba(255,68,102,.18); border-color: var(--red); color: var(--red-soft); }
+        .modal-ok-btn.wrong:hover   { background: rgba(255,68,102,.32); transform: translateY(-1px); }
+        .modal-ok-btn.missed  { background: rgba(255,224,102,.16); border-color: var(--yellow); color: var(--yellow); }
+        .modal-ok-btn.missed:hover  { background: rgba(255,224,102,.28); transform: translateY(-1px); }
+
+        /* ─── Life gain flash ─── */
+        .life-gain-toast {
+            position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 400; pointer-events: none;
+            font-size: 1.8rem; font-weight: 800;
+            color: var(--green); letter-spacing: .12em;
+            text-transform: uppercase;
+            text-shadow: 0 0 30px rgba(57,255,110,.8);
+            animation: life-toast .9s ease forwards;
+        }
+        @keyframes life-toast {
+            0%   { opacity: 0; transform: translate(-50%, -50%) scale(.6); }
+            25%  { opacity: 1; transform: translate(-50%, -60%) scale(1.1); }
+            70%  { opacity: 1; transform: translate(-50%, -70%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -80%) scale(.9); }
+        }
+
+        /* ─── Leaderboard modal ─── */
+        #leaderboard-overlay {
+            align-items: flex-start; padding-top: 80px;
+            overflow-y: auto;
+        }
+        #leaderboard-modal {
+            background: var(--panel-2);
+            border: 1px solid var(--line-strong);
+            border-radius: 18px; padding: 36px 32px 28px;
+            max-width: 640px; width: 100%;
+            box-shadow: 0 32px 80px rgba(0,0,0,.55);
+            animation: modal-pop .38s cubic-bezier(.18,.89,.32,1.28) both;
+        }
+        #leaderboard-modal h2 {
+            font-size: 1.4rem; font-weight: 800; letter-spacing: .12em;
+            text-transform: uppercase; color: var(--yellow);
+            text-align: center; margin-bottom: 8px;
+        }
+        .lb-subtitle {
+            text-align: center; font-size: .75rem; color: var(--text-mute);
+            letter-spacing: .14em; text-transform: uppercase; margin-bottom: 22px;
+        }
+        .lb-table {
+            width: 100%; border-collapse: collapse;
+            font-family: var(--mono); font-size: .78rem;
+        }
+        .lb-table th {
+            font-size: .62rem; letter-spacing: .16em; text-transform: uppercase;
+            color: var(--text-mute); padding: 6px 10px; text-align: left;
+            border-bottom: 1px solid var(--line-strong);
+        }
+        .lb-table td {
+            padding: 9px 10px; color: var(--text-soft);
+            border-bottom: 1px solid var(--line);
+        }
+        .lb-table tr:last-child td { border-bottom: none; }
+        .lb-table .rank-1 td { color: var(--yellow); font-weight: 700; }
+        .lb-table .rank-2 td { color: var(--text); font-weight: 600; }
+        .lb-table .rank-3 td { color: var(--accent-2); }
+        .lb-table .current-run td { background: rgba(90,168,255,.08); color: var(--accent); }
+        .lb-table .rank-col { color: var(--text-mute); font-size: .72rem; }
+        .lb-empty {
+            text-align: center; color: var(--text-mute);
+            font-size: .85rem; padding: 24px; font-family: var(--mono);
+        }
+        .lb-actions {
+            display: flex; gap: 12px; justify-content: center; margin-top: 22px;
+            flex-wrap: wrap;
+        }
+        .lb-btn {
+            padding: 11px 28px; font-size: .82rem;
+            letter-spacing: .14em; text-transform: uppercase;
+            font-weight: 700; font-family: inherit;
+            border-radius: 9px; cursor: pointer;
+            transition: background .2s, transform .15s;
+        }
+        .lb-btn-primary {
+            background: rgba(90,168,255,.2); border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+        .lb-btn-primary:hover { background: rgba(90,168,255,.35); transform: translateY(-1px); }
+        .lb-btn-secondary {
+            background: var(--panel); border: 1px solid var(--line-strong);
+            color: var(--text-soft);
+        }
+        .lb-btn-secondary:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+
+        /* ─── Name entry modal ─── */
+        #name-modal {
+            background: var(--panel-2);
+            border: 1px solid var(--yellow);
+            border-radius: 18px; padding: 40px 36px 30px;
+            max-width: 420px; width: 100%; text-align: center;
+            box-shadow: 0 0 50px rgba(255,224,102,.15), 0 32px 80px rgba(0,0,0,.55);
+            animation: modal-pop .38s cubic-bezier(.18,.89,.32,1.28) both;
+        }
+        #name-modal h2 {
+            font-size: 1.3rem; font-weight: 800; letter-spacing: .12em;
+            text-transform: uppercase; color: var(--yellow);
+            text-shadow: 0 0 20px rgba(255,224,102,.5); margin-bottom: 8px;
+        }
+        #name-modal p {
+            font-size: .85rem; color: var(--text-mute); margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .name-score-preview {
+            font-family: var(--mono); font-size: 1.1rem; font-weight: 700;
+            color: var(--cyan); margin-bottom: 20px;
+        }
+        #name-input {
+            width: 100%; padding: 12px 16px;
+            font-family: var(--mono); font-size: .95rem;
+            background: var(--panel); border: 1px solid var(--line-strong);
+            border-radius: 8px; color: var(--text);
+            outline: none; margin-bottom: 14px;
+            transition: border-color .2s;
+        }
+        #name-input:focus { border-color: var(--yellow); }
+        #name-submit-btn {
+            width: 100%; padding: 12px;
+            background: rgba(255,224,102,.18); border: 2px solid var(--yellow);
+            border-radius: 9px; color: var(--yellow);
+            font-size: .9rem; font-weight: 700; font-family: inherit;
+            letter-spacing: .16em; text-transform: uppercase;
+            cursor: pointer; transition: background .2s, transform .15s;
+        }
+        #name-submit-btn:hover { background: rgba(255,224,102,.3); transform: translateY(-1px); }
+        #name-skip-btn {
+            margin-top: 10px; width: 100%;
+            background: transparent; border: 1px solid var(--line-strong);
+            border-radius: 9px; color: var(--text-mute);
+            font-size: .78rem; font-family: inherit;
+            letter-spacing: .12em; text-transform: uppercase;
+            cursor: pointer; padding: 9px; transition: color .2s;
+        }
+        #name-skip-btn:hover { color: var(--text); }
+
         /* ═══ RESPONSIVE ═════════════════════════════════════════════════════ */
         @media (max-width: 720px) {
             body { padding: 76px 12px 32px; }
@@ -429,10 +615,13 @@
             .ll-event { min-width: 90px; }
             .log-line { padding: 9px 12px; gap: 7px; }
             .ll-data { font-size: .68rem; }
+            #feedback-modal, #leaderboard-modal, #name-modal { padding: 28px 18px 22px; }
+            .modal-ok-btn { padding: 11px 32px; }
         }
         @media (max-width: 440px) {
             .ll-event { min-width: 70px; font-size: .67rem; }
             .ll-data { font-size: .64rem; }
+            .lb-table th, .lb-table td { padding: 6px 6px; font-size: .7rem; }
         }
     </style>
 </head>
@@ -449,7 +638,46 @@
     </div>
 </nav>
 
-<!-- ══ PARTICLES LAYER ═══════════════════════════════════════════════════ -->
+<!-- ══ MODAL OVERLAYS ════════════════════════════════════════════════════ -->
+
+<!-- Feedback modal (correct / wrong / missed) -->
+<div id="feedback-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-headline-text">
+    <div id="feedback-modal">
+        <div class="modal-icon" id="modal-icon" aria-hidden="true"></div>
+        <div class="modal-headline" id="modal-headline-text"></div>
+        <div class="modal-explanation" id="modal-explanation"></div>
+        <div class="modal-lives-change hidden" id="modal-lives-change"></div>
+        <div class="modal-sub" id="modal-sub"></div>
+        <button class="modal-ok-btn" id="modal-ok-btn" type="button">OK — Continue</button>
+    </div>
+</div>
+
+<!-- Leaderboard modal -->
+<div id="leaderboard-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Leaderboard">
+    <div id="leaderboard-modal">
+        <h2>🏆 Top Scores</h2>
+        <div class="lb-subtitle">Local leaderboard — stored in your browser</div>
+        <div id="leaderboard-table-wrap"></div>
+        <div class="lb-actions">
+            <button class="lb-btn lb-btn-primary" id="lb-play-btn" type="button">▶ Play Again</button>
+            <button class="lb-btn lb-btn-secondary" id="lb-close-btn" type="button">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Name entry modal -->
+<div id="name-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Enter your name for the leaderboard">
+    <div id="name-modal">
+        <h2>🎉 New High Score!</h2>
+        <p>You've earned a spot on the leaderboard. Enter your name to save your score.</p>
+        <div class="name-score-preview" id="name-score-preview"></div>
+        <input type="text" id="name-input" maxlength="20" placeholder="Your name" autocomplete="off" aria-label="Your name for the leaderboard">
+        <button id="name-submit-btn" type="button">Save Score</button>
+        <button id="name-skip-btn" type="button">Skip</button>
+    </div>
+</div>
+
+
 <div id="particles" aria-hidden="true"></div>
 
 <!-- ══ MILESTONE BADGE ═══════════════════════════════════════════════════ -->
@@ -474,6 +702,10 @@
         <div class="stat-cell">
             <span class="stat-label">Best</span>
             <span class="stat-value" id="stat-best">0</span>
+        </div>
+        <div class="stat-cell lives-cell">
+            <span class="stat-label">Lives</span>
+            <span class="stat-value" id="stat-lives">❤️❤️❤️</span>
         </div>
         <div class="stat-cell score-cell">
             <span class="stat-label">Score</span>
@@ -507,9 +739,12 @@
         <!-- Start Screen -->
         <div id="start-screen" role="main">
             <h2>Debugging an <span>AI System</span></h2>
-            <p>You're monitoring the AI core data pipeline. Corrupted log entries are being injected into the stream.<br><br>Find the error line and click it before it expires. Wrong clicks lose your streak. The glitches get subtler the longer you last.</p>
+            <p>You're monitoring the AI core data pipeline. Corrupted log entries are being injected into the stream.<br><br>Find the error line and click it before time runs out. You start with <strong>3 lives</strong> — lose one per wrong answer, gain one at streak milestones. The errors get subtler and the timer gets shorter the longer you survive.</p>
             <button class="start-btn" id="start-btn" type="button" aria-label="Start the debugging game">
                 ▶ &nbsp;START DEBUGGING
+            </button>
+            <button class="result-btn" id="view-lb-btn" type="button" style="margin-top:4px;" aria-label="View leaderboard">
+                🏆 &nbsp;Leaderboard
             </button>
         </div>
 
@@ -525,9 +760,7 @@
             <div id="log-stream" aria-label="Log entries — click the error"></div>
         </div>
 
-        <!-- Feedback Overlay -->
-        <div id="feedback-overlay" class="hidden" aria-live="assertive"></div>
-
+        <!-- Feedback overlay no longer used inline; replaced by #feedback-overlay modal -->
         <!-- Result Screen -->
         <div id="result-screen" class="hidden" role="main"></div>
 
@@ -542,12 +775,12 @@
     /* ══════════════════════════════════════════════════════════════════════
        CONSTANTS & TUNABLES
     ══════════════════════════════════════════════════════════════════════ */
-    const BATCH_MS = lvl =>
-        lvl <= 5  ? 14000 :
-        lvl <= 10 ? 11000 :
-        lvl <= 20 ? 9000  :
-        lvl <= 30 ? 7000  :
-        lvl <= 50 ? 5500  : 4500;
+    // Per-line timing: seconds × number of lines in batch
+    const BATCH_MS = lvl => {
+        const n = LINES_N(lvl);
+        const spl = lvl <= 5 ? 3.0 : lvl <= 15 ? 2.5 : lvl <= 25 ? 2.0 : 1.5;
+        return Math.round(spl * n * 1000);
+    };
 
     const LINES_N = lvl => lvl <= 3 ? 5 : lvl <= 8 ? 6 : 7;
 
@@ -563,6 +796,14 @@
 
     const ONE_HOUR_MS = 3600000;
 
+    // Streak thresholds that grant +1 life
+    const LIFE_THRESHOLDS = [5, 10, 20, 50, 100];
+    const MAX_LIVES = 5;
+    const STARTING_LIVES = 3;
+
+    // localStorage key for leaderboard
+    const LB_KEY = 'logs_leaderboard_v1';
+
     /* ══════════════════════════════════════════════════════════════════════
        STATE
     ══════════════════════════════════════════════════════════════════════ */
@@ -572,6 +813,8 @@
         bestStreak:      0,
         score:           0,
         level:           1,
+        lives:           STARTING_LIVES,
+        lifeGranted:     new Set(),   // streak thresholds that already gave a life
         round:           0,
         roundsSinceUp:   0,
         totalClicks:     0,
@@ -587,6 +830,7 @@
         elapsedIval:     null,
         answered:        false,
         lastHumor:       '',
+        pendingCallback: null,   // callback stored while modal is open
     };
 
     /* ══════════════════════════════════════════════════════════════════════
@@ -833,6 +1077,22 @@
     const $startScreen    = document.getElementById('start-screen');
     const $playingScreen  = document.getElementById('playing-screen');
     const $feedbackOv     = document.getElementById('feedback-overlay');
+    const $feedbackModal  = document.getElementById('feedback-modal');
+    const $modalIcon      = document.getElementById('modal-icon');
+    const $modalHeadline  = document.getElementById('modal-headline-text');
+    const $modalExplain   = document.getElementById('modal-explanation');
+    const $modalLives     = document.getElementById('modal-lives-change');
+    const $modalSub       = document.getElementById('modal-sub');
+    const $modalOkBtn     = document.getElementById('modal-ok-btn');
+    const $lbOverlay      = document.getElementById('leaderboard-overlay');
+    const $lbTableWrap    = document.getElementById('leaderboard-table-wrap');
+    const $lbPlayBtn      = document.getElementById('lb-play-btn');
+    const $lbCloseBtn     = document.getElementById('lb-close-btn');
+    const $nameOverlay    = document.getElementById('name-overlay');
+    const $nameInput      = document.getElementById('name-input');
+    const $nameSubmitBtn  = document.getElementById('name-submit-btn');
+    const $nameSkipBtn    = document.getElementById('name-skip-btn');
+    const $nameScorePrev  = document.getElementById('name-score-preview');
     const $resultScreen   = document.getElementById('result-screen');
     const $logStream      = document.getElementById('log-stream');
     const $timerFill      = document.getElementById('timer-fill');
@@ -841,6 +1101,7 @@
     const $milestoneBadge = document.getElementById('milestone-badge');
     const $particles      = document.getElementById('particles');
     const $startBtn       = document.getElementById('start-btn');
+    const $viewLbBtn      = document.getElementById('view-lb-btn');
 
     // Stats
     const $sSt    = document.getElementById('stat-streak');
@@ -851,10 +1112,15 @@
     const $sCaught= document.getElementById('stat-caught');
     const $sMissed= document.getElementById('stat-missed');
     const $sTime  = document.getElementById('stat-time');
+    const $sLives = document.getElementById('stat-lives');
 
     /* ══════════════════════════════════════════════════════════════════════
        STATS UPDATE
     ══════════════════════════════════════════════════════════════════════ */
+    function livesDisplay(n) {
+        return '❤️'.repeat(Math.max(0, n)) + '🖤'.repeat(Math.max(0, STARTING_LIVES - n));
+    }
+
     function updateStats() {
         $sSt.textContent    = G.streak;
         $sBest.textContent  = G.bestStreak;
@@ -865,6 +1131,8 @@
             : '--%';
         $sCaught.textContent = G.caughtErrors;
         $sMissed.textContent = G.missedErrors;
+        $sLives.textContent  = livesDisplay(G.lives);
+        $sLives.setAttribute('aria-label', `Lives: ${G.lives}`);
         if (G.startTime) {
             const s = Math.floor((Date.now() - G.startTime) / 1000);
             $sTime.textContent = s < 60 ? s + 's' : Math.floor(s/60) + 'm ' + (s%60) + 's';
@@ -1043,16 +1311,16 @@
         clickedEl.classList.remove('expiring');
         clickedEl.classList.add('correct-flash');
 
-        // Also reveal the error line if they clicked by luck (same as errorIdx here so no-op)
-
         updateStats();
         checkMilestone();
 
+        // Check for life gain at streak thresholds
+        const lifeGained = checkLifeGain();
+
         const humor = G.batch.lines[G.errorIdx].humor;
         showFeedback('correct', '✓ CORRECT', humor, () => {
-            $feedbackOv.classList.add('hidden');
             startBatch();
-        });
+        }, null, lifeGained);
         spawnParticles(clickedEl);
     }
 
@@ -1060,6 +1328,7 @@
         const prevStreak = G.streak;
         G.streak  = 0;
         G.missedErrors++;
+        G.lives   = Math.max(0, G.lives - 1);
 
         // Flash wrong line red
         if (clickedEl) clickedEl.classList.add('wrong-flash');
@@ -1076,10 +1345,17 @@
         triggerGlitch();
 
         const humor = G.batch.lines[G.errorIdx].humor;
-        showFeedback('wrong', '✗ WRONG', humor, () => {
-            $feedbackOv.classList.add('hidden');
-            startBatch();
-        }, `Streak reset${prevStreak > 0 ? ' (was ' + prevStreak + ')' : ''}`);
+        const sub   = `Streak reset${prevStreak > 0 ? ' (was ' + prevStreak + ')' : ''}`;
+
+        if (G.lives <= 0) {
+            showFeedback('wrong', '✗ WRONG', humor, () => {
+                handleGameOver();
+            }, sub, false, true);
+        } else {
+            showFeedback('wrong', '✗ WRONG', humor, () => {
+                startBatch();
+            }, sub, false);
+        }
     }
 
     function handleTimeout() {
@@ -1087,6 +1363,7 @@
         G.answered    = true;
         G.missedErrors++;
         G.streak      = 0;
+        G.lives       = Math.max(0, G.lives - 1);
 
         stopTimer();
 
@@ -1102,34 +1379,294 @@
         updateStats();
 
         const humor = G.batch.lines[G.errorIdx].humor;
-        showFeedback('missed', '⏱ MISSED', humor, () => {
-            $feedbackOv.classList.add('hidden');
-            startBatch();
-        }, 'Streak reset — too slow');
+        if (G.lives <= 0) {
+            showFeedback('missed', '⏱ MISSED', humor, () => {
+                handleGameOver();
+            }, 'Streak reset — too slow', false, true);
+        } else {
+            showFeedback('missed', '⏱ MISSED', humor, () => {
+                startBatch();
+            }, 'Streak reset — too slow');
+        }
     }
 
     /* ══════════════════════════════════════════════════════════════════════
-       FEEDBACK OVERLAY
+       FEEDBACK MODAL (requires OK button)
     ══════════════════════════════════════════════════════════════════════ */
-    function showFeedback(type, headline, humor, cb, sub) {
-        $feedbackOv.innerHTML =
-            `<div class="feedback-badge ${type}">${headline}</div>` +
-            (humor ? `<div class="feedback-humor">${escHtml(humor)}</div>` : '') +
-            (sub   ? `<div class="feedback-sub">${escHtml(sub)}</div>` : '');
+    function showFeedback(type, headline, humor, cb, sub, lifeGained, isGameOver) {
+        const icons = { correct: '✅', wrong: '❌', missed: '⏱️' };
+        $modalIcon.textContent = icons[type] || '';
+
+        $modalHeadline.textContent = headline;
+        $modalHeadline.className   = 'modal-headline ' + type;
+
+        $feedbackModal.className = type + '-modal';
+        $modalExplain.textContent = humor || '';
+
+        // Life change display
+        if (lifeGained) {
+            $modalLives.textContent = `+1 LIFE — Streak Milestone!`;
+            $modalLives.className   = 'modal-lives-change gained';
+            $modalLives.classList.remove('hidden');
+        } else if (type !== 'correct' && !isGameOver) {
+            $modalLives.textContent = `−1 LIFE  (${G.lives} remaining)`;
+            $modalLives.className   = 'modal-lives-change lost';
+            $modalLives.classList.remove('hidden');
+        } else if (isGameOver) {
+            $modalLives.textContent = `💀 NO LIVES REMAINING`;
+            $modalLives.className   = 'modal-lives-change lost';
+            $modalLives.classList.remove('hidden');
+        } else {
+            $modalLives.classList.add('hidden');
+        }
+
+        $modalSub.textContent = sub || '';
+
+        // OK button label
+        if (isGameOver) {
+            $modalOkBtn.textContent = 'See Results';
+        } else {
+            $modalOkBtn.textContent = 'OK — Continue';
+        }
+        $modalOkBtn.className = 'modal-ok-btn ' + type;
+
+        // Store callback, wire up OK button
+        G.pendingCallback = cb;
 
         $feedbackOv.classList.remove('hidden');
-        G.lastHumor = humor || '';
 
-        const delay = type === 'correct' ? 1600 : 2000;
-        setTimeout(() => {
+        // Wire up OK button: clone to remove any prior listeners, then bind dismissal
+        let activeKeyHandler = null;
+        function bindOkBtn(handler) {
+            const okBtn = document.getElementById('modal-ok-btn');
+            const newBtn = okBtn.cloneNode(true);
+            okBtn.parentNode.replaceChild(newBtn, okBtn);
+            newBtn.addEventListener('click', handler);
+        }
+
+        const dismissModal = () => {
             $feedbackOv.classList.add('hidden');
-            if (cb) cb();
-        }, delay);
+            if (activeKeyHandler) {
+                document.removeEventListener('keydown', activeKeyHandler);
+                activeKeyHandler = null;
+            }
+            if (G.pendingCallback) {
+                const fn = G.pendingCallback;
+                G.pendingCallback = null;
+                fn();
+            }
+        };
+
+        bindOkBtn(dismissModal);
+
+        // Keyboard: Enter/Space to dismiss; cleaned up on any close path
+        activeKeyHandler = (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                dismissModal();
+            }
+        };
+        document.addEventListener('keydown', activeKeyHandler);
+
+        G.lastHumor = humor || '';
     }
 
     /* ══════════════════════════════════════════════════════════════════════
-       MILESTONE BADGES
+       LIVES: gain logic
     ══════════════════════════════════════════════════════════════════════ */
+    function checkLifeGain() {
+        // Check fixed thresholds
+        for (const t of LIFE_THRESHOLDS) {
+            if (G.streak >= t && !G.lifeGranted.has(t)) {
+                G.lifeGranted.add(t);
+                if (G.lives < MAX_LIVES) {
+                    G.lives++;
+                    updateStats();
+                    showLifeGainToast();
+                    return true;
+                }
+            }
+        }
+        // Every 50 above 100 (150, 200, 250, ...)
+        if (G.streak >= 150 && G.streak % 50 === 0 && !G.lifeGranted.has(G.streak)) {
+            G.lifeGranted.add(G.streak);
+            if (G.lives < MAX_LIVES) {
+                G.lives++;
+                updateStats();
+                showLifeGainToast();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function showLifeGainToast() {
+        const el = document.createElement('div');
+        el.className = 'life-gain-toast';
+        el.textContent = '+1 LIFE ❤️';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1000);
+
+        // Pulse the lives display
+        $sLives.classList.remove('gain-pulse');
+        void $sLives.offsetWidth;
+        $sLives.classList.add('gain-pulse');
+        setTimeout(() => $sLives.classList.remove('gain-pulse'), 700);
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       LEADERBOARD (localStorage)
+    ══════════════════════════════════════════════════════════════════════ */
+    function lbLoad() {
+        try { return JSON.parse(localStorage.getItem(LB_KEY)) || []; }
+        catch { return []; }
+    }
+    function lbSave(board) {
+        try { localStorage.setItem(LB_KEY, JSON.stringify(board)); } catch {}
+    }
+    function lbQualifies(score) {
+        const board = lbLoad();
+        return board.length < 10 || score > board[board.length - 1].score;
+    }
+    function lbAdd(name, score, level, streak) {
+        const board = lbLoad();
+        board.push({
+            name: name.trim() || 'Anonymous',
+            score, level, streak,
+            date: new Date().toLocaleDateString()
+        });
+        board.sort((a, b) => b.score - a.score);
+        if (board.length > 10) board.length = 10;
+        lbSave(board);
+        return board;
+    }
+
+    function renderLeaderboard(highlightScore) {
+        const board = lbLoad();
+        if (!board.length) {
+            $lbTableWrap.innerHTML = '<div class="lb-empty">No scores yet — be the first!</div>';
+            return;
+        }
+        let html = '<table class="lb-table"><thead><tr>'
+            + '<th class="rank-col">Rank</th><th>Name</th><th>Score</th>'
+            + '<th>Level</th><th>Streak</th><th>Date</th>'
+            + '</tr></thead><tbody>';
+        board.forEach((e, i) => {
+            const rowClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3'
+                : (highlightScore && e.score === highlightScore ? 'current-run' : '');
+            html += `<tr class="${rowClass}">
+                <td class="rank-col">#${i+1}</td>
+                <td>${escHtml(e.name)}</td>
+                <td>${e.score.toLocaleString()}</td>
+                <td>${e.level}</td>
+                <td>${e.streak}</td>
+                <td>${e.date}</td>
+            </tr>`;
+        });
+        html += '</tbody></table>';
+        $lbTableWrap.innerHTML = html;
+    }
+
+    function showLeaderboard(highlightScore, afterClose) {
+        renderLeaderboard(highlightScore);
+        $lbOverlay.classList.remove('hidden');
+
+        function closeLb() {
+            $lbOverlay.classList.add('hidden');
+            if (afterClose) afterClose();
+        }
+
+        // Re-bind buttons cleanly
+        function rebindBtn(id, handler) {
+            const el = document.getElementById(id);
+            const fresh = el.cloneNode(true);
+            el.parentNode.replaceChild(fresh, el);
+            fresh.addEventListener('click', handler);
+        }
+
+        rebindBtn('lb-play-btn', () => {
+            $lbOverlay.classList.add('hidden');
+            resetAndStart();
+        });
+        rebindBtn('lb-close-btn', closeLb);
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       GAME OVER
+    ══════════════════════════════════════════════════════════════════════ */
+    function handleGameOver() {
+        clearInterval(G.elapsedIval);
+        stopTimer();
+        G.phase = 'gameover';
+        $playingScreen.classList.add('hidden');
+
+        const elapsed = Math.floor((Date.now() - G.startTime) / 1000);
+        const acc = G.totalClicks > 0
+            ? Math.round((G.correctClicks / G.totalClicks) * 100)
+            : 0;
+
+        $resultScreen.innerHTML =
+            `<div class="result-title" style="color:var(--red)">💀 GAME OVER</div>` +
+            `<div class="result-stats-grid">` +
+            rStat('Final Score',   G.score.toLocaleString())  +
+            rStat('Best Streak',   G.bestStreak)              +
+            rStat('Level Reached', G.level)                   +
+            rStat('Errors Caught', G.caughtErrors)            +
+            rStat('Errors Missed', G.missedErrors)            +
+            rStat('Accuracy',      acc + '%')                 +
+            rStat('Time Played',   elapsed + 's')             +
+            `</div>` +
+            `<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px;">` +
+            `<button class="result-btn" id="play-again-btn" type="button">▶ Play Again</button>` +
+            `<button class="result-btn" id="view-lb-result-btn" type="button" style="border-color:var(--yellow);color:var(--yellow);">🏆 Leaderboard</button>` +
+            `</div>`;
+
+        $resultScreen.classList.remove('hidden');
+
+        document.getElementById('play-again-btn').addEventListener('click', () => {
+            $resultScreen.classList.add('hidden');
+            resetAndStart();
+        });
+        document.getElementById('view-lb-result-btn').addEventListener('click', () => {
+            showLeaderboard(G.score, null);
+        });
+
+        // Check for leaderboard qualification
+        if (lbQualifies(G.score) && G.score > 0) {
+            $nameScorePrev.textContent = `Score: ${G.score.toLocaleString()} | Level ${G.level} | Best Streak: ${G.bestStreak}`;
+            $nameOverlay.classList.remove('hidden');
+
+            // Re-bind buttons using helper to avoid duplicate listener stacking
+            function rebindNameBtn(id, handler) {
+                const el = document.getElementById(id);
+                const fresh = el.cloneNode(true);
+                el.parentNode.replaceChild(fresh, el);
+                fresh.addEventListener('click', handler);
+            }
+
+            // Clone input to clear stacked keydown listeners from prior game sessions
+            const oldInput = document.getElementById('name-input');
+            const freshInput = oldInput.cloneNode(true);
+            oldInput.parentNode.replaceChild(freshInput, oldInput);
+            freshInput.value = '';
+
+            const doSubmit = () => {
+                const name = freshInput.value;
+                $nameOverlay.classList.add('hidden');
+                lbAdd(name, G.score, G.level, G.bestStreak);
+                showLeaderboard(G.score, null);
+            };
+
+            rebindNameBtn('name-submit-btn', doSubmit);
+            rebindNameBtn('name-skip-btn', () => { $nameOverlay.classList.add('hidden'); });
+
+            freshInput.addEventListener('keydown', e => {
+                if (e.key === 'Enter') { e.preventDefault(); doSubmit(); }
+            });
+            // Focus input
+            setTimeout(() => freshInput.focus(), 100);
+        }
+    }
     const MILESTONES = {
         10:  { emoji:'🔥', text:'ON FIRE',      sub:'10 streak' },
         25:  { emoji:'⚡', text:'UNSTOPPABLE',  sub:'25 streak' },
@@ -1204,38 +1741,8 @@
     }
 
     /* ══════════════════════════════════════════════════════════════════════
-       RESULT SCREEN (session stats)
+       RESULT HELPERS
     ══════════════════════════════════════════════════════════════════════ */
-    function showResult() {
-        clearInterval(G.elapsedIval);
-        stopTimer();
-        G.phase = 'result';
-        $playingScreen.classList.add('hidden');
-        $feedbackOv.classList.add('hidden');
-
-        const elapsed = Math.floor((Date.now() - G.startTime) / 1000);
-        const acc = G.totalClicks > 0
-            ? Math.round((G.correctClicks / G.totalClicks) * 100)
-            : 0;
-
-        $resultScreen.innerHTML =
-            `<div class="result-title" style="color:var(--cyan)">SESSION COMPLETE</div>` +
-            `<div class="result-stats-grid">` +
-            rStat('Final Score',   G.score)             +
-            rStat('Best Streak',   G.bestStreak)        +
-            rStat('Level Reached', G.level)             +
-            rStat('Errors Caught', G.caughtErrors)      +
-            rStat('Errors Missed', G.missedErrors)      +
-            rStat('Accuracy',      acc + '%')           +
-            rStat('Time Played',   elapsed + 's')       +
-            `</div>` +
-            `<button class="result-btn" id="play-again-btn" type="button">▶ Play Again</button>`;
-
-        $resultScreen.classList.remove('hidden');
-
-        document.getElementById('play-again-btn').addEventListener('click', resetAndStart);
-    }
-
     function rStat(label, value) {
         return `<div class="result-stat"><span class="result-stat-label">${label}</span><span class="result-stat-value">${value}</span></div>`;
     }
@@ -1245,6 +1752,8 @@
         G.streak         = 0;
         G.score          = 0;
         G.level          = 1;
+        G.lives          = STARTING_LIVES;
+        G.lifeGranted    = new Set();
         G.round          = 0;
         G.roundsSinceUp  = 0;
         G.totalClicks    = 0;
@@ -1256,6 +1765,7 @@
         CTX.ts = Date.now() - ONE_HOUR_MS;
 
         $resultScreen.classList.add('hidden');
+        $nameOverlay.classList.add('hidden');
         updateStats();
         startGame();
     }
@@ -1264,6 +1774,7 @@
        INIT
     ══════════════════════════════════════════════════════════════════════ */
     $startBtn.addEventListener('click', startGame);
+    $viewLbBtn.addEventListener('click', () => showLeaderboard(null, null));
     updateStats();
 
 })();
