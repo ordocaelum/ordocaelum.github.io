@@ -775,14 +775,14 @@
     /* ══════════════════════════════════════════════════════════════════════
        CONSTANTS & TUNABLES
     ══════════════════════════════════════════════════════════════════════ */
-    // Per-line timing: seconds × number of lines in batch
+    // Time per question (one log batch)
     const BATCH_MS = lvl => {
-        const n = LINES_N(lvl);
-        const spl = lvl <= 5 ? 3.0 : lvl <= 15 ? 2.5 : lvl <= 25 ? 2.0 : 1.5;
-        return Math.round(spl * n * 1000);
+        const sec = lvl <= 5 ? 3.0 : lvl <= 15 ? 2.5 : lvl <= 30 ? 2.0 : 1.5;
+        return Math.round(sec * 1000);
     };
 
-    const LINES_N = lvl => lvl <= 3 ? 5 : lvl <= 8 ? 6 : 7;
+    // Number of lines shown in each question batch
+    const LINES_N = () => rndInt(8, 10);
 
     const ERROR_GLOW = lvl =>
         lvl <= 2 ? .9 :
@@ -831,6 +831,7 @@
         answered:        false,
         lastHumor:       '',
         pendingCallback: null,   // callback stored while modal is open
+        errorIntensity:  'obvious',
     };
 
     /* ══════════════════════════════════════════════════════════════════════
@@ -885,182 +886,158 @@
     }
 
     /* ══════════════════════════════════════════════════════════════════════
-       ERROR DEFINITIONS
-       Each: { id, tier, gen(prevCtxTs), humor }
+       ERROR DEFINITIONS (obvious -> subtle -> very subtle)
     ══════════════════════════════════════════════════════════════════════ */
-    const ERRORS = [
-        /* ── EASY (tier 1) ─────────────────────────────────────────── */
-        {
-            id:'temp_425', tier:1,
-            gen:() => ({ ev:'sensor_read',   lv:'INFO', d:`{"sensor": "temp_01", "temperature_f": 425, "unit": "F"}` }),
-            humor:'OOPS | Temperature at 425°F — the sensor thinks it\'s inside a volcano. It is not 🌋',
-        },
-        {
-            id:'neg_user_id', tier:1,
-            gen:() => ({ ev:'user_login',     lv:'INFO', d:`{"user_id": -999, "ip": "10.0.1.${rndInt(1,200)}", "latency_ms": ${rndInt(20,80)}}` }),
-            humor:'NAH | User ID -999? IDs can\'t be negative (unless they owe us money 💸)',
-        },
-        {
-            id:'age_1500', tier:1,
-            gen:() => ({ ev:'user_profile',   lv:'INFO', d:`{"user_id": ${rnd(CTX.users)}, "username": "${rnd(CTX.unames)}", "age": 1500}` }),
-            humor:'WAIT | This user is 1,500 years old. Impressive lifespan, but probably wrong 🧛',
-        },
-        {
-            id:'battery_150', tier:1,
-            gen:() => ({ ev:'device_metric',  lv:'INFO', d:`{"device_id": "dev_${rndInt(1,50)}", "battery_pct": 150, "charging": false}` }),
-            humor:'HUH | 150% battery charge. Physics would like a word 🔋',
-        },
-        {
-            id:'mem_neg', tier:1,
-            gen:() => ({ ev:'metric_record',  lv:'INFO', d:`{"cpu_pct": ${rndInt(10,55)}, "mem_mb": -256, "conns": ${rndInt(2,20)}}` }),
-            humor:'YIKES | Negative memory usage. The process is borrowing RAM from the future ⏳',
-        },
-        {
-            id:'http_999', tier:1,
-            gen:() => ({ ev:'api_response',   lv:'INFO', d:`{"endpoint": "${rnd(CTX.eps)}", "status": 999, "bytes": ${rndInt(512,2048)}}` }),
-            humor:'NAH | HTTP 999 is not a real status code. We checked. Twice. 🤔',
-        },
-        {
-            id:'cpu_200', tier:1,
-            gen:() => ({ ev:'metric_record',  lv:'INFO', d:`{"cpu_pct": 200, "mem_mb": ${rndInt(256,1020)}, "conns": ${rndInt(2,20)}}` }),
-            humor:'CRISPY | 200% CPU — the server is filing for early retirement 🔥',
-        },
-        {
-            id:'port_99999', tier:1,
-            gen:() => ({ ev:'conn_open',       lv:'INFO', d:`{"service": "${rnd(CTX.svcs)}", "port": 99999, "protocol": "TCP"}` }),
-            humor:'NOPE | Port 99999 doesn\'t exist. Valid range is 0–65535. Nice try 🚪',
-        },
-        {
-            id:'neg_bytes', tier:1,
-            gen:() => ({ ev:'api_response',   lv:'INFO', d:`{"endpoint": "${rnd(CTX.eps)}", "status": 200, "bytes": -1024}` }),
-            humor:'WAIT | -1024 bytes transferred? The client is sending data backwards 📤',
-        },
+    const RECENT_ERRORS = { obvious: [], subtle: [], very_subtle: [] };
+    const RECENT_ERROR_LIMIT = 8;
 
-        /* ── MEDIUM (tier 2) ────────────────────────────────────────── */
-        {
-            id:'userid_string', tier:2,
-            gen:() => ({ ev:'user_login',     lv:'INFO', d:`{"user_id": "${rnd(CTX.unames)}", "ip": "10.0.1.${rndInt(1,200)}", "latency_ms": ${rndInt(20,80)}}` }),
-            humor:'NOPE | user_id should be a number, not someone\'s username. Different field 📱',
-        },
-        {
-            id:'duration_str', tier:2,
-            gen:() => ({ ev:'db_query',       lv:'INFO', d:`{"table": "${rnd(CTX.tables)}", "rows_returned": ${rndInt(1,100)}, "duration_ms": "fast"}` }),
-            humor:'"fast" is not a unit of time. Milliseconds exist for a reason ⏱️',
-        },
-        {
-            id:'valid_number', tier:2,
-            gen:() => ({ ev:'token_validate', lv:'INFO', d:`{"user_id": ${rnd(CTX.users)}, "token_age_s": ${rndInt(100,3550)}, "valid": 1}` }),
-            humor:'"valid" should be true/false, not 1. Booleans are free, use them 🆓',
-        },
-        {
-            id:'rows_neg', tier:2,
-            gen:() => ({ ev:'db_query',       lv:'INFO', d:`{"table": "${rnd(CTX.tables)}", "rows_returned": -1, "duration_ms": ${rndInt(5,45)}}` }),
-            humor:'-1 rows returned. A database that owes you data? Bold concept 📚',
-        },
-        {
-            id:'ts_backward_60', tier:2,
-            gen:() => {
-                const bad = fmtTs(CTX.ts - 60000);
-                return { ev:'health_check', lv:'INFO', d:`{"service": "${rnd(CTX.svcs)}", "status": "healthy", "uptime_s": ${rndInt(1000,99999)}}`, overrideTs: bad };
-            },
-            humor:'ERROR | Timestamp jumped back 60 seconds. Time travel detected ⏰',
-        },
-        {
-            id:'status_UPPER', tier:2,
-            gen:() => ({ ev:'health_check',   lv:'INFO', d:`{"service": "${rnd(CTX.svcs)}", "status": "HEALTHY", "uptime_s": ${rndInt(1000,99999)}}` }),
-            humor:'"HEALTHY" should be lowercase "healthy". Capslock was not the bug we expected 🔐',
-        },
-        {
-            id:'progress_110', tier:2,
-            gen:() => ({ ev:'bg_job',         lv:'INFO', d:`{"job_id": "${rnd(CTX.jobs)}", "status": "running", "progress": 110}` }),
-            humor:'Progress at 110% — went past done and kept going. Overachiever 🏅',
-        },
-        {
-            id:'latency_str', tier:2,
-            gen:() => ({ ev:'user_login',     lv:'INFO', d:`{"user_id": ${rnd(CTX.users)}, "ip": "10.0.1.${rndInt(1,200)}", "latency_ms": "slow"}` }),
-            humor:'"slow" is not a valid latency value. Try a number, maybe in milliseconds 🐢',
-        },
-        {
-            id:'neg_ttl', tier:2,
-            gen:() => ({ ev:'cache_hit',      lv:'INFO', d:`{"key": "usr:${rnd(CTX.users)}", "ttl_remaining": -300, "hit": true}` }),
-            humor:'TTL of -300 seconds. This cached entry expired 5 minutes ago and is still here haunting us 👻',
-        },
+    function levelIntensity(level) {
+        return level <= 5 ? 'obvious' : level <= 15 ? 'subtle' : 'very_subtle';
+    }
 
-        /* ── HARD (tier 3) ──────────────────────────────────────────── */
-        {
-            id:'ts_1s_back', tier:3,
-            gen:() => {
-                const bad = fmtTs(CTX.ts - 1000);
-                return { ev:'metric_record', lv:'INFO', d:`{"cpu_pct": ${rndInt(10,55)}, "mem_mb": ${rndInt(256,1020)}, "conns": ${rndInt(2,28)}}`, overrideTs: bad };
-            },
-            humor:'SUBTLE | Timestamp went back exactly 1 second. The system is having a senior moment 🕐',
-        },
-        {
-            id:'status_201_get', tier:3,
-            gen:() => ({ ev:'api_response',   lv:'INFO', d:`{"endpoint": "${rnd(CTX.eps)}", "status": 201, "bytes": ${rndInt(512,2048)}}` }),
-            humor:'MILD | 201 Created on a read endpoint? Interesting interpretation of REST 🤨',
-        },
-        {
-            id:'cpu_zero_busy', tier:3,
-            gen:() => ({ ev:'metric_record',  lv:'INFO', d:`{"cpu_pct": 0, "mem_mb": ${rndInt(400,1020)}, "conns": ${rndInt(8,28)}}` }),
-            humor:'ODD | CPU at 0% while handling many connections. Suspicious silence 🤫',
-        },
-        {
-            id:'latency_neg', tier:3,
-            gen:() => ({ ev:'user_login',     lv:'INFO', d:`{"user_id": ${rnd(CTX.users)}, "ip": "10.0.1.${rndInt(1,200)}", "latency_ms": -3}` }),
-            humor:'-3ms latency. The response arrived before the request. Precognition API 🔮',
-        },
-        {
-            id:'expires_neg', tier:3,
-            gen:() => ({ ev:'session_create', lv:'INFO', d:`{"session_id": "${rnd(CTX.sess)}", "user_id": ${rnd(CTX.users)}, "expires_in": -1}` }),
-            humor:'Session expires in -1 seconds. It was already dead when it arrived 💀',
-        },
-        {
-            id:'ts_future_hr', tier:3,
-            gen:() => {
-                const future = fmtTs(CTX.ts + ONE_HOUR_MS);
-                return { ev:'health_check', lv:'INFO', d:`{"service": "${rnd(CTX.svcs)}", "status": "healthy", "uptime_s": ${rndInt(1000,99999)}}`, overrideTs: future };
-            },
-            humor:'Timestamp is an hour in the future. Is this server... prophetic? 🔮',
-        },
-        {
-            id:'rows_0_query', tier:3,
-            gen:() => ({ ev:'db_query',       lv:'INFO', d:`{"table": "${rnd(CTX.tables)}", "rows_returned": 0, "duration_ms": ${rndInt(80,200)}}` }),
-            humor:'0 rows returned on a busy table. Either perfectly empty or the query is gaslighting us 🕵️',
-        },
-        {
-            id:'hit_false_ttl', tier:3,
-            gen:() => ({ ev:'cache_hit',      lv:'INFO', d:`{"key": "usr:${rnd(CTX.users)}", "ttl_remaining": ${rndInt(200,7200)}, "hit": false}` }),
-            humor:'Event is cache_hit but hit=false. A very transparent lie 🎭',
-        },
-    ];
+    function pushRecentError(intensity, id) {
+        const list = RECENT_ERRORS[intensity];
+        list.push(id);
+        if (list.length > RECENT_ERROR_LIMIT) list.shift();
+    }
+
+    function pickNonRepeating(pool, intensity) {
+        const recent = RECENT_ERRORS[intensity];
+        let available = pool.filter(p => !recent.includes(p.id));
+        if (!available.length) {
+            RECENT_ERRORS[intensity] = [];
+            available = pool;
+        }
+        const picked = rnd(available);
+        pushRecentError(intensity, picked.id);
+        return picked;
+    }
+
+    function genEasyOutOfRange() {
+        const variants = [
+            { id:'easy_range_temp', ev:'sensor_read', lv:'INFO', d:`{"sensor":"temp_${rndInt(1,12)}","temperature_f":999,"unit":"F"}`, humor:'Hint: 999°F is a glaring out-of-range value.' },
+            { id:'easy_range_cpu', ev:'metric_record', lv:'INFO', d:`{"cpu_pct":240,"mem_mb":${rndInt(256,1020)},"conns":${rndInt(2,20)}}`, humor:'Hint: CPU percentage cannot be 240% for this single host metric.' },
+            { id:'easy_range_battery', ev:'device_metric', lv:'INFO', d:`{"device_id":"dev_${rndInt(1,120)}","battery_pct":175,"charging":false}`, humor:'Hint: Battery over 100% is an obvious bad reading.' },
+            { id:'easy_range_http', ev:'api_response', lv:'INFO', d:`{"endpoint":"${rnd(CTX.eps)}","status":799,"bytes":${rndInt(300,9000)}}`, humor:'Hint: HTTP 799 is not a valid status in this API context.' },
+            { id:'easy_range_port', ev:'conn_open', lv:'INFO', d:`{"service":"${rnd(CTX.svcs)}","port":99999,"protocol":"TCP"}`, humor:'Hint: Port numbers must be within 0-65535.' },
+        ];
+        return rnd(variants);
+    }
+
+    function genEasyImpossibleId() {
+        const variants = [
+            { id:'easy_id_negative_user', ev:'user_login', lv:'INFO', d:`{"user_id":-1,"ip":"10.0.1.${rndInt(1,200)}","latency_ms":${rndInt(18,90)}}`, humor:'Hint: user_id -1 is impossible in this schema.' },
+            { id:'easy_id_negative_order', ev:'order_fetch', lv:'INFO', d:`{"order_id":-42,"region":"us-east","found":true}`, humor:'Hint: order_id should never be negative.' },
+            { id:'easy_id_bad_session', ev:'session_create', lv:'INFO', d:`{"session_id":"","user_id":${rnd(CTX.users)},"expires_in":3600}`, humor:'Hint: Empty session_id means a required identifier is invalid.' },
+            { id:'easy_id_missing_account', ev:'account_lookup', lv:'INFO', d:`{"account_id":null,"active":true}`, humor:'Hint: null account_id is not a valid identifier.' },
+            { id:'easy_id_neg_job', ev:'bg_job', lv:'INFO', d:`{"job_id":"job_${rndInt(1,50)}","worker_id":-7,"status":"running"}`, humor:'Hint: worker_id cannot be negative here.' },
+        ];
+        return rnd(variants);
+    }
+
+    function genEasyMissingField() {
+        const variants = [
+            { id:'easy_missing_user_id', ev:'user_login', lv:'INFO', d:`{"ip":"10.1.${rndInt(1,9)}.${rndInt(1,200)}","latency_ms":${rndInt(20,90)}}`, humor:'Hint: user_login is missing required field user_id.' },
+            { id:'easy_missing_status', ev:'api_response', lv:'INFO', d:`{"endpoint":"${rnd(CTX.eps)}","bytes":${rndInt(512,4096)}}`, humor:'Hint: api_response must include status.' },
+            { id:'easy_missing_table', ev:'db_query', lv:'INFO', d:`{"rows_returned":${rndInt(1,140)},"duration_ms":${rndInt(4,40)}}`, humor:'Hint: db_query is missing table name entirely.' },
+            { id:'easy_missing_hit', ev:'cache_hit', lv:'INFO', d:`{"key":"usr:${rnd(CTX.users)}","ttl_remaining":${rndInt(120,5400)}}`, humor:'Hint: cache_hit event is missing required boolean hit.' },
+            { id:'easy_missing_sensor', ev:'sensor_read', lv:'INFO', d:`{"temperature_f":102,"unit":"F"}`, humor:'Hint: sensor_read should include a sensor identifier.' },
+        ];
+        return rnd(variants);
+    }
+
+    function genMediumBoundary() {
+        const variants = [
+            { id:'med_boundary_temp', ev:'sensor_read', lv:'INFO', d:`{"sensor":"temp_${rndInt(1,12)}","temperature_f":124,"unit":"F"}`, humor:'Hint: 124°F is possible but suspicious for this baseline workload.' },
+            { id:'med_boundary_latency', ev:'user_login', lv:'INFO', d:`{"user_id":${rnd(CTX.users)},"ip":"10.0.1.${rndInt(1,200)}","latency_ms":121}`, humor:'Hint: Latency is only slightly outside normal expected range.' },
+            { id:'med_boundary_rate', ev:'rate_limit_chk', lv:'WARN', d:`{"user_id":${rnd(CTX.users)},"requests":101,"limit":100}`, humor:'Hint: requests is just over limit by 1.' },
+            { id:'med_boundary_ttl', ev:'cache_hit', lv:'INFO', d:`{"key":"usr:${rnd(CTX.users)}","ttl_remaining":0,"hit":true}`, humor:'Hint: ttl_remaining at 0 means this is effectively expired.' },
+            { id:'med_boundary_progress', ev:'bg_job', lv:'INFO', d:`{"job_id":"${rnd(CTX.jobs)}","status":"running","progress":101}`, humor:'Hint: progress exceeds max by only one point.' },
+        ];
+        return rnd(variants);
+    }
+
+    function genMediumOffByOne() {
+        const variants = [
+            { id:'med_offbyone_user', ev:'auth_ok', lv:'INFO', d:`{"user_id":0,"method":"jwt","role":"user"}`, humor:'Hint: user_id 0 is an edge case that should be reviewed carefully.' },
+            { id:'med_offbyone_rows', ev:'db_query', lv:'INFO', d:`{"table":"${rnd(CTX.tables)}","rows_returned":-0,"duration_ms":${rndInt(5,35)}}`, humor:'Hint: rows_returned formatting is suspicious for this schema.' },
+            { id:'med_offbyone_bytes', ev:'api_response', lv:'INFO', d:`{"endpoint":"${rnd(CTX.eps)}","status":200,"bytes":511}`, humor:'Hint: bytes is just outside expected minimum payload size.' },
+            { id:'med_offbyone_conn', ev:'metric_record', lv:'INFO', d:`{"cpu_pct":${rndInt(10,55)},"mem_mb":${rndInt(256,1020)},"conns":1}`, humor:'Hint: connection count is unusually low for this service.' },
+            { id:'med_offbyone_exp', ev:'session_create', lv:'INFO', d:`{"session_id":"${rnd(CTX.sess)}","user_id":${rnd(CTX.users)},"expires_in":3599}`, humor:'Hint: expiry is off by one second from policy.' },
+        ];
+        return rnd(variants);
+    }
+
+    function genMediumFormatDrift() {
+        const tsNow = CTX.ts;
+        const variants = [
+            { id:'med_fmt_ts_space', ev:'health_check', lv:'INFO', d:`{"service":"${rnd(CTX.svcs)}","status":"healthy","uptime_s":${rndInt(1200,99000)}}`, overrideTs:new Date(tsNow).toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, 'Z'), humor:'Hint: Timestamp format drifted from strict ISO-8601.' },
+            { id:'med_fmt_ts_offset', ev:'health_check', lv:'INFO', d:`{"service":"${rnd(CTX.svcs)}","status":"healthy","uptime_s":${rndInt(1200,99000)}}`, overrideTs:new Date(tsNow).toISOString().replace('Z', '+00:00'), humor:'Hint: Valid timestamp, but format differs from surrounding log convention.' },
+            { id:'med_fmt_boolean', ev:'token_validate', lv:'INFO', d:`{"user_id":${rnd(CTX.users)},"token_age_s":${rndInt(100,3550)},"valid":"true"}`, humor:'Hint: valid should be boolean true, not string "true".' },
+            { id:'med_fmt_schema', ev:'db_query', lv:'INFO', d:`{"schema":"public_${rndInt(1,5)}","table":"${rnd(CTX.tables)}","rows_returned":${rndInt(1,200)},"duration_ms":${rndInt(8,48)}}`, humor:'Hint: schema key exists, but this pipeline expects db_schema field name.' },
+            { id:'med_fmt_id', ev:'session_create', lv:'INFO', d:`{"session_id":"SID-${rndInt(1000,9999)}","user_id":${rnd(CTX.users)},"expires_in":3600}`, humor:'Hint: session_id format deviates from expected sess_* pattern.' },
+        ];
+        return rnd(variants);
+    }
+
+    function genHardContextMismatch() {
+        const variants = [
+            { id:'hard_ctx_unit', ev:'sensor_read', lv:'INFO', d:`{"sensor":"temp_${rndInt(1,12)}","temperature_f":98.6,"unit":"K"}`, humor:'Hint: Value looks normal, but the unit makes it contextually wrong.' },
+            { id:'hard_ctx_http', ev:'api_response', lv:'INFO', d:`{"endpoint":"/api/v2/users","status":201,"bytes":${rndInt(512,2048)}}`, humor:'Hint: status code is valid, but mismatched for this read endpoint.' },
+            { id:'hard_ctx_cache', ev:'cache_hit', lv:'INFO', d:`{"key":"usr:${rnd(CTX.users)}","ttl_remaining":${rndInt(220,6100)},"hit":false}`, humor:'Hint: Event name says hit, payload says miss.' },
+            { id:'hard_ctx_cpu', ev:'metric_record', lv:'INFO', d:`{"cpu_pct":0.4,"mem_mb":${rndInt(420,980)},"conns":${rndInt(18,26)}}`, humor:'Hint: CPU is technically valid, but implausible for this connection load.' },
+            { id:'hard_ctx_auth', ev:'auth_ok', lv:'INFO', d:`{"user_id":${rnd(CTX.users)},"method":"jwt","role":"anonymous"}`, humor:'Hint: auth_ok with anonymous role is logically inconsistent.' },
+        ];
+        return rnd(variants);
+    }
+
+    function genHardPatternDrift() {
+        const variants = [
+            { id:'hard_pattern_order', ev:'order_fetch', lv:'INFO', d:`{"order_id":"ORD-${rndInt(1000,9998)}${rndInt(0,8)}","region":"us-east","found":true}`, humor:'Hint: order_id almost matches pattern, but one digit is malformed.' },
+            { id:'hard_pattern_session', ev:'session_create', lv:'INFO', d:`{"session_id":"sess-${rndInt(100,999)}_${rndInt(100,999)}","user_id":${rnd(CTX.users)},"expires_in":3600}`, humor:'Hint: session_id format is close, but separator pattern is wrong.' },
+            { id:'hard_pattern_ip', ev:'user_login', lv:'INFO', d:`{"user_id":${rnd(CTX.users)},"ip":"10.0.${rndInt(1,9)}.256","latency_ms":${rndInt(24,82)}}`, humor:'Hint: IP pattern looks close, but one octet is invalid.' },
+            { id:'hard_pattern_table', ev:'db_query', lv:'INFO', d:`{"table":"${rnd(CTX.tables)}_archive","rows_returned":${rndInt(30,260)},"duration_ms":${rndInt(8,38)}}`, humor:'Hint: table naming pattern is similar but unexpected in this stream.' },
+            { id:'hard_pattern_job', ev:'bg_job', lv:'INFO', d:`{"job_id":"job-${rndInt(1,9)}0${rndInt(1,9)}","status":"running","progress":${rndInt(45,88)}}`, humor:'Hint: job_id almost fits, but uses a different ID pattern.' },
+        ];
+        return rnd(variants);
+    }
+
+    function genHardTemporalLogic() {
+        const now = CTX.ts;
+        const variants = [
+            { id:'hard_time_back_2s', ev:'health_check', lv:'INFO', d:`{"service":"${rnd(CTX.svcs)}","status":"healthy","uptime_s":${rndInt(1200,99000)}}`, overrideTs:fmtTs(now - 2000), humor:'Hint: Timestamp is valid but moves backward against stream order.' },
+            { id:'hard_time_future_5m', ev:'metric_record', lv:'INFO', d:`{"cpu_pct":${rndInt(8,55)},"mem_mb":${rndInt(300,980)},"conns":${rndInt(4,26)}}`, overrideTs:fmtTs(now + 300000), humor:'Hint: Timestamp is valid ISO, but appears 5 minutes in the future.' },
+            { id:'hard_time_old_token', ev:'token_validate', lv:'INFO', d:`{"user_id":${rnd(CTX.users)},"token_age_s":86400,"valid":true}`, humor:'Hint: Fields are valid, but token age is illogical for active sessions.' },
+            { id:'hard_time_rotate', ev:'log_rotate', lv:'INFO', d:`{"file":"app.log","size_kb":${rndInt(120,2100)},"archived":true}`, overrideTs:fmtTs(now - ONE_HOUR_MS), humor:'Hint: Rotation event timestamp is valid but out of sequence by an hour.' },
+            { id:'hard_time_sync', ev:'data_sync', lv:'INFO', d:`{"source":"${rnd(CTX.tables)}","records":${rndInt(10,3800)},"duration_ms":1}`, humor:'Hint: Valid values, but 1ms sync duration is contextually unrealistic.' },
+        ];
+        return rnd(variants);
+    }
+
+    function genEasyError()   { return pickNonRepeating([genEasyOutOfRange(), genEasyImpossibleId(), genEasyMissingField()], 'obvious'); }
+    function genMediumError() { return pickNonRepeating([genMediumBoundary(), genMediumOffByOne(), genMediumFormatDrift()], 'subtle'); }
+    function genHardError()   { return pickNonRepeating([genHardContextMismatch(), genHardPatternDrift(), genHardTemporalLogic()], 'very_subtle'); }
 
     function pickError(level) {
-        // Weight toward harder errors at higher levels
-        let pool;
-        if (level <= 4)  pool = ERRORS.filter(e => e.tier === 1);
-        else if (level <= 8)  pool = ERRORS.filter(e => e.tier === 1 || (e.tier === 2 && Math.random() < .3));
-        else if (level <= 15) pool = ERRORS.filter(e => e.tier <= 2);
-        else if (level <= 25) pool = ERRORS.filter(e => e.tier >= 2);
-        else                  pool = ERRORS.filter(e => e.tier === 3 || (e.tier === 2 && Math.random() < .3));
-        return rnd(pool);
+        if (level <= 5) return genEasyError();
+        if (level <= 15) return genMediumError();
+        return genHardError();
     }
 
     function genBatch(level) {
-        const n   = LINES_N(level);
+        const n = LINES_N();
         const eIdx = rndInt(0, n - 1);
-        const err  = pickError(level);
+        const err = pickError(level);
         const lines = [];
 
         for (let i = 0; i < n; i++) {
             if (i === eIdx) {
-                const ts   = advanceTs();
-                const info = err.gen();
+                const ts = advanceTs();
                 lines.push({
-                    ts:      info.overrideTs || ts,
-                    ev:      info.ev,
-                    lv:      info.lv,
-                    d:       info.d,
+                    ts:      err.overrideTs || ts,
+                    ev:      err.ev,
+                    lv:      err.lv,
+                    d:       err.d,
                     isError: true,
                     humor:   err.humor,
                 });
@@ -1257,6 +1234,7 @@
 
     function startBatch() {
         G.answered   = false;
+        G.errorIntensity = levelIntensity(G.level);
         G.batchDur   = BATCH_MS(G.level);
         G.batchStart = performance.now();
 
