@@ -1433,28 +1433,38 @@
 
         $feedbackOv.classList.remove('hidden');
 
-        // Replace event listener (clone trick)
-        const newOkBtn = $modalOkBtn.cloneNode(true);
-        $modalOkBtn.parentNode.replaceChild(newOkBtn, $modalOkBtn);
-        // Re-grab reference (can't reassign const, use the modal's querySelector)
-        document.getElementById('modal-ok-btn').addEventListener('click', () => {
+        // Utility: replace a button's click handler without node cloning
+        let activeKeyHandler = null;
+        function bindOkBtn(handler) {
+            const okBtn = document.getElementById('modal-ok-btn');
+            const newBtn = okBtn.cloneNode(true);
+            okBtn.parentNode.replaceChild(newBtn, okBtn);
+            newBtn.addEventListener('click', handler);
+        }
+
+        const dismissModal = () => {
             $feedbackOv.classList.add('hidden');
+            if (activeKeyHandler) {
+                document.removeEventListener('keydown', activeKeyHandler);
+                activeKeyHandler = null;
+            }
             if (G.pendingCallback) {
                 const fn = G.pendingCallback;
                 G.pendingCallback = null;
                 fn();
             }
-        });
+        };
 
-        // Keyboard: Enter to dismiss
-        const keyHandler = (e) => {
+        bindOkBtn(dismissModal);
+
+        // Keyboard: Enter/Space to dismiss; cleaned up on any close path
+        activeKeyHandler = (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                document.getElementById('modal-ok-btn').click();
-                document.removeEventListener('keydown', keyHandler);
+                dismissModal();
             }
         };
-        document.addEventListener('keydown', keyHandler);
+        document.addEventListener('keydown', activeKeyHandler);
 
         G.lastHumor = humor || '';
     }
@@ -1475,7 +1485,7 @@
                 }
             }
         }
-        // Every 100 above 100 (150, 200, 250, ...)
+        // Every 50 above 100 (150, 200, 250, ...)
         if (G.streak >= 150 && G.streak % 50 === 0 && !G.lifeGranted.has(G.streak)) {
             G.lifeGranted.add(G.streak);
             if (G.lives < MAX_LIVES) {
@@ -1514,7 +1524,7 @@
     }
     function lbQualifies(score) {
         const board = lbLoad();
-        return board.length < 10 || score > (board[board.length - 1] || {score: -1}).score;
+        return board.length < 10 || score > board[board.length - 1].score;
     }
     function lbAdd(name, score, level, streak) {
         const board = lbLoad();
@@ -1564,16 +1574,19 @@
             if (afterClose) afterClose();
         }
 
-        // Re-bind buttons
-        const newPlayBtn  = $lbPlayBtn.cloneNode(true);
-        const newCloseBtn = $lbCloseBtn.cloneNode(true);
-        $lbPlayBtn.parentNode.replaceChild(newPlayBtn, $lbPlayBtn);
-        $lbCloseBtn.parentNode.replaceChild(newCloseBtn, $lbCloseBtn);
-        document.getElementById('lb-play-btn').addEventListener('click', () => {
+        // Re-bind buttons cleanly
+        function rebindBtn(id, handler) {
+            const el = document.getElementById(id);
+            const fresh = el.cloneNode(true);
+            el.parentNode.replaceChild(fresh, el);
+            fresh.addEventListener('click', handler);
+        }
+
+        rebindBtn('lb-play-btn', () => {
             $lbOverlay.classList.add('hidden');
             resetAndStart();
         });
-        document.getElementById('lb-close-btn').addEventListener('click', closeLb);
+        rebindBtn('lb-close-btn', closeLb);
     }
 
     /* ══════════════════════════════════════════════════════════════════════
@@ -1628,18 +1641,21 @@
                 showLeaderboard(G.score, null);
             };
 
-            // Re-bind buttons
-            const newSub  = $nameSubmitBtn.cloneNode(true);
-            const newSkip = $nameSkipBtn.cloneNode(true);
-            $nameSubmitBtn.parentNode.replaceChild(newSub, $nameSubmitBtn);
-            $nameSkipBtn.parentNode.replaceChild(newSkip, $nameSkipBtn);
-            document.getElementById('name-submit-btn').addEventListener('click', doSubmit);
-            document.getElementById('name-input').addEventListener('keydown', e => {
-                if (e.key === 'Enter') doSubmit();
-            });
-            document.getElementById('name-skip-btn').addEventListener('click', () => {
-                $nameOverlay.classList.add('hidden');
-            });
+            // Re-bind buttons using helper to avoid duplicate listener stacking
+            function rebindNameBtn(id, handler) {
+                const el = document.getElementById(id);
+                const fresh = el.cloneNode(true);
+                el.parentNode.replaceChild(fresh, el);
+                fresh.addEventListener('click', handler);
+            }
+
+            rebindNameBtn('name-submit-btn', doSubmit);
+            rebindNameBtn('name-skip-btn', () => { $nameOverlay.classList.add('hidden'); });
+
+            // Allow Enter key in input field to submit
+            const nameInput = document.getElementById('name-input');
+            nameInput.value = '';
+            nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') doSubmit(); });
             // Focus input
             setTimeout(() => document.getElementById('name-input').focus(), 100);
         }
