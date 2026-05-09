@@ -782,7 +782,7 @@
     };
 
     // Number of lines shown in each question batch
-    const LINES_N = () => rndInt(8, 10);
+    const BATCH_SIZE = () => rndInt(8, 10);
 
     const ERROR_GLOW = lvl =>
         lvl <= 2 ? .9 :
@@ -890,6 +890,7 @@
     ══════════════════════════════════════════════════════════════════════ */
     const RECENT_ERRORS = { obvious: [], subtle: [], very_subtle: [] };
     const RECENT_ERROR_LIMIT = 8;
+    const MAX_ERROR_PICK_RETRIES = 8;
 
     function levelIntensity(level) {
         return level <= 5 ? 'obvious' : level <= 15 ? 'subtle' : 'very_subtle';
@@ -901,14 +902,22 @@
         if (list.length > RECENT_ERROR_LIMIT) list.shift();
     }
 
-    function pickNonRepeating(pool, intensity) {
+    function pickNonRepeating(generators, intensity) {
         const recent = RECENT_ERRORS[intensity];
-        let available = pool.filter(p => !recent.includes(p.id));
-        if (!available.length) {
-            RECENT_ERRORS[intensity] = [];
-            available = pool;
+        let picked = null;
+
+        for (let tries = 0; tries < MAX_ERROR_PICK_RETRIES; tries++) {
+            const candidate = rnd(generators)();
+            if (!recent.includes(candidate.id)) {
+                picked = candidate;
+                break;
+            }
         }
-        const picked = rnd(available);
+
+        if (!picked) {
+            RECENT_ERRORS[intensity] = [];
+            picked = rnd(generators)();
+        }
         pushRecentError(intensity, picked.id);
         return picked;
     }
@@ -960,7 +969,7 @@
     function genMediumOffByOne() {
         const variants = [
             { id:'med_offbyone_user', ev:'auth_ok', lv:'INFO', d:`{"user_id":0,"method":"jwt","role":"user"}`, humor:'Hint: user_id 0 is an edge case that should be reviewed carefully.' },
-            { id:'med_offbyone_rows', ev:'db_query', lv:'INFO', d:`{"table":"${rnd(CTX.tables)}","rows_returned":-0,"duration_ms":${rndInt(5,35)}}`, humor:'Hint: rows_returned formatting is suspicious for this schema.' },
+            { id:'med_offbyone_rows', ev:'db_query', lv:'INFO', d:`{"table":"${rnd(CTX.tables)}","rows_returned":0,"duration_ms":${rndInt(5,35)}}`, humor:'Hint: rows_returned is an edge case here and often indicates an off-by-one issue.' },
             { id:'med_offbyone_bytes', ev:'api_response', lv:'INFO', d:`{"endpoint":"${rnd(CTX.eps)}","status":200,"bytes":511}`, humor:'Hint: bytes is just outside expected minimum payload size.' },
             { id:'med_offbyone_conn', ev:'metric_record', lv:'INFO', d:`{"cpu_pct":${rndInt(10,55)},"mem_mb":${rndInt(256,1020)},"conns":1}`, humor:'Hint: connection count is unusually low for this service.' },
             { id:'med_offbyone_exp', ev:'session_create', lv:'INFO', d:`{"session_id":"${rnd(CTX.sess)}","user_id":${rnd(CTX.users)},"expires_in":3599}`, humor:'Hint: expiry is off by one second from policy.' },
@@ -993,9 +1002,9 @@
 
     function genHardPatternDrift() {
         const variants = [
-            { id:'hard_pattern_order', ev:'order_fetch', lv:'INFO', d:`{"order_id":"ORD-${rndInt(1000,9998)}${rndInt(0,8)}","region":"us-east","found":true}`, humor:'Hint: order_id almost matches pattern, but one digit is malformed.' },
+            { id:'hard_pattern_order', ev:'order_fetch', lv:'INFO', d:`{"order_id":"ORD-${rndInt(10,99)}A${rndInt(100,999)}","region":"us-east","found":true}`, humor:'Hint: order_id almost matches pattern, but one character is malformed.' },
             { id:'hard_pattern_session', ev:'session_create', lv:'INFO', d:`{"session_id":"sess-${rndInt(100,999)}_${rndInt(100,999)}","user_id":${rnd(CTX.users)},"expires_in":3600}`, humor:'Hint: session_id format is close, but separator pattern is wrong.' },
-            { id:'hard_pattern_ip', ev:'user_login', lv:'INFO', d:`{"user_id":${rnd(CTX.users)},"ip":"10.0.${rndInt(1,9)}.256","latency_ms":${rndInt(24,82)}}`, humor:'Hint: IP pattern looks close, but one octet is invalid.' },
+            { id:'hard_pattern_ip', ev:'user_login', lv:'INFO', d:`{"user_id":${rnd(CTX.users)},"ip":"10.0.${rndInt(1,9)}.${rndInt(256,260)}","latency_ms":${rndInt(24,82)}}`, humor:'Hint: IP pattern looks close, but one octet is invalid.' },
             { id:'hard_pattern_table', ev:'db_query', lv:'INFO', d:`{"table":"${rnd(CTX.tables)}_archive","rows_returned":${rndInt(30,260)},"duration_ms":${rndInt(8,38)}}`, humor:'Hint: table naming pattern is similar but unexpected in this stream.' },
             { id:'hard_pattern_job', ev:'bg_job', lv:'INFO', d:`{"job_id":"job-${rndInt(1,9)}0${rndInt(1,9)}","status":"running","progress":${rndInt(45,88)}}`, humor:'Hint: job_id almost fits, but uses a different ID pattern.' },
         ];
@@ -1014,9 +1023,9 @@
         return rnd(variants);
     }
 
-    function genEasyError()   { return pickNonRepeating([genEasyOutOfRange(), genEasyImpossibleId(), genEasyMissingField()], 'obvious'); }
-    function genMediumError() { return pickNonRepeating([genMediumBoundary(), genMediumOffByOne(), genMediumFormatDrift()], 'subtle'); }
-    function genHardError()   { return pickNonRepeating([genHardContextMismatch(), genHardPatternDrift(), genHardTemporalLogic()], 'very_subtle'); }
+    function genEasyError()   { return pickNonRepeating([genEasyOutOfRange, genEasyImpossibleId, genEasyMissingField], 'obvious'); }
+    function genMediumError() { return pickNonRepeating([genMediumBoundary, genMediumOffByOne, genMediumFormatDrift], 'subtle'); }
+    function genHardError()   { return pickNonRepeating([genHardContextMismatch, genHardPatternDrift, genHardTemporalLogic], 'very_subtle'); }
 
     function pickError(level) {
         if (level <= 5) return genEasyError();
@@ -1025,7 +1034,7 @@
     }
 
     function genBatch(level) {
-        const n = LINES_N();
+        const n = BATCH_SIZE();
         const eIdx = rndInt(0, n - 1);
         const err = pickError(level);
         const lines = [];
