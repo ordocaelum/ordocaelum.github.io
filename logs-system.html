@@ -799,6 +799,7 @@
     // Streak thresholds that grant +1 life
     const LIFE_THRESHOLDS = [5, 10, 20, 50, 100];
     const MAX_LIVES = 5;
+    const STARTING_LIVES = 3;
 
     // localStorage key for leaderboard
     const LB_KEY = 'logs_leaderboard_v1';
@@ -812,7 +813,7 @@
         bestStreak:      0,
         score:           0,
         level:           1,
-        lives:           3,
+        lives:           STARTING_LIVES,
         lifeGranted:     new Set(),   // streak thresholds that already gave a life
         round:           0,
         roundsSinceUp:   0,
@@ -1117,7 +1118,7 @@
        STATS UPDATE
     ══════════════════════════════════════════════════════════════════════ */
     function livesDisplay(n) {
-        return '❤️'.repeat(Math.max(0, n)) + '🖤'.repeat(Math.max(0, 3 - n));
+        return '❤️'.repeat(Math.max(0, n)) + '🖤'.repeat(Math.max(0, STARTING_LIVES - n));
     }
 
     function updateStats() {
@@ -1131,6 +1132,7 @@
         $sCaught.textContent = G.caughtErrors;
         $sMissed.textContent = G.missedErrors;
         $sLives.textContent  = livesDisplay(G.lives);
+        $sLives.setAttribute('aria-label', `Lives: ${G.lives}`);
         if (G.startTime) {
             const s = Math.floor((Date.now() - G.startTime) / 1000);
             $sTime.textContent = s < 60 ? s + 's' : Math.floor(s/60) + 'm ' + (s%60) + 's';
@@ -1433,7 +1435,7 @@
 
         $feedbackOv.classList.remove('hidden');
 
-        // Utility: replace a button's click handler without node cloning
+        // Wire up OK button: clone to remove any prior listeners, then bind dismissal
         let activeKeyHandler = null;
         function bindOkBtn(handler) {
             const okBtn = document.getElementById('modal-ok-btn');
@@ -1634,13 +1636,6 @@
             $nameScorePrev.textContent = `Score: ${G.score.toLocaleString()} | Level ${G.level} | Best Streak: ${G.bestStreak}`;
             $nameOverlay.classList.remove('hidden');
 
-            const doSubmit = () => {
-                const name = $nameInput.value;
-                $nameOverlay.classList.add('hidden');
-                lbAdd(name, G.score, G.level, G.bestStreak);
-                showLeaderboard(G.score, null);
-            };
-
             // Re-bind buttons using helper to avoid duplicate listener stacking
             function rebindNameBtn(id, handler) {
                 const el = document.getElementById(id);
@@ -1649,15 +1644,27 @@
                 fresh.addEventListener('click', handler);
             }
 
+            // Clone input to clear stacked keydown listeners from prior game sessions
+            const oldInput = document.getElementById('name-input');
+            const freshInput = oldInput.cloneNode(true);
+            oldInput.parentNode.replaceChild(freshInput, oldInput);
+            freshInput.value = '';
+
+            const doSubmit = () => {
+                const name = freshInput.value;
+                $nameOverlay.classList.add('hidden');
+                lbAdd(name, G.score, G.level, G.bestStreak);
+                showLeaderboard(G.score, null);
+            };
+
             rebindNameBtn('name-submit-btn', doSubmit);
             rebindNameBtn('name-skip-btn', () => { $nameOverlay.classList.add('hidden'); });
 
-            // Allow Enter key in input field to submit
-            const nameInput = document.getElementById('name-input');
-            nameInput.value = '';
-            nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') doSubmit(); });
+            freshInput.addEventListener('keydown', e => {
+                if (e.key === 'Enter') { e.preventDefault(); doSubmit(); }
+            });
             // Focus input
-            setTimeout(() => document.getElementById('name-input').focus(), 100);
+            setTimeout(() => freshInput.focus(), 100);
         }
     }
     const MILESTONES = {
@@ -1745,7 +1752,7 @@
         G.streak         = 0;
         G.score          = 0;
         G.level          = 1;
-        G.lives          = 3;
+        G.lives          = STARTING_LIVES;
         G.lifeGranted    = new Set();
         G.round          = 0;
         G.roundsSinceUp  = 0;
