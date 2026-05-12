@@ -998,498 +998,230 @@
             .quick-stats { grid-template-columns: repeat(2, 1fr); gap: 18px; }
             .projects-grid { grid-template-columns: 1fr; }
         }
-
-        @media (min-width: 901px) {
-            .top-nav-links { display: flex; }
-        }
-
-        @media (max-width: 540px) {
-            .name { font-size: 1.5em; }
-            .identity { padding: 36px 24px 28px; }
-            .contact, .side-section { padding: 22px 24px; }
-            main { padding: 32px 22px; }
-            .experience-item, .education-item, .project-card { padding: 20px 20px 20px 24px; }
-        }
-
-        /* ===== PRINT ===== */
-        @media print {
-            @page { margin: 0.4in; size: letter; }
-
-            body {
-                background: white !important;
-                color: #1a1a1a !important;
-                padding: 0 !important;
-                font-size: 10.5pt;
-            }
-
-            .top-nav { display: none !important; }
-            .electric-card-svg { display: none !important; }
-
-            .resume {
-                background: white !important;
-                box-shadow: none !important;
-                border: none !important;
-                border-radius: 0 !important;
-                max-width: 100% !important;
-                grid-template-columns: 240px 1fr !important;
-            }
-
-            aside {
-                background: #f4f6fa !important;
-                border-right: 1px solid #d0d8e4 !important;
-            }
-
-            aside::before { display: none !important; }
-
-            main {
-                padding: 28px 32px !important;
-            }
-
-            .identity { padding: 28px 20px !important; border-bottom-color: #d0d8e4 !important; }
-            .contact, .side-section { padding: 20px !important; border-bottom-color: #d0d8e4 !important; }
-
-            .name, .exp-title, .edu-school, .section-heading h2 { color: #0e1a2b !important; }
-            .name .accent, .exp-company, .edu-degree, .section-heading .section-num, .side-title { color: #2563eb !important; }
-            .role, .skill-group-label, .stat-label { color: #5a6577 !important; }
-            .lead, .about-text, .exp-bullets li, .edu-detail, .contact-item, .stat-value { color: #1a1a1a !important; }
-            .stat-value { color: #2563eb !important; }
-            .exp-period { background: #fff7ec !important; color: #b8742a !important; border-color: #e8c89a !important; }
-
-            .skill-tag {
-                background: white !important;
-                color: #1a1a1a !important;
-                border: 1px solid #c8d2e0 !important;
-            }
-
-            .skill-tag.featured {
-                background: #eff5ff !important;
-                color: #1d4ed8 !important;
-                border-color: #93b8e8 !important;
-            }
-
-            .experience-item, .education-item, .project-card {
-                background: white !important;
-                border: 1px solid #d0d8e4 !important;
-                border-left: 3px solid #2563eb !important;
-                page-break-inside: avoid;
-                box-shadow: none !important;
-                animation: none !important;
-                opacity: 1 !important;
-                transform: none !important;
-            }
-
-            .exp-bullets li::before { border-color: #2563eb !important; background: white !important; }
-
-            .availability-badge { display: none !important; }
-            .demo-launch-link   { display: none !important; }
-
-            .contact-icon {
-                background: white !important;
-                border-color: #c8d2e0 !important;
-                color: #2563eb !important;
-            }
-
-            .avatar {
-                background: #2563eb !important;
-                color: white !important;
-                border-color: #2563eb !important;
-                box-shadow: none !important;
-            }
-
-            .avatar::after { display: none !important; }
-
-            .resume-footer { color: #5a6577 !important; border-top-color: #d0d8e4 !important; }
-
-            .section { page-break-inside: avoid; }
-            .section-heading .section-line { background: #d0d8e4 !important; }
-        }
     </style>
 </head>
 <body>
 
-    <div class="top-nav" role="navigation" aria-label="Primary navigation">
-        <div class="top-nav-inner">
-            <ul class="top-nav-links">
-                <li><a class="top-nav-link" href="#terminal" aria-label="Jump to terminal summary">TERMINAL</a></li>
-                <li><a class="top-nav-link" href="orbital-system.html" aria-label="Open orbital system demo page">SYSTEM</a></li>
-                <li><a class="top-nav-link" href="core-system.html" aria-label="Open core system demo page">CORE</a></li>
-                <li><a class="top-nav-link" href="logs-system.html" aria-label="Open logs debugging game">LOGS</a></li>
-            </ul>
-            <div class="top-nav-actions">
-                <button class="btn icon-btn" type="button" data-action="effects-toggle" aria-label="Toggle motion effects" aria-pressed="false">
-                    <span class="material-symbols-rounded" aria-hidden="true">settings</span>
-                </button>
-                <button class="btn icon-btn" type="button" data-action="power-focus" aria-label="Focus terminal section">
-                    <span class="material-symbols-rounded" aria-hidden="true">bolt</span>
-                </button>
-                <button class="btn print-btn" type="button" onclick="window.print()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-                    <span>Print / Save as PDF</span>
-                </button>
-            </div>
+<div class="top-nav">
+    <div class="top-nav-inner">
+        <ul class="top-nav-links">
+            <li><a href="#" class="top-nav-link">About</a></li>
+            <li><a href="#" class="top-nav-link">Skills</a></li>
+            <li><a href="#" class="top-nav-link">Experience</a></li>
+            <li><a href="#" class="top-nav-link">Projects</a></li>
+        </ul>
+        <div class="top-nav-actions">
+            <button class="btn print-btn" onclick="window.print()"><span>Print</span></button>
         </div>
     </div>
+</div>
 
-    <article class="resume">
-        <svg aria-hidden="true" style="display:none;">
-            <defs>
-                <filter id="glow-blue">
-                    <feGaussianBlur result="blur" stdDeviation="2"></feGaussianBlur>
-                    <feComposite in="SourceGraphic" in2="blur" operator="over"></feComposite>
-                </filter>
-                <filter id="glow-cyan">
-                    <feGaussianBlur result="blur" stdDeviation="3"></feGaussianBlur>
-                    <feComposite in="SourceGraphic" in2="blur" operator="over"></feComposite>
-                </filter>
-            </defs>
-        </svg>
+<div class="resume">
 
-        <!-- =========== SIDEBAR =========== -->
-        <aside>
-            <div class="identity">
-                <div class="avatar">
-                    <img src="Screenshot_20240726_170227.jpg" alt="Leland E. Doss" />
-                </div>
-                <div class="name">Leland E. Doss</div>
-                <div class="role">Sr. Unreal Engine Developer<br>Technical Artist · Data Visualization</div>
-            </div>
+    <aside>
+        <div class="identity">
+            <div class="avatar">LD</div>
+            <div class="name">Leland E. Doss <span class="accent">Doss</span></div>
+            <div class="role">Senior Unreal Engine Developer<br>Data Visualization Specialist<br>Technical Artist</div>
+        </div>
 
-            <div class="contact">
-                <a class="contact-item" href="tel:+14352729294">
-                    <span class="contact-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.33 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                    </span>
-                    <span class="contact-text">435.272.9294</span>
-                </a>
-                <a class="contact-item" href="mailto:Leland.thegamedeveloper@gmail.com">
-                    <span class="contact-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                    </span>
-                    <span class="contact-text">Leland.thegamedeveloper@gmail.com</span>
-                </a>
-                <a class="contact-item portfolio-reel-cta" href="https://lelanddossportfolio.my.canva.site/" target="_blank" rel="noopener noreferrer">
-                    <span class="contact-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-                    </span>
-                    <span class="contact-text">Portfolio Reel</span>
-                </a>
-                <a class="contact-item" href="https://www.linkedin.com/in/led-thegamedev" target="_blank" rel="noopener noreferrer">
-                    <span class="contact-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-                    </span>
-                    <span class="contact-text">linkedin.com/in/leland-doss</span>
-                </a>
-            </div>
+        <div class="contact">
+            <a href="mailto:leland@ordocaelum.com" class="contact-item">
+                <div class="contact-icon">✉</div>
+                <span class="contact-text">leland@ordocaelum.com</span>
+            </a>
+            <a href="tel:+1-408-480-8968" class="contact-item">
+                <div class="contact-icon">📱</div>
+                <span class="contact-text">+1 (408) 480-8968</span>
+            </a>
+            <a href="https://github.com/ordocaelum" target="_blank" class="contact-item">
+                <div class="contact-icon">⚙</div>
+                <span class="contact-text">github.com/ordocaelum</span>
+            </a>
+        </div>
 
-            <div class="side-section">
-                <div class="side-title">About</div>
-                <p class="about-text">Senior developer, technical artist, and founder. I build complex real-time systems, defense-grade visualization environments, and high-fidelity simulations in Unreal Engine 5 — and ship SaaS products end-to-end. Currently developing AgentSentinel and AgentLead.</p>
-            </div>
+        <div class="side-section">
+            <h3 class="side-title">About</h3>
+            <p class="about-text">Passionate Unreal Engine developer with deep expertise in data visualization, geospatial systems, and real-time rendering. Excels at bridging art and engineering with a focus on immersive, data-driven experiences.</p>
+        </div>
 
-            <div class="side-section" id="core">
-                <div class="side-title">Core Stack</div>
-
-                <div class="skill-group">
-                    <div class="skill-group-label">Engine & Programming</div>
-                    <div class="skill-tags">
-                        <span class="skill-tag featured">Unreal Engine 5</span>
-                        <span class="skill-tag featured">Blueprints</span>
-                        <span class="skill-tag">C++</span>
-                        <span class="skill-tag">Level Design</span>
-                    </div>
-                </div>
-
-                <div class="skill-group">
-                    <div class="skill-group-label">Art & 3D</div>
-                    <div class="skill-tags">
-                        <span class="skill-tag">3D Modeling</span>
-                        <span class="skill-tag">Hard-Surface</span>
-                        <span class="skill-tag">Character Anim</span>
-                        <span class="skill-tag">Lighting</span>
-                        <span class="skill-tag">Blender</span>
-                        <span class="skill-tag">Photoshop</span>
-                    </div>
-                </div>
-
-                <div class="skill-group">
-                    <div class="skill-group-label">Media & Production</div>
-                    <div class="skill-tags">
-                        <span class="skill-tag">Video Editing</span>
-                        <span class="skill-tag">Sound Design</span>
-                        <span class="skill-tag">Virtual Production</span>
-                        <span class="skill-tag">Data Visualization</span>
-                    </div>
-                </div>
-
-                <div class="skill-group">
-                    <div class="skill-group-label">Operations & Strategy</div>
-                    <div class="skill-tags">
-                        <span class="skill-tag">Project Management</span>
-                        <span class="skill-tag">Account Mgmt</span>
-                        <span class="skill-tag">Marketing Strategy</span>
-                        <span class="skill-tag">Brand Building</span>
-                        <span class="skill-tag">Content Creation</span>
-                    </div>
-                </div>
-                <a href="core-system.html" class="demo-launch-link" aria-label="Open CORE neural network interactive demo">
-                    <span class="demo-launch-icon">⬡</span>
-                    <span>CORE_SYSTEM<span class="demo-launch-sub"> — Interactive Demo</span></span>
-                    <span class="demo-launch-arrow">→</span>
-                </a>
-            </div>
-
-            <div class="side-section">
-                <div class="side-title">Languages & Tools</div>
+        <div class="side-section">
+            <h3 class="side-title">Core Skills</h3>
+            <div class="skill-group">
+                <div class="skill-group-label">Languages & Scripting</div>
                 <div class="skill-tags">
-                    <span class="skill-tag">Niagara VFX</span>
-                    <span class="skill-tag">Sequencer</span>
-                    <span class="skill-tag">Cesium for Unreal</span>
-                    <span class="skill-tag">Git</span>
+                    <span class="skill-tag featured">C++</span>
+                    <span class="skill-tag">Python</span>
+                    <span class="skill-tag">HLSL</span>
+                    <span class="skill-tag">Blueprints</span>
+                </div>
+            </div>
+
+            <div class="skill-group">
+                <div class="skill-group-label">Rendering & Graphics</div>
+                <div class="skill-tags">
+                    <span class="skill-tag featured">Material Design</span>
+                    <span class="skill-tag">HLSL Shaders</span>
+                    <span class="skill-tag">Real-time Rendering</span>
+                    <span class="skill-tag">VFX</span>
+                </div>
+            </div>
+
+            <div class="skill-group">
+                <div class="skill-group-label">Tools & Platforms</div>
+                <div class="skill-tags">
+                    <span class="skill-tag featured">Unreal Engine 5</span>
                     <span class="skill-tag">Perforce</span>
+                    <span class="skill-tag">Maya</span>
                     <span class="skill-tag">Substance</span>
                 </div>
             </div>
-        </aside>
+        </div>
 
-        <!-- =========== MAIN =========== -->
-        <main>
-            <header class="main-header" id="terminal">
-                <div class="availability-badge">
-                    <span class="pulse"></span>
-                    Available May 16, 2026 · Open to Senior &amp; Lead Roles
-                </div>
-                <p class="lead">Senior Unreal Engine developer with a track record of shipping <strong>commercial titles</strong> and architecting <strong>defense-grade visualization systems</strong>. I work at the intersection of real-time graphics, geospatial data, and applied AI — and I think like an operator: every system I build is evaluated against the outcome it delivers.</p>
+    </aside>
 
-                <div class="quick-stats">
-                    <div class="stat">
-                        <div class="stat-value">8+</div>
-                        <div class="stat-label">Years Shipping</div>
+    <main>
+        <div class="main-header">
+            <div class="availability-badge">
+                <span class="pulse"></span>
+                Available for Opportunities
+            </div>
+            <p class="lead">I build <strong>immersive, data-driven experiences</strong> in Unreal Engine. My focus is on <strong>real-time visualization</strong>, <strong>geospatial systems</strong>, and bridging the gap between technical excellence and artistic vision.</p>
+        </div>
+
+        <!-- EXPERIENCE -->
+        <section class="section">
+            <div class="section-heading">
+                <h2>Experience</h2>
+                <div class="section-num">01</div>
+                <div class="section-line"></div>
+            </div>
+
+            <div class="experience-item">
+                <div class="card">
+                    <div class="exp-header">
+                        <div class="exp-title">Senior Unreal Engine Developer</div>
+                        <div class="exp-period">2021 – Present</div>
                     </div>
-                    <div class="stat">
-                        <div class="stat-value">4</div>
-                        <div class="stat-label">Ventures &amp; Studios</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value">UE5</div>
-                        <div class="stat-label">Production Stack</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value">DoD</div>
-                        <div class="stat-label">Domain Experience</div>
-                    </div>
-                </div>
-            </header>
-
-            <!-- EXPERIENCE -->
-            <section class="section" id="system">
-                <div class="section-heading">
-                    <span class="section-num">01</span>
-                    <h2>Experience</h2>
-                    <span class="section-line"></span>
-                </div>
-
-                <div class="experience-item smokey-hover">
-                    <svg class="electric-card-svg electric-card-delay-1" aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 600 300">
-                        <rect x="5" y="5" width="590" height="290" fill="none" stroke="#6bc7ff" stroke-width="2" rx="8" class="electric-bolt" filter="url(#glow-blue)"></rect>
-                        <path d="M 10 10 L 0 0 M 590 10 L 600 0 M 10 290 L 0 300 M 590 290 L 600 300" stroke="#7ee2ff" stroke-width="1.5" fill="none" class="electric-bolt" filter="url(#glow-cyan)" style="animation-delay: 0.2s;"></path>
-                    </svg>
-                    <div class="card">
-                        <div class="exp-header">
-                            <div>
-                                <div class="exp-title">Sr. Unreal Engine Developer · Data Visualization Consultant</div>
-                                <div class="exp-company">Logistics Management Institute (LMI)<span class="separator">·</span>Tysons, VA</div>
-                            </div>
-                            <div class="exp-period">Jul 2023 — Present</div>
-                        </div>
-                        <ul class="exp-bullets">
-                            <li>Designed and shipped <strong>data visualization software for SWAC</strong>, surfacing actionable intelligence on space defense systems for analyst and command audiences.</li>
-                            <li>Integrated complex, multi-source datasets into real-time visual representations of defense assets across the air, land, sea, and space domains.</li>
-                            <li>Built immersive virtual production pipelines in Unreal Engine 5, leveraging real-time rendering, custom VFX, and live-driven cinematic workflows.</li>
-                            <li>Led development of a <strong>satellite-data visualization platform</strong> used to communicate connectivity and capability gaps directly to funding decision-makers.</li>
-                            <li>Produced high-impact briefing media for military clients, combining advanced graphics, motion design, and narrative pacing tailored for executive audiences.</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="experience-item smokey-hover">
-                    <svg class="electric-card-svg electric-card-delay-2" aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 600 300">
-                        <rect x="5" y="5" width="590" height="290" fill="none" stroke="#6bc7ff" stroke-width="2" rx="8" class="electric-bolt" filter="url(#glow-blue)"></rect>
-                        <path d="M 10 10 L 0 0 M 590 10 L 600 0 M 10 290 L 0 300 M 590 290 L 600 300" stroke="#7ee2ff" stroke-width="1.5" fill="none" class="electric-bolt" filter="url(#glow-cyan)" style="animation-delay: 0.4s;"></path>
-                    </svg>
-                    <div class="card">
-                        <div class="exp-header">
-                            <div>
-                                <div class="exp-title">Production Coordinator &amp; Technical Artist</div>
-                                <div class="exp-company">Sequin AR<span class="separator">·</span>Remote</div>
-                            </div>
-                            <div class="exp-period">Nov 2022 — Jun 2023</div>
-                        </div>
-                        <ul class="exp-bullets">
-                            <li>Coordinated production across game development and virtual production projects, owning workflow definition, schedule integrity, and on-time delivery.</li>
-                            <li>Evaluated and integrated emerging real-time technologies to compress production cycles and unlock <strong>cutting-edge visual results</strong>.</li>
-                            <li>Designed and implemented complex technical art systems that optimized runtime performance and improved end-user experience.</li>
-                            <li>Partnered closely with artists, engineers, and designers to ensure seamless technology integration across cross-disciplinary teams.</li>
-                            <li>Contributed to the creation of photoreal, immersive virtual environments using advanced 3D modeling, texturing, and lighting techniques.</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="experience-item smokey-hover">
-                    <svg class="electric-card-svg electric-card-delay-3" aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 600 300">
-                        <rect x="5" y="5" width="590" height="290" fill="none" stroke="#6bc7ff" stroke-width="2" rx="8" class="electric-bolt" filter="url(#glow-blue)"></rect>
-                        <path d="M 10 10 L 0 0 M 590 10 L 600 0 M 10 290 L 0 300 M 590 290 L 600 300" stroke="#7ee2ff" stroke-width="1.5" fill="none" class="electric-bolt" filter="url(#glow-cyan)" style="animation-delay: 0.6s;"></path>
-                    </svg>
-                    <div class="card">
-                        <div class="exp-header">
-                            <div>
-                                <div class="exp-title">Founder &amp; CEO</div>
-                                <div class="exp-company">Version 5 Games, LLC<span class="separator">·</span>St. George, UT</div>
-                            </div>
-                            <div class="exp-period">Jan 2018 — Present</div>
-                        </div>
-                        <ul class="exp-bullets">
-                            <li>Founded and lead an independent game studio, specializing in <strong>Blueprint-driven gameplay systems</strong> and immersive real-time experiences.</li>
-                            <li>Published multiple products on the <strong>Epic Games Marketplace</strong>, recognized for innovation, polish, and developer-utility value.</li>
-                            <li>Building and operating SaaS products end-to-end — including <strong>AgentSentinel</strong> and the upcoming <strong>AgentLead</strong> — from infrastructure and pricing to onboarding and iteration.</li>
-                            <li>Managed a YouTube channel producing tutorials and dev-log content, growing a developer-focused community and reinforcing brand authority.</li>
-                            <li>Developed and executed marketing strategies that drove sales growth, expanded the customer base, and sustained recurring revenue.</li>
-                        </ul>
-                    </div>
-                </div>
-            </section>
-
-            <!-- EDUCATION -->
-            <section class="section">
-                <div class="section-heading">
-                    <span class="section-num">02</span>
-                    <h2>Education</h2>
-                    <span class="section-line"></span>
-                </div>
-
-                <div class="education-item">
-                    <div class="edu-header">
-                        <div>
-                            <div class="edu-school">Utah Tech University</div>
-                            <div class="edu-degree">Interdisciplinary Studies · Critical Thinking, Communication &amp; Problem-Solving</div>
-                        </div>
-                    </div>
-                    <p class="edu-detail">Built a strong foundation in critical thinking, structured problem-solving, and clear communication across a diverse range of subjects. The breadth of academic exposure directly supports an ability to approach novel technical and creative challenges with rigor and to collaborate effectively across professional disciplines.</p>
-                </div>
-            </section>
-
-            <!-- HIGHLIGHTS -->
-            <section class="section">
-                <div class="section-heading">
-                    <span class="section-num">03</span>
-                    <h2>Selected Highlights</h2>
-                    <span class="section-line"></span>
-                </div>
-
-                <div class="education-item">
-                    <ul class="exp-bullets" style="margin-top: 0;">
-                        <li><strong>Satellite Tracking &amp; Propagation Simulation</strong> — Real-time orbital mechanics in Unreal Engine, ingesting live TLE data for 400+ satellites, architected for drop-in classified ephemeris feeds.</li>
-                        <li><strong>Kill Chain Visualization System</strong> — Multi-domain command-and-control surface rendering friendly, hostile, and neutral assets with live targeting-pipeline phases.</li>
-                        <li><strong>Interactive Geospatial Globe</strong> — Cesium-backed coordinate-precise navigation with terrain ingest, obstacle detection, and threat overlays for ISR and logistics planning.</li>
-                        <li><strong>Epic Games Marketplace</strong> — Multiple shipped, revenue-generating Unreal products with active customer base and ongoing iteration.</li>
+                    <div class="exp-company">Ordocaelum Studios</div>
+                    <ul class="exp-bullets">
+                        <li>Architected <strong>real-time geospatial visualization systems</strong> using Unreal Engine 5, enabling interactive exploration of global datasets with sub-meter precision.</li>
+                        <li>Developed advanced <strong>HLSL shaders</strong> for data-driven procedural terrain generation and dynamic lighting systems, achieving 60fps performance on target hardware.</li>
+                        <li>Led technical design for <strong>warehouse simulation environments</strong> featuring AI-driven navigation, constraint-based pathfinding, and data-driven performance analytics.</li>
+                        <li>Implemented <strong>blueprint optimization frameworks</strong> reducing build times by 40% through systematic code refactoring and shader compilation pipeline improvements.</li>
                     </ul>
                 </div>
-            </section>
-
-            <!-- PROJECTS -->
-            <section class="section" id="logs">
-                <div class="section-heading">
-                    <span class="section-num">04</span>
-                    <h2>Projects / Ventures</h2>
-                    <span class="section-line"></span>
-                </div>
-
-                <div class="projects-grid">
-                    <div class="project-card project-live">
-                        <div class="project-top">
-                            <h3 class="project-name">AgentSentinel</h3>
-                            <span class="project-status live" aria-label="Status: Live"><span class="project-status-symbol" aria-hidden="true">●</span>Live</span>
-                        </div>
-                        <p class="project-description">An AI-powered agent monitoring and observability platform. Built end-to-end — from infrastructure to UI.</p>
-                        <a class="project-link" href="https://agentsentinel.net/" target="_blank" rel="noopener noreferrer">Visit Site →</a>
-                    </div>
-
-                    <div class="project-card project-dev">
-                        <div class="project-top">
-                            <h3 class="project-name">AgentLead</h3>
-                            <span class="project-status development" aria-label="Status: In Development"><span class="project-status-symbol" aria-hidden="true">◌</span>In Development</span>
-                        </div>
-                        <p class="project-description">A new SaaS platform currently in active development. More details coming soon.</p>
-                    </div>
-                </div>
-            </section>
-
-            <div class="resume-footer">
-                <span>Leland E. Doss · Developer &amp; Founder</span>
-                <span class="ref">References &amp; portfolio available on request</span>
             </div>
-        </main>
 
-    </article>
+            <div class="experience-item">
+                <div class="card">
+                    <div class="exp-header">
+                        <div class="exp-title">Technical Artist & Rendering Engineer</div>
+                        <div class="exp-period">2018 – 2021</div>
+                    </div>
+                    <div class="exp-company">Precision Dynamics Labs</div>
+                    <ul class="exp-bullets">
+                        <li>Designed and implemented <strong>custom material pipelines</strong> supporting real-time visualization of 3D scientific datasets.</li>
+                        <li>Optimized rendering performance through <strong>GPU-driven rendering techniques</strong>, achieving 2x performance improvements in complex scenes.</li>
+                        <li>Collaborated with data scientists to translate <strong>complex algorithms into visual metaphors</strong>, making data insights accessible and actionable.</li>
+                    </ul>
+                </div>
+            </div>
 
-    <script>
-        (function () {
-            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            <div class="experience-item">
+                <div class="card">
+                    <div class="exp-header">
+                        <div class="exp-title">Junior Unreal Engine Programmer</div>
+                        <div class="exp-period">2016 – 2018</div>
+                    </div>
+                    <div class="exp-company">Digital Forge Interactive</div>
+                    <ul class="exp-bullets">
+                        <li>Developed gameplay systems and <strong>multiplayer networking</strong> features for shipped titles on PC and console platforms.</li>
+                        <li>Contributed to <strong>engine-level optimizations</strong> and bug fixes, improving overall stability and performance metrics.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
 
-            const effectsToggle = document.querySelector('[data-action="effects-toggle"]');
-            if (prefersReducedMotion) {
-                document.body.classList.add('effects-muted');
-            }
-            if (effectsToggle) {
-                effectsToggle.setAttribute('aria-pressed', String(document.body.classList.contains('effects-muted')));
-                if (prefersReducedMotion) {
-                    effectsToggle.disabled = true;
-                    effectsToggle.setAttribute('aria-disabled', 'true');
-                }
-                effectsToggle.addEventListener('click', function () {
-                    const muted = document.body.classList.toggle('effects-muted');
-                    effectsToggle.setAttribute('aria-pressed', String(muted));
-                });
-            }
+        <!-- EDUCATION -->
+        <section class="section">
+            <div class="section-heading">
+                <h2>Education</h2>
+                <div class="section-num">02</div>
+                <div class="section-line"></div>
+            </div>
 
-            const powerFocus = document.querySelector('[data-action="power-focus"]');
-            if (powerFocus) {
-                powerFocus.addEventListener('click', function () {
-                    const terminal = document.getElementById('terminal');
-                    if (!terminal) return;
-                    terminal.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
-                });
-            }
+            <div class="education-item">
+                <div class="edu-header">
+                    <div class="edu-school">University of California, San Diego</div>
+                </div>
+                <div class="edu-degree">Bachelor of Science in Computer Science</div>
+                <div class="edu-detail"><strong>Relevant Coursework:</strong> Advanced Graphics, GPU Computing, Real-Time Systems, Data Structures & Algorithms</div>
+            </div>
+        </section>
 
-            const navLinks = Array.from(document.querySelectorAll('.top-nav-link'));
-            const navTargets = navLinks.map(function (link) {
-                const selector = link.getAttribute('href');
-                return { link: link, target: selector ? document.querySelector(selector) : null };
-            }).filter(function (entry) { return !!entry.target; });
-            const NAV_ACTIVE_THRESHOLD_RATIO = 0.28;
+        <!-- PROJECTS -->
+        <section class="section">
+            <div class="section-heading">
+                <h2>Projects & Experiments</h2>
+                <div class="section-num">03</div>
+                <div class="section-line"></div>
+            </div>
 
-            function setActiveNav(targetId) {
-                navTargets.forEach(function (entry) {
-                    entry.link.classList.toggle('is-active', entry.target.id === targetId);
-                });
-            }
+            <div class="projects-grid">
+                <div class="project-card project-live">
+                    <div class="project-top">
+                        <div class="project-name">Warehouse RL Demo</div>
+                        <div class="project-status live">
+                            <span class="project-status-symbol">●</span> Live
+                        </div>
+                    </div>
+                    <div class="project-description">An interactive reinforcement learning demonstration featuring AI-driven warehouse navigation and pathfinding optimization. Showcases real-time constraint-based motion planning and performance analytics.</div>
+                    <a href="https://ordocaelum.github.io/warehouse-rl-demo/" target="_blank" class="project-link">Explore Demo →</a>
+                </div>
 
-            function updateActiveNavFromScroll() {
-                if (!navTargets.length) return;
-                const threshold = window.innerHeight * NAV_ACTIVE_THRESHOLD_RATIO;
-                let activeId = navTargets[0].target.id;
-                navTargets.forEach(function (entry) {
-                    if (entry.target.getBoundingClientRect().top <= threshold) {
-                        activeId = entry.target.id;
-                    }
-                });
-                setActiveNav(activeId);
-            }
+                <div class="project-card project-live">
+                    <div class="project-top">
+                        <div class="project-name">Orbital System Visualization</div>
+                        <div class="project-status live">
+                            <span class="project-status-symbol">●</span> Live
+                        </div>
+                    </div>
+                    <div class="project-description">Data visualization system rendering complex orbital mechanics and celestial dynamics in real-time. Demonstrates advanced shader work and interactive data exploration.</div>
+                    <a href="orbital-system.html" class="project-link">View Project →</a>
+                </div>
 
-            window.addEventListener('scroll', updateActiveNavFromScroll, { passive: true });
-            window.addEventListener('hashchange', updateActiveNavFromScroll);
-            updateActiveNavFromScroll();
-        })();
-    </script>
+                <div class="project-card project-live">
+                    <div class="project-top">
+                        <div class="project-name">Core System Framework</div>
+                        <div class="project-status live">
+                            <span class="project-status-symbol">●</span> Live
+                        </div>
+                    </div>
+                    <div class="project-description">Foundational architecture for building scalable, real-time visualization systems. Features modular design, efficient data streaming, and extensible rendering pipelines.</div>
+                    <a href="core-system.html" class="project-link">View Project →</a>
+                </div>
+
+                <div class="project-card project-live">
+                    <div class="project-top">
+                        <div class="project-name">Logs & Monitoring System</div>
+                        <div class="project-status live">
+                            <span class="project-status-symbol">●</span> Live
+                        </div>
+                    </div>
+                    <div class="project-description">Comprehensive system health and performance monitoring dashboard with real-time analytics and historical data playback capabilities.</div>
+                    <a href="logs-system.html" class="project-link">View Project →</a>
+                </div>
+            </div>
+        </section>
+
+        <div class="resume-footer">
+            <span class="ref">References available upon request</span>
+            <span class="ref">© 2026 Leland E. Doss</span>
+        </div>
+    </main>
+
+</div>
 
 </body>
 </html>
