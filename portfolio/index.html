@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leland E. Doss — Portfolio</title>
+    <meta name="description" content="Portfolio of Leland E. Doss, Senior Unreal Engine Developer and Game Designer: Backrooms: Betrayal, Revenant Sleuth, VoidGate, Unreal VFX and tools, and AI/simulation work.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0e1a2b;
+            --bg-soft: #142640;
+            --panel: #1a2f4d;
+            --panel-2: #11233c;
+            --line: rgba(170, 200, 235, 0.14);
+            --line-strong: rgba(170, 200, 235, 0.28);
+            --accent: #5aa8ff;
+            --accent-2: #82c0ff;
+            --accent-warm: #d4a574;
+            --text: #eef3fa;
+            --text-soft: #c2cfe0;
+            --text-mute: #8a98ad;
+            --radius: 14px;
+            --max: 1180px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: var(--bg);
+            background-image: radial-gradient(1200px 600px at 80% -10%, rgba(90, 168, 255, 0.10), transparent 60%),
+                              radial-gradient(900px 500px at -10% 30%, rgba(212, 165, 116, 0.06), transparent 60%);
+            color: var(--text);
+            font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+        a { color: var(--accent-2); text-decoration: none; }
+        a:hover { color: var(--text); }
+        img, video { display: block; max-width: 100%; }
+
+        /* ---------- nav ---------- */
+        .nav {
+            position: sticky; top: 0; z-index: 50;
+            background: rgba(14, 26, 43, 0.82);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--line);
+        }
+        .nav-inner {
+            max-width: var(--max); margin: 0 auto; padding: 12px 20px;
+            display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+        }
+        .nav-name { font-weight: 700; letter-spacing: 0.02em; color: var(--text); margin-right: auto; }
+        .nav a.link { font-size: 0.86rem; color: var(--text-soft); }
+        .nav a.link:hover { color: var(--accent-2); }
+
+        /* ---------- layout ---------- */
+        .wrap { max-width: var(--max); margin: 0 auto; padding: 0 20px; }
+        section { padding: 72px 0 24px; scroll-margin-top: 64px; }
+        .eyebrow {
+            font-size: 0.74rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
+            color: var(--accent);
+        }
+        h1 { font-size: clamp(2.2rem, 5vw, 3.6rem); line-height: 1.05; font-weight: 800; letter-spacing: -0.02em; }
+        h2 { font-size: clamp(1.7rem, 3.4vw, 2.5rem); line-height: 1.1; font-weight: 800; letter-spacing: -0.01em; margin: 6px 0 10px; }
+        h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 6px; }
+        .lead { color: var(--text-soft); font-size: 1.05rem; max-width: 760px; }
+        .status {
+            display: inline-flex; align-items: center; gap: 8px; margin: 4px 0 14px;
+            font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+            padding: 5px 12px; border-radius: 999px; border: 1px solid var(--line-strong); color: var(--text-soft);
+        }
+        .status.live { color: #8ee6b0; border-color: rgba(142, 230, 176, 0.4); }
+        .status.dev { color: var(--accent-warm); border-color: rgba(212, 165, 116, 0.45); }
+        .btns { display: flex; gap: 10px; flex-wrap: wrap; margin: 18px 0 4px; }
+        .btn {
+            display: inline-block; padding: 10px 16px; border-radius: 10px; font-weight: 600; font-size: 0.92rem;
+            background: var(--panel); border: 1px solid var(--line-strong); color: var(--text);
+        }
+        .btn.primary { background: var(--accent); border-color: var(--accent); color: #06101e; }
+        .btn:hover { border-color: var(--accent-2); color: var(--text); }
+        .btn.primary:hover { background: var(--accent-2); color: #06101e; }
+
+        /* ---------- media ---------- */
+        .media {
+            border-radius: var(--radius); overflow: hidden; background: #000;
+            border: 1px solid var(--line); box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+        }
+        .media img, .media video { width: 100%; height: 100%; object-fit: cover; }
+        .media.contain img { object-fit: contain; background: var(--panel-2); }
+        .hero-media { margin-top: 28px; aspect-ratio: 16 / 9; }
+        .banner { margin: 28px 0 0; aspect-ratio: 21 / 9; }
+        .grid { display: grid; gap: 14px; margin-top: 14px; }
+        .g2 { grid-template-columns: repeat(2, 1fr); }
+        .g3 { grid-template-columns: repeat(3, 1fr); }
+        .g5 { grid-template-columns: repeat(5, 1fr); }
+        .g6 { grid-template-columns: repeat(6, 1fr); }
+        .r169 { aspect-ratio: 16 / 9; }
+        .r43 { aspect-ratio: 4 / 3; }
+        .r1 { aspect-ratio: 1 / 1; }
+        .split { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 28px; align-items: center; margin-top: 28px; }
+        .caption { font-size: 0.82rem; color: var(--text-mute); margin-top: 8px; }
+        .panel {
+            background: linear-gradient(180deg, var(--panel), var(--panel-2));
+            border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 24px;
+        }
+        .panel p + p { margin-top: 10px; }
+        .panel ul { margin: 8px 0 0 18px; color: var(--text-soft); }
+        .panel li + li { margin-top: 4px; }
+        .tall { aspect-ratio: 9 / 16; max-height: 640px; margin: 0 auto; }
+
+        /* ---------- hero ---------- */
+        .hero { padding-top: 64px; padding-bottom: 8px; }
+        .hero-top { display: flex; gap: 28px; align-items: center; flex-wrap: wrap; }
+        .avatar {
+            width: 132px; height: 132px; border-radius: 50%; overflow: hidden; flex: none;
+            border: 2px solid var(--line-strong); box-shadow: 0 0 0 6px rgba(90, 168, 255, 0.08);
+        }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .role { color: var(--text-soft); font-size: 1.1rem; margin-top: 8px; }
+
+        .yt { position: relative; aspect-ratio: 16 / 9; }
+        .yt iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+        footer { border-top: 1px solid var(--line); margin-top: 72px; padding: 28px 0 48px; color: var(--text-mute); font-size: 0.88rem; }
+        footer .wrap { display: flex; gap: 18px; flex-wrap: wrap; justify-content: space-between; }
+
+        @media (max-width: 860px) {
+            .split { grid-template-columns: 1fr; }
+            .g3 { grid-template-columns: repeat(2, 1fr); }
+            .g5, .g6 { grid-template-columns: repeat(3, 1fr); }
+            .banner { aspect-ratio: 16 / 9; }
+        }
+        @media (max-width: 560px) {
+            .g2, .g3 { grid-template-columns: 1fr; }
+            .nav a.link.opt { display: none; }
+        }
+        @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    </style>
+</head>
+<body>
+
+<nav class="nav">
+    <div class="nav-inner">
+        <span class="nav-name">Leland E. Doss</span>
+        <a class="link" href="#backrooms">Backrooms: Betrayal</a>
+        <a class="link opt" href="#revenant">Revenant Sleuth</a>
+        <a class="link opt" href="#voidgate">VoidGate</a>
+        <a class="link opt" href="#vfx">VFX &amp; Tools</a>
+        <a class="link opt" href="#ai">AI &amp; Simulation</a>
+        <a class="link" href="../">Resume</a>
+    </div>
+</nav>
+
+<main>
+    <!-- HERO -->
+    <header class="hero wrap" id="top">
+        <div class="hero-top">
+            <div class="avatar"><img src="media/headshot.webp" alt="Leland E. Doss" width="400" height="400"></div>
+            <div>
+                <div class="eyebrow">Portfolio</div>
+                <h1>Leland E. Doss</h1>
+                <div class="role">Senior Unreal Engine Developer · Game Designer</div>
+            </div>
+        </div>
+        <p class="lead" style="margin-top:20px">Gameplay and multiplayer in C++ and Blueprints, real-time simulation, and Unreal tools. Shipped VoidGate on Steam, building Backrooms: Betrayal, and selling six Unreal products on FAB.</p>
+        <div class="btns">
+            <a class="btn primary" href="mailto:Leland.thegamedeveloper@gmail.com">Email me</a>
+            <a class="btn" href="../">Resume</a>
+            <a class="btn" href="https://www.linkedin.com/in/led-thegamedev" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+            <a class="btn" href="https://store.steampowered.com/app/2270670/BackroomsBetrayal/" target="_blank" rel="noopener noreferrer">Backrooms on Steam</a>
+        </div>
+        <div class="media hero-media">
+            <video src="media/reel.mp4" poster="media/reel.jpg" controls playsinline preload="none" aria-label="Portfolio reel"></video>
+        </div>
+    </header>
+
+    <!-- BACKROOMS: BETRAYAL -->
+    <section id="backrooms">
+        <div class="wrap">
+            <div class="eyebrow">Solo developer · Unreal Engine 5</div>
+            <h2>Backrooms: Betrayal</h2>
+            <span class="status dev">● In development · Demo in final polish</span>
+            <p class="lead">A 4–6 player co-op psychological horror game where the environment is the antagonist. Players stabilize shifting sectors against a tide of entropy while wondering whether the collapse is accidental, or one of them.</p>
+            <div class="btns">
+                <a class="btn primary" href="https://store.steampowered.com/app/2270670/BackroomsBetrayal/" target="_blank" rel="noopener noreferrer">Wishlist on Steam</a>
+                <a class="btn" href="https://ordocaelum.github.io/BackroomsBetrayal_GDD/" target="_blank" rel="noopener noreferrer">Read the GDD</a>
+            </div>
+
+            <div class="split">
+                <div class="media r169"><video src="media/backrooms-menu.mp4" poster="media/backrooms-menu.jpg" controls playsinline preload="none" aria-label="Backrooms: Betrayal lobby and menu"></video></div>
+                <div class="panel">
+                    <h3>What I built</h3>
+                    <ul>
+                        <li>Core gameplay loop and hand-authored C++ replication for player state, interaction, and environment events</li>
+                        <li>Dynamic, shifting level geometry</li>
+                        <li>Menus, settings, and in-world UI</li>
+                        <li>Integrating and adapting assets to the game's look</li>
+                        <li>Full technical GDD, written as the working spec</li>
+                    </ul>
+                    <p class="caption">Steam Next Fest February 2027 · Early Access March 2027</p>
+                </div>
+            </div>
+        </div>
+        <div class="wrap"><div class="media banner"><img src="media/backrooms-keyart.webp" alt="Backrooms: Betrayal key art" loading="lazy"></div></div>
+        <div class="wrap">
+            <div class="grid g2">
+                <div class="media r169"><img src="media/backrooms-shot-1.webp" alt="Backrooms: Betrayal gameplay" loading="lazy"></div>
+                <div class="media r169"><img src="media/backrooms-shot-2.webp" alt="Backrooms: Betrayal gameplay" loading="lazy"></div>
+                <div class="media r169"><img src="media/backrooms-shot-3.webp" alt="Backrooms: Betrayal environment" loading="lazy"></div>
+                <div class="media r169"><img src="media/backrooms-settings.webp" alt="Backrooms: Betrayal settings menu" loading="lazy"></div>
+            </div>
+            <div class="grid g5">
+                <div class="media r1 contain"><img src="media/backrooms-ui-1.webp" alt="Backrooms: Betrayal menu UI" loading="lazy"></div>
+                <div class="media r1 contain"><img src="media/backrooms-ui-2.webp" alt="Backrooms: Betrayal menu UI" loading="lazy"></div>
+                <div class="media r1 contain"><img src="media/backrooms-ui-3.webp" alt="Backrooms: Betrayal menu UI" loading="lazy"></div>
+                <div class="media r1 contain"><img src="media/backrooms-ui-4.webp" alt="Backrooms: Betrayal menu UI" loading="lazy"></div>
+                <div class="media r1 contain"><img src="media/backrooms-ui-5.webp" alt="Backrooms: Betrayal menu UI" loading="lazy"></div>
+            </div>
+            <div class="grid g6">
+                <div class="media r1 contain"><img src="media/backrooms-icon-1.webp" alt="Backrooms: Betrayal item icon" loading="lazy"></div>
+                <div class="media r1 contain"><img src="media/backrooms-icon-2.webp" alt="Backrooms: Betrayal item icon" loading="lazy"></div>
+                <div class="media r1 contain"><img src="media/backrooms-icon-3.webp" alt="Backrooms: Betrayal item icon" loading="lazy"></div>
+                <div class="media r1 contain"><img src="media/backrooms-icon-4.webp" alt="Backrooms: Betrayal item icon" loading="lazy"></div>
+                <div class="media r1 contain"><img src="media/backrooms-icon-5.webp" alt="Backrooms: Betrayal item icon" loading="lazy"></div>
+                <div class="media r1 contain"><img src="media/backrooms-icon-6.webp" alt="Backrooms: Betrayal item icon" loading="lazy"></div>
+            </div>
+            <div class="split">
+                <div class="media contain"><img src="media/backrooms-gdd.webp" alt="Backrooms: Betrayal game design document cover" loading="lazy"></div>
+                <div class="media tall"><video data-src="media/backrooms-hazmat.mp4" poster="media/backrooms-hazmat.jpg" muted loop playsinline preload="none" aria-label="Backrooms: Betrayal characters"></video></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- REVENANT SLEUTH -->
+    <section id="revenant">
+        <div class="wrap">
+            <div class="eyebrow">Unreal Engine</div>
+            <h2>Revenant Sleuth: Arcade</h2>
+            <span class="status dev">● In development</span>
+            <p class="lead">A top-down narrative arcade game: core gameplay loop, physics-driven character interactions, and investigation mechanics.</p>
+            <div class="grid g2">
+                <div class="media r169"><video src="media/revenant-city.mp4" poster="media/revenant-city.jpg" controls playsinline preload="none" aria-label="Revenant Sleuth city"></video></div>
+                <div class="media r169"><video src="media/revenant-gameplay.mp4" poster="media/revenant-gameplay.jpg" controls playsinline preload="none" aria-label="Revenant Sleuth gameplay"></video></div>
+            </div>
+            <div class="grid g2">
+                <div class="media r169"><img src="media/revenant-menu.webp" alt="Revenant Sleuth main menu" loading="lazy"></div>
+                <div class="media r169"><img src="media/revenant-shot-1.webp" alt="Revenant Sleuth gameplay" loading="lazy"></div>
+                <div class="media r169"><img src="media/revenant-shot-2.webp" alt="Revenant Sleuth gameplay" loading="lazy"></div>
+                <div class="media r169"><img src="media/revenant-shot-3.webp" alt="Revenant Sleuth gameplay" loading="lazy"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- VOIDGATE -->
+    <section id="voidgate">
+        <div class="wrap">
+            <div class="eyebrow">Version 5 Games · Shipped</div>
+            <h2>VoidGate</h2>
+            <span class="status live">● On Steam</span>
+            <p class="lead">An action RPG with randomly generated dungeons and dynamic combat, shipped on Steam end to end: early access prototyping, launch, build and distribution, community balancing, and post-launch iteration.</p>
+            <div class="btns">
+                <a class="btn primary" href="https://store.steampowered.com/app/971530/VoidGate/" target="_blank" rel="noopener noreferrer">VoidGate on Steam</a>
+            </div>
+            <div class="media banner"><img src="media/voidgate-menu.webp" alt="VoidGate main menu" loading="lazy"></div>
+            <div class="grid g2">
+                <div class="media r169"><img src="media/voidgate-shot-1.webp" alt="VoidGate environment" loading="lazy"></div>
+                <div class="media r169"><img src="media/voidgate-shot-2.webp" alt="VoidGate environment" loading="lazy"></div>
+                <div class="media r169"><img src="media/voidgate-shot-3.webp" alt="VoidGate environment" loading="lazy"></div>
+                <div class="media r169"><img src="media/voidgate-shot-4.webp" alt="VoidGate environment" loading="lazy"></div>
+            </div>
+            <div class="media hero-media"><video src="media/voidgate-combat.mp4" poster="media/voidgate-combat.jpg" controls playsinline preload="none" aria-label="VoidGate combat"></video></div>
+        </div>
+    </section>
+
+    <!-- VFX & TOOLS -->
+    <section id="vfx">
+        <div class="wrap">
+            <div class="eyebrow">FAB · Epic Games</div>
+            <h2>VFX &amp; Tools</h2>
+            <p class="lead">Six Unreal products on FAB, including Niagara VFX packs and gameplay plugins. 300+ units sold; OnlyLeaves VFX Pack received Epic featured placement.</p>
+            <div class="grid g3">
+                <div class="media r169"><video src="media/vfx-1.mp4" poster="media/vfx-1.jpg" controls playsinline preload="none" aria-label="Niagara VFX"></video></div>
+                <div class="media r169"><video src="media/vfx-2.mp4" poster="media/vfx-2.jpg" controls playsinline preload="none" aria-label="Niagara VFX"></video></div>
+                <div class="media r169"><video src="media/vfx-3.mp4" poster="media/vfx-3.jpg" controls playsinline preload="none" aria-label="Niagara VFX in the Unreal Editor"></video></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI & SIMULATION -->
+    <section id="ai">
+        <div class="wrap">
+            <div class="eyebrow">AI &amp; Simulation</div>
+            <h2>ABACUS AI</h2>
+            <div class="media hero-media"><video src="media/abacus.mp4" poster="media/abacus.jpg" controls playsinline preload="none" aria-label="ABACUS AI environment"></video></div>
+
+            <div class="split">
+                <div class="media r169"><video src="media/warehouse-rl.mp4" poster="media/warehouse-rl.jpg" controls playsinline preload="none" aria-label="Warehouse RL training lab"></video></div>
+                <div class="panel">
+                    <h3>Warehouse RL Demo</h3>
+                    <p>A reinforcement learning agent trained in a warehouse-style grid to find a package, pick it up, and deliver it to the destination zone. Over 100,000 training steps it went from random exploration to a stable positive reward (50-episode average about 10.5), and the trained policy was saved.</p>
+                    <p>The same approach applies to warehouse automation, robot path planning, and delivery or inventory optimization.</p>
+                    <div class="btns"><a class="btn primary" href="https://ordocaelum.github.io/warehouse-rl-demo/" target="_blank" rel="noopener noreferrer">Try the demo</a></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TUTORIAL -->
+    <section id="tutorial">
+        <div class="wrap">
+            <div class="eyebrow">YouTube</div>
+            <h2>How to make a City with PCG, Nanite and UE5.2</h2>
+            <div class="media yt" style="margin-top:20px">
+                <iframe src="https://www.youtube-nocookie.com/embed/KRjtqxID16U" title="How to make a City with PCG, Nanite and UE5.2" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div class="wrap">
+        <span>Leland E. Doss · Senior Unreal Engine Developer</span>
+        <span><a href="../">Resume</a> · <a href="mailto:Leland.thegamedeveloper@gmail.com">Leland.thegamedeveloper@gmail.com</a></span>
+    </div>
+</footer>
+
+<script>
+    (function () {
+        // The short looping clip loads and plays only while on screen.
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const loops = document.querySelectorAll('video[data-src]');
+        if ('IntersectionObserver' in window) {
+            const io = new IntersectionObserver(entries => entries.forEach(e => {
+                const v = e.target;
+                if (e.isIntersecting) { if (!v.src) v.src = v.dataset.src; if (!reduce) v.play().catch(() => { v.controls = true; }); }
+                else if (!v.paused) v.pause();
+            }), { rootMargin: '200px 0px', threshold: 0.25 });
+            loops.forEach(v => { if (reduce) v.controls = true; io.observe(v); });
+        } else { loops.forEach(v => { v.src = v.dataset.src; v.controls = true; }); }
+        // Only one video with sound plays at a time.
+        document.querySelectorAll('video[controls]').forEach(v => v.addEventListener('play', () => {
+            document.querySelectorAll('video[controls]').forEach(o => { if (o !== v) o.pause(); });
+        }));
+    })();
+</script>
+</body>
+</html>
